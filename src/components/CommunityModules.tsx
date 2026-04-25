@@ -9,15 +9,20 @@ export const ProfileCard = ({ profile }: { profile: any }) => (
         <img src={profile.photoURL} alt={profile.name} className="w-full h-full object-cover" />
       </div>
       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gold text-ink text-[8px] font-bold px-2 py-1 rounded-full uppercase tracking-widest whitespace-nowrap">
-        {profile.role}
+        {profile.role || profile.year}
       </div>
     </div>
     
     <div className="text-center space-y-1">
       <h3 className="font-bold serif text-ink dark:text-gold uppercase tracking-widest">{profile.name}</h3>
       <p className="text-[10px] text-ink/40 dark:text-dark-text/40 font-bold uppercase tracking-[0.2em]">
-        {profile.year} | SEC {profile.section}
+        {profile.year} {profile.section ? `| SEC ${profile.section}` : ""}
       </p>
+      {profile.narrative && (
+        <p className="pt-4 text-[11px] text-ink/60 dark:text-dark-text/60 italic serif leading-relaxed">
+          "{profile.narrative}"
+        </p>
+      )}
     </div>
  
     <div className="mt-6 flex items-center justify-center gap-4 border-t border-gold/5 pt-6">

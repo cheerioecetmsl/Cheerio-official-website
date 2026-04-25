@@ -21,7 +21,7 @@ import { auth } from "@/lib/firebase";
 const navItems = [
   { name: "Image Archive", icon: Image, path: "/dashboard/archive/images" },
   { name: "Video Archive", icon: Video, path: "/dashboard/archive/videos" },
-  { name: "My Moments", icon: Search, path: "/dashboard/my-moments" },
+  { name: "My Moments", icon: Search, path: "/dashboard/my-moments", id: "scanner-nav" },
   { 
     name: "Upload Media", 
     icon: UploadCloud, 
@@ -35,13 +35,13 @@ const navItems = [
     name: "Community", 
     icon: Users, 
     path: "/dashboard/community/participants",
+    id: "community-nav",
     subItems: [
       { name: "Organizers", path: "/dashboard/community/organizers" },
       { name: "Participants", path: "/dashboard/community/participants" },
       { name: "Seniors", path: "/dashboard/community/seniors" },
     ]
   },
-  { name: "Settings", icon: Settings, path: "/dashboard/settings" },
 ];
 
 export const Sidebar = () => {
@@ -122,7 +122,7 @@ export const Sidebar = () => {
               const Icon = item.icon;
 
               return (
-                <div key={item.name} className={`flex flex-col relative ${isExpanded ? "w-full" : "items-center"}`}>
+                <div key={item.name} id={item.id} className={`flex flex-col relative ${isExpanded ? "w-full" : "items-center"}`}>
                   <Link 
                     href={item.path}
                     onClick={() => !item.subItems && setIsExpanded(false)}
@@ -166,9 +166,19 @@ export const Sidebar = () => {
               );
             })}
 
-            {/* Mobile-Only Logout (Inside flow to prevent overlap) */}
+            {/* Mobile-Only Settings & Logout */}
             <div className="md:hidden pt-8 pb-12">
               <div className="h-px w-full bg-gold/10 mb-8" />
+              <Link 
+                href="/dashboard/settings"
+                onClick={() => setIsExpanded(false)}
+                className="flex items-center w-full p-5 gap-6 rounded-2xl text-dark-text/60 hover:bg-gold/5 hover:text-gold transition-all duration-300 mb-4"
+              >
+                <Settings size={28} className="flex-shrink-0" />
+                <span className="font-bold tracking-widest uppercase text-sm">
+                  Settings
+                </span>
+              </Link>
               <button 
                 onClick={() => auth.signOut()}
                 className="flex items-center w-full p-5 gap-6 rounded-2xl text-red-500 hover:bg-red-500/10 transition-all duration-300"
@@ -182,8 +192,21 @@ export const Sidebar = () => {
           </div>
         </nav>
 
-        {/* Desktop-Only Absolute Logout Button */}
-        <div className={`hidden md:flex absolute bottom-8 left-0 w-full transition-all duration-500 ${isExpanded ? "px-6" : "justify-center"}`}>
+        {/* Desktop-Only Bottom Section */}
+        <div className={`hidden md:flex flex-col absolute bottom-8 left-0 w-full transition-all duration-500 ${isExpanded ? "px-6" : "items-center"}`}>
+          <Link 
+            href="/dashboard/settings"
+            className={`flex items-center rounded-2xl text-dark-text/60 hover:bg-gold/5 hover:text-gold transition-all duration-300 mb-4 ${
+              isExpanded ? "w-full p-5 gap-6" : "w-12 h-12 justify-center"
+            }`}
+          >
+            <Settings size={isExpanded ? 28 : 22} className="flex-shrink-0" />
+            {isExpanded && (
+              <span className="font-bold tracking-widest uppercase text-sm">
+                Settings
+              </span>
+            )}
+          </Link>
           <button 
             onClick={() => auth.signOut()}
             className={`flex items-center rounded-2xl text-red-500 hover:bg-red-500/10 transition-all duration-300 ${
