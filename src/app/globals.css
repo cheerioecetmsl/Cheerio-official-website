@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  /* Core Cinematic Archive Palette */
+  --color-gold: #D4AF37;
+  --color-gold-soft: #C49A2C;
+  --color-gold-glow: #E6C96A;
+
+  /* Dark Mode Layer (Memory Film Experience) */
+  --color-dark-bg: #121212;
+  --color-dark-surface: #1E1E1E;
+  --color-dark-shadow: #2A2118;
+  --color-dark-text: #E7DFC9;
+  --color-dark-text-secondary: #B8AE98;
+
+  /* Legacy aliases mapped to dark theme to prevent breakage */
+  --color-parchment: #121212;
+  --color-paper-warm: #1E1E1E;
+  --color-archive-tan: #2A2118;
+  --color-ink: #E7DFC9;
+  --color-ink-soft: #B8AE98;
+  --color-ink-muted: #7A6A58;
+
+  --font-serif: "EB Garamond", serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+:root {
+  --background: #121212;
+  --foreground: #E7DFC9;
+  --card-bg: rgba(30, 30, 30, 0.8);
+  --card-border: rgba(212, 175, 55, 0.3);
+}
+
+/* Force dark mode behavior globally */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+h1, h2, h3, h4, .serif {
+  font-family: var(--font-serif);
+}
+
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.5s ease, border-color 0.5s ease;
+}
+
+.gold-button {
+  background: var(--color-gold);
+  color: #121212; /* Dark text on gold button for premium contrast */
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
+}
+
+.gold-button:hover {
+  background: var(--color-gold-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+}
+
+/* Cinematic Utilities */
+.film-grain {
+  position: relative;
+}
+
+.film-grain::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 999;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}

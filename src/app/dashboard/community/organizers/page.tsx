@@ -1,0 +1,158 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { ReturnToDashboard } from "@/components/Sidebar";
+import { X, Camera, ExternalLink, Mail, Sparkles, Loader2 } from "lucide-react";
+
+interface Person {
+  id: string;
+  name: string;
+  role: string;
+  description: string;
+  imageURL?: string;
+  category: string;
+}
+
+export default function OrganizersPage() {
+  const [members, setMembers] = useState<Person[]>([]);
+  const [selectedMember, setSelectedMember] = useState<Person | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const q = query(collection(db, "people"), where("category", "==", "COUNCIL"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Person[];
+      setMembers(data);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  return (
+    <main className="min-h-screen bg-parchment dark:bg-dark-bg py-24 px-8">
+      <ReturnToDashboard />
+      
+      <div className="max-w-7xl mx-auto space-y-12">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold/10 rounded-full text-gold text-[10px] font-bold tracking-[0.3em] uppercase">
+            <Sparkles size={14} /> The Architects of 2026
+          </div>
+          <h1 className="text-5xl md:text-6xl font-bold text-ink dark:text-gold serif">The Council.</h1>
+          <p className="text-ink/60 dark:text-dark-text/60 italic serif text-lg max-w-2xl mx-auto">
+            Meet the visionaries who are reconstructing our story, frame by frame.
+          </p>
+        </div>
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-32 space-y-6">
+            <Loader2 className="w-16 h-16 text-gold animate-spin" />
+            <p className="text-gold font-bold uppercase tracking-widest text-xs animate-pulse">Summoning the Council...</p>
+          </div>
+        ) : members.length === 0 ? (
+          <div className="text-center py-32 border-2 border-dashed border-gold/10 rounded-[3rem]">
+            <p className="text-gold/40 font-bold uppercase tracking-widest text-sm italic serif">The Council is currently in the shadows.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {members.map((member) => (
+              <div 
+                key={member.id}
+                onClick={() => setSelectedMember(member)}
+                className="group relative glass-card p-4 rounded-[2.5rem] border-gold/10 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-[0_0_50px_rgba(212,175,55,0.2)] hover:border-gold/40"
+              >
+                <div className="aspect-[4/5] rounded-[2rem] overflow-hidden relative shadow-2xl bg-zinc-900">
+                  {member.imageURL ? (
+                    <img 
+                      src={member.imageURL} 
+                      alt={member.name}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-zinc-800">
+                      {member.name.charAt(0)}
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                    <p className="text-gold font-bold uppercase tracking-widest text-[10px] mb-1">Council Member</p>
+                    <h3 className="text-xl font-bold text-white serif">{member.name}</h3>
+                  </div>
+                </div>
+                <div className="mt-6 text-center">
+                  <h3 className="text-lg font-bold text-ink dark:text-gold uppercase tracking-widest">{member.name}</h3>
+                  <p className="text-[10px] text-ink/40 dark:text-dark-text/40 font-bold uppercase tracking-widest mt-1">{member.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Member Detail Modal */}
+      {selectedMember && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+          <div 
+            className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
+            onClick={() => setSelectedMember(null)}
+          />
+          
+          <div className="relative glass-card max-w-4xl w-full rounded-[3rem] border-gold/20 overflow-hidden animate-in zoom-in fade-in duration-500 flex flex-col md:flex-row h-full max-h-[80vh] md:h-auto">
+            <button 
+              onClick={() => setSelectedMember(null)}
+              className="absolute top-6 right-6 p-3 bg-gold text-ink rounded-full z-10 hover:scale-110 transition-transform"
+            >
+              <X size={24} />
+            </button>
+
+            <div className="w-full md:w-1/2 h-64 md:h-auto bg-zinc-900">
+              {selectedMember.imageURL ? (
+                <img 
+                  src={selectedMember.imageURL} 
+                  alt={selectedMember.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-zinc-800">
+                  {selectedMember.name.charAt(0)}
+                </div>
+              )}
+            </div>
+
+            <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col justify-center space-y-8 overflow-y-auto">
+              <div className="space-y-4">
+                <span className="text-gold font-bold uppercase tracking-[0.4em] text-[10px] block">
+                  The Council
+                </span>
+                <h2 className="text-4xl md:text-5xl font-bold text-ink dark:text-gold serif leading-tight">
+                  {selectedMember.name}
+                </h2>
+                <p className="text-gold font-bold uppercase tracking-widest text-[10px]">{selectedMember.role}</p>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-gold/40 font-bold uppercase tracking-widest text-[10px]">The Legacy</h4>
+                <p className="text-ink/60 dark:text-dark-text/60 italic serif text-lg leading-relaxed">
+                  "{selectedMember.description}"
+                </p>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button className="p-4 bg-gold/5 text-gold rounded-2xl hover:bg-gold hover:text-ink transition-all">
+                  <Camera size={20} />
+                </button>
+                <button className="p-4 bg-gold/5 text-gold rounded-2xl hover:bg-gold hover:text-ink transition-all">
+                  <ExternalLink size={20} />
+                </button>
+                <button className="p-4 bg-gold/5 text-gold rounded-2xl hover:bg-gold hover:text-ink transition-all">
+                  <Mail size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
