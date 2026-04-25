@@ -9,7 +9,7 @@ import { Countdown } from "@/components/Countdown";
 import { HypeBoard, UserStats } from "@/components/DashboardModules";
 import { Trophy, TrendingUp, ChevronDown, ArrowUpRight, Files } from "lucide-react";
 import Link from "next/link";
-import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore";
+import { collection, query, orderBy, limit, onSnapshot, where } from "firebase/firestore";
 import { TutorialOverlay } from "@/components/TutorialOverlay";
 
 export default function DashboardPage() {
