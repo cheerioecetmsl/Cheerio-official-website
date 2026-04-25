@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Filter, Mail, Instagram } from "lucide-react";
+import { Search, Filter, Mail, Camera } from "lucide-react";
 
 export const ProfileCard = ({ profile }: { profile: any }) => (
   <div className="glass-card p-6 rounded-3xl border-gold/10 hover:border-gold/30 transition-all group">
@@ -19,13 +19,13 @@ export const ProfileCard = ({ profile }: { profile: any }) => (
         {profile.year} | SEC {profile.section}
       </p>
     </div>
-
+ 
     <div className="mt-6 flex items-center justify-center gap-4 border-t border-gold/5 pt-6">
       <button className="text-ink/30 hover:text-gold transition-colors">
         <Mail size={16} />
       </button>
       <button className="text-ink/30 hover:text-gold transition-colors">
-        <Instagram size={16} />
+        <Camera size={16} />
       </button>
     </div>
   </div>

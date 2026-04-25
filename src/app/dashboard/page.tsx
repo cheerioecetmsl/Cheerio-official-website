@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Countdown } from "@/components/Countdown";
 import { HypeBoard, UserStats } from "@/components/DashboardModules";
-import { Trophy, TrendingUp, ChevronDown, ArrowUpRight } from "lucide-react";
+import { Trophy, TrendingUp, ChevronDown, ArrowUpRight, Files } from "lucide-react";
 import Link from "next/link";
 import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 
@@ -137,7 +137,7 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-3">
                           {item.mediaGallery && item.mediaGallery.length > 0 && (
                             <span className="flex items-center gap-1 text-[8px] font-bold text-gold/60 uppercase tracking-widest">
-                              <Layers size={10} /> {item.mediaGallery.length} Assets
+                              <Files size={10} /> {item.mediaGallery.length} Assets
                             </span>
                           )}
                           <span className="text-[10px] text-ink/40 dark:text-dark-text/40 font-bold uppercase">{item.date}</span>
