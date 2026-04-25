@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [pulseItems, setPulseItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [userRank, setUserRank] = useState<number | null>(null);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -41,8 +42,8 @@ export default function DashboardPage() {
       }
     });
 
-    // Real-time Leaderboard Query
-    const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(5));
+    // Real-time Leaderboard Query (Top 10)
+    const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(10));
     const unsubscribeLeaderboard = onSnapshot(q, (snapshot) => {
       const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setLeaderboard(users);
@@ -62,6 +63,18 @@ export default function DashboardPage() {
       unsubscribePulse();
     };
   }, [router]);
+
+  // Separate effect for rank calculation to avoid auth race conditions
+  useEffect(() => {
+    if (!userData?.xp) return;
+
+    const rankQuery = query(collection(db, "users"), where("xp", ">", userData.xp));
+    const unsubscribeRank = onSnapshot(rankQuery, (snap) => {
+      setUserRank(snap.size + 1);
+    });
+
+    return () => unsubscribeRank();
+  }, [userData?.xp]);
 
   const handleTutorialComplete = async () => {
     if (auth.currentUser) {
@@ -196,22 +209,47 @@ export default function DashboardPage() {
           </div>
 
           <div className="w-full max-w-4xl glass-card rounded-[3rem] border-gold/10 overflow-hidden bg-white/5 backdrop-blur-sm">
-            {leaderboard.length > 0 ? leaderboard.map((user, i) => (
-              <div key={user.id} className="flex items-center gap-4 md:gap-8 p-4 md:p-8 border-b border-gold/5 last:border-none hover:bg-gold/5 transition-all">
-                <div className="text-2xl md:text-3xl font-bold serif text-gold/40 w-8 md:w-12 text-center">#{i + 1}</div>
-                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-gold/20 shadow-xl flex-shrink-0 bg-gold/10">
-                  <img src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} className="w-full h-full object-cover" alt={user.name} />
-                </div>
-                <div className="flex-grow min-w-0">
-                  <h3 className="text-sm md:text-xl font-bold serif text-ink dark:text-gold uppercase tracking-widest truncate">{user.name}</h3>
-                  <p className="text-[8px] md:text-xs text-ink/40 dark:text-dark-text/40 font-bold uppercase tracking-widest truncate">Rank: {user.rank || "Archivist"} | {user.memoryCount || 0} Memories</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <div className="text-xl md:text-3xl font-bold text-gold tabular-nums">{user.xp || 0}</div>
-                  <div className="text-[8px] md:text-[10px] font-bold text-ink/30 dark:text-dark-text/30 uppercase tracking-[0.2em]">Legacy XP</div>
-                </div>
-              </div>
-            )) : (
+            {leaderboard.length > 0 ? (
+              <>
+                {leaderboard.map((user, i) => (
+                  <div key={user.id} className={`flex items-center gap-4 md:gap-8 p-4 md:p-8 border-b border-gold/5 last:border-none hover:bg-gold/5 transition-all ${user.id === auth.currentUser?.uid ? "bg-gold/5 border-l-4 border-l-gold" : ""}`}>
+                    <div className="text-2xl md:text-3xl font-bold serif text-gold/40 w-8 md:w-12 text-center">#{i + 1}</div>
+                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-gold/20 shadow-xl flex-shrink-0 bg-gold/10">
+                      <img src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} className="w-full h-full object-cover" alt={user.name} />
+                    </div>
+                    <div className="flex-grow min-w-0">
+                      <h3 className="text-sm md:text-xl font-bold serif text-ink dark:text-gold uppercase tracking-widest truncate">{user.name}</h3>
+                      <p className="text-[8px] md:text-xs text-ink/40 dark:text-dark-text/40 font-bold uppercase tracking-widest truncate">Rank: {user.rank || "Archivist"} | {user.memoryCount || 0} Memories</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-xl md:text-3xl font-bold text-gold tabular-nums">{user.xp || 0}</div>
+                      <div className="text-[8px] md:text-[10px] font-bold text-ink/30 dark:text-dark-text/30 uppercase tracking-[0.2em]">Legacy XP</div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Show Current User if not in Top 10 */}
+                {userRank && userRank > 10 && (
+                  <>
+                    <div className="p-4 text-center text-gold/20 italic serif border-b border-gold/5">... descending into the archives ...</div>
+                    <div className="flex items-center gap-4 md:gap-8 p-4 md:p-8 bg-gold/10 border-l-4 border-l-gold">
+                      <div className="text-2xl md:text-3xl font-bold serif text-gold w-8 md:w-12 text-center">#{userRank}</div>
+                      <div className="w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-gold shadow-xl flex-shrink-0">
+                        <img src={userData.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${auth.currentUser?.uid}`} className="w-full h-full object-cover" alt="You" />
+                      </div>
+                      <div className="flex-grow min-w-0">
+                        <h3 className="text-sm md:text-xl font-bold serif text-ink dark:text-gold uppercase tracking-widest truncate">Your Station</h3>
+                        <p className="text-[8px] md:text-xs text-ink/40 dark:text-dark-text/40 font-bold uppercase tracking-widest truncate">{userData.rank || "Archivist"} | {userData.memoryCount || 0} Memories</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-xl md:text-3xl font-bold text-gold tabular-nums">{userData.xp || 0}</div>
+                        <div className="text-[8px] md:text-[10px] font-bold text-ink/30 dark:text-dark-text/30 uppercase tracking-[0.2em]">Legacy XP</div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
               <div className="p-20 text-center text-ink/20 dark:text-gold/20 serif italic">No legends recorded yet.</div>
             )}
             <div className="p-8 text-center bg-gold/5">
