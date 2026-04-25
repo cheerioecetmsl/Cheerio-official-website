@@ -21,13 +21,49 @@ export default function FacultyPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, "people"), where("category", "==", "FACULTY"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Person[];
-      setMembers(data);
-      setLoading(false);
+    // Query both "people" collection and "users" collection
+    const qPeople = query(collection(db, "people"), where("category", "==", "FACULTY"));
+    const qUsers = query(collection(db, "users"), where("category", "==", "FACULTY"), where("status", "==", "approved"));
+
+    let peopleData: Person[] = [];
+    let usersData: Person[] = [];
+
+    const unsubscribePeople = onSnapshot(qPeople, (snapshot) => {
+      peopleData = snapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        name: doc.data().name,
+        role: doc.data().role,
+        description: doc.data().description || doc.data().narrative,
+        imageURL: doc.data().imageURL || doc.data().photoURL,
+        category: doc.data().category
+      })) as Person[];
+      combineAndSet();
     });
-    return () => unsubscribe();
+
+    const unsubscribeUsers = onSnapshot(qUsers, (snapshot) => {
+      usersData = snapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        name: doc.data().name,
+        role: doc.data().role || "Esteemed Faculty",
+        description: doc.data().narrative || doc.data().description,
+        imageURL: doc.data().photoURL || doc.data().imageURL,
+        category: doc.data().category
+      })) as Person[];
+      combineAndSet();
+    });
+
+    const combineAndSet = () => {
+      const combined = [...peopleData, ...usersData];
+      // Remove duplicates by ID if any
+      const unique = combined.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+      setMembers(unique);
+      setLoading(false);
+    };
+
+    return () => {
+      unsubscribePeople();
+      unsubscribeUsers();
+    };
   }, []);
 
   return (

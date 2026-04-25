@@ -157,55 +157,9 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-gold text-left block">Legal Name</label>
-                <input 
-                  type="text"
-                  placeholder="Full Name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-white/50 dark:bg-black/20 border border-gold/10 p-4 rounded-2xl outline-none focus:border-gold transition-all text-xl serif"
-                />
-              </div>
-
-              {formData.year !== "Faculty" && (
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-gold text-left block">Univ Roll No (Mandatory)</label>
-                  <div className="relative">
-                    <Hash size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gold/40" />
-                    <input 
-                      type="text"
-                      placeholder="e.g. 12345678"
-                      value={formData.univRollNo}
-                      onChange={(e) => setFormData({ ...formData, univRollNo: e.target.value })}
-                      className="w-full bg-white/50 dark:bg-black/20 border border-gold/10 p-4 pl-12 rounded-2xl outline-none focus:border-gold transition-all text-sm font-bold tracking-widest"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <button 
-                disabled={!formData.name || !formData.photoURL || (formData.year !== "Faculty" && !formData.univRollNo) || loading}
-                onClick={() => setStep(2)}
-                className="gold-button w-full py-5 rounded-2xl font-bold tracking-widest uppercase disabled:opacity-50 shadow-xl"
-              >
-                {loading ? "Forging..." : "Forge Identity"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="space-y-10">
-            <div className="space-y-2">
-              <h1 className="text-4xl font-bold serif text-ink dark:text-gold">Station & Legacy</h1>
-              <p className="text-ink/60 dark:text-dark-text/60 italic serif">Where do you stand in the Batch of 2026?</p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-8 text-left">
+            <div className="space-y-8 text-left">
               <div className="space-y-4">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-gold">Current Academic Station</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gold block">Current Academic Station</label>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   {["1st Year", "2nd Year", "3rd Year", "4th Year", "Faculty"].map(y => (
                     <button 
@@ -225,6 +179,53 @@ export default function OnboardingPage() {
                   ))}
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gold block">Legal Name</label>
+                <input 
+                  type="text"
+                  placeholder="Full Name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full bg-white/50 dark:bg-black/20 border border-gold/10 p-4 rounded-2xl outline-none focus:border-gold transition-all text-xl serif"
+                />
+              </div>
+
+              {formData.year !== "Faculty" && (
+                <div className="space-y-2 animate-in slide-in-from-top-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-gold block">Univ Roll No (Mandatory)</label>
+                  <div className="relative">
+                    <Hash size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gold/40" />
+                    <input 
+                      type="text"
+                      placeholder="e.g. 12345678"
+                      value={formData.univRollNo}
+                      onChange={(e) => setFormData({ ...formData, univRollNo: e.target.value })}
+                      className="w-full bg-white/50 dark:bg-black/20 border border-gold/10 p-4 pl-12 rounded-2xl outline-none focus:border-gold transition-all text-sm font-bold tracking-widest"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <button 
+                disabled={!formData.name || !formData.photoURL || (formData.year !== "Faculty" && !formData.univRollNo) || loading}
+                onClick={() => setStep(2)}
+                className="gold-button w-full py-5 rounded-2xl font-bold tracking-widest uppercase disabled:opacity-50 shadow-xl mt-4"
+              >
+                {loading ? "Forging..." : "Forge Identity"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-10">
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold serif text-ink dark:text-gold">Station & Legacy</h1>
+              <p className="text-ink/60 dark:text-dark-text/60 italic serif">Refining your archives in the Batch of 2026.</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8 text-left">
 
               {formData.year !== "Faculty" && (
                 <div className="space-y-4">
