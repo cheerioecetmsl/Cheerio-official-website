@@ -14,10 +14,18 @@ const ebGaramond = EB_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Cheerio 2026 | Cheerio",
-  description: "A journey of a thousand memories begins with a single frame.",
+  title: "Cheerio 2026 | The Archival Legacy",
+  description: "A journey of a thousand memories begins with a single frame. Preserve the legacy of the Batch of 2026.",
+  manifest: "/manifest.json",
+  themeColor: "#D4AF37",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Cheerio 2026",
+  },
   icons: {
-    icon: "/assets/cheerio logo.png",
+    icon: "/assets/pwa-logo.png",
+    apple: "/assets/pwa-logo.png",
   },
 };
 

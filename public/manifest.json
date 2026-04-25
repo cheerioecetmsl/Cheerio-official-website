@@ -1,0 +1,23 @@
+{
+  "name": "Cheerio 2026",
+  "short_name": "Cheerio",
+  "description": "The official archival platform for the Batch of 2026. Capture memories, climb the Hall of Legacy, and preserve the journey.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "/assets/pwa-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/pwa-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
