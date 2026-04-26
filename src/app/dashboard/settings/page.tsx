@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged, updateProfile } from "firebase/auth";
-import { Camera, Save, User, Mail, GraduationCap, School, CheckCircle, Loader2 } from "lucide-react";
+import { Camera, Save, User, Mail, GraduationCap, School, CheckCircle, Loader2, Star } from "lucide-react";
 import { ReturnToDashboard } from "@/components/Sidebar";
+import Image from "next/image";
+import { User as FirebaseUser } from "firebase/auth";
 
 export default function SettingsPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -17,6 +19,7 @@ export default function SettingsPage() {
     year: "",
     section: "",
     photoURL: "",
+    category: "STUDENT",
   });
 
   useEffect(() => {
@@ -32,6 +35,7 @@ export default function SettingsPage() {
             year: data.year || "1st Year",
             section: data.section || "A",
             photoURL: data.photoURL || u.photoURL || "",
+            category: data.category || "STUDENT",
           });
         }
         setLoading(false);
@@ -49,6 +53,7 @@ export default function SettingsPage() {
       const data = new FormData();
       data.append("file", file);
       data.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-2026");
+      data.append("folder", "Cheerio/Profiles");
       
       const res = await fetch(
         `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
@@ -93,26 +98,26 @@ export default function SettingsPage() {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-dark-bg text-gold serif text-2xl animate-pulse">Syncing Profile Sanctum...</div>;
+  if (loading) return <div className="theme-cinematic min-h-screen flex items-center justify-center text-brown-primary serif text-2xl animate-pulse">Syncing Profile Sanctum...</div>;
 
   return (
-    <main className="min-h-screen bg-parchment dark:bg-dark-bg py-24 px-8 flex items-center justify-center">
+    <main className="min-h-screen py-24 px-8 flex items-center justify-center">
       <div className="max-w-3xl w-full space-y-8">
         
         <ReturnToDashboard />
 
-        <div className="glass-card p-12 rounded-[3rem] border-gold/20 relative overflow-hidden">
+        <div className="theme-card p-12 rounded-[3rem] relative overflow-hidden">
           {/* Background Motif */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -mr-32 -mt-32" />
           
           <div className="relative space-y-12">
             {/* Header */}
             <div className="text-center space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 rounded-full text-gold text-[9px] font-bold tracking-widest uppercase mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-soft/20 rounded-full text-gold-primary text-[9px] font-bold tracking-widest uppercase mb-4">
                 <User size={12} /> Profile Sanctum
               </div>
-              <h1 className="text-5xl font-bold text-ink dark:text-gold serif">Identity Forge</h1>
-              <p className="text-ink/60 dark:text-dark-text/60 italic serif text-lg">Refine how you are remembered in the archives.</p>
+              <h1 className="text-5xl font-bold text-brown-primary serif">Identity Forge</h1>
+              <p className="text-brown-secondary italic serif text-lg">Refine how you are remembered in the archives.</p>
             </div>
 
             <form onSubmit={handleSave} className="space-y-12">
@@ -120,11 +125,18 @@ export default function SettingsPage() {
               {/* Profile Photo Section */}
               <div className="flex flex-col items-center gap-6">
                 <div className="relative group">
-                  <div className="w-40 h-40 rounded-full border-4 border-gold/20 overflow-hidden bg-ink/5 flex items-center justify-center group-hover:border-gold transition-all duration-500 shadow-2xl">
+                  <div className="w-40 h-40 rounded-full border-4 border-gold-soft/40 overflow-hidden bg-card-tone flex items-center justify-center group-hover:border-gold-primary transition-all duration-500 shadow-2xl">
                     {formData.photoURL ? (
-                      <img src={formData.photoURL} className="w-full h-full object-cover" alt="Profile" />
+                      <div className="relative w-full h-full">
+                        <Image 
+                          src={formData.photoURL} 
+                          alt="Profile" 
+                          fill
+                          className="object-cover" 
+                        />
+                      </div>
                     ) : (
-                      <div className="text-gold/20"><User size={60} /></div>
+                      <div className="text-gold-soft"><User size={60} /></div>
                     )}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <Camera size={32} className="text-white" />
@@ -136,24 +148,24 @@ export default function SettingsPage() {
                     className="absolute inset-0 opacity-0 cursor-pointer z-10"
                     accept="image/*"
                   />
-                  <div className="absolute bottom-2 right-2 p-3 bg-gold text-ink rounded-full shadow-xl">
+                  <div className="absolute bottom-2 right-2 p-3 bg-gold-primary text-theme-text-primary rounded-full shadow-xl">
                     <Camera size={20} />
                   </div>
                 </div>
-                <span className="text-[10px] font-bold text-gold uppercase tracking-[0.3em]">Update Portrait</span>
+                <span className="text-[10px] font-bold text-brown-primary uppercase tracking-[0.3em]">Update Portrait</span>
               </div>
 
               {/* Form Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Name */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-gold uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[10px] font-bold text-brown-primary uppercase tracking-widest flex items-center gap-2">
                     <User size={12} /> Display Name
                   </label>
                   <input 
                     type="text"
                     required
-                    className="w-full bg-white/5 dark:bg-black/20 border-b border-gold/20 p-4 outline-none focus:border-gold transition-all text-xl serif text-ink dark:text-gold"
+                    className="w-full theme-cinematic-input border-b border-gold-soft/40 p-4 rounded-none text-xl serif text-brown-primary"
                     value={formData.name}
                     onChange={e => setFormData({...formData, name: e.target.value})}
                   />
@@ -161,46 +173,63 @@ export default function SettingsPage() {
 
                 {/* Email (Read-only) */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-gold/40 uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[10px] font-bold text-brown-secondary uppercase tracking-widest flex items-center gap-2">
                     <Mail size={12} /> Ledger Email
                   </label>
-                  <div className="w-full p-4 text-ink/40 dark:text-dark-text/40 serif text-xl border-b border-gold/5">
+                  <div className="w-full p-4 text-brown-secondary serif text-xl border-b border-gold-soft/20">
                     {user?.email}
                   </div>
                 </div>
 
-                {/* Year Selection */}
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-gold uppercase tracking-widest flex items-center gap-2">
-                    <GraduationCap size={12} /> Academic Year
-                  </label>
-                  <select 
-                    className="w-full bg-white/5 dark:bg-black/20 border-b border-gold/20 p-4 outline-none focus:border-gold transition-all text-xl serif text-ink dark:text-gold appearance-none"
-                    value={formData.year}
-                    onChange={e => setFormData({...formData, year: e.target.value})}
-                  >
-                    <option className="bg-dark-bg" value="1st Year">1st Year</option>
-                    <option className="bg-dark-bg" value="2nd Year">2nd Year</option>
-                    <option className="bg-dark-bg" value="3rd Year">3rd Year</option>
-                  </select>
-                </div>
+                {/* Year Selection (Students & Legends only) */}
+                {formData.category !== "FACULTY" && (
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold text-brown-primary uppercase tracking-widest flex items-center gap-2">
+                      <GraduationCap size={12} /> Academic Year
+                    </label>
+                    <select 
+                      className="w-full theme-cinematic-input border-b border-gold-soft/40 p-4 rounded-none text-xl serif text-brown-primary appearance-none"
+                      value={formData.year}
+                      onChange={e => setFormData({...formData, year: e.target.value})}
+                    >
+                      <option value="1st Year">1st Year</option>
+                      <option value="2nd Year">2nd Year</option>
+                      <option value="3rd Year">3rd Year</option>
+                      <option value="4th Year">4th Year (Legend)</option>
+                    </select>
+                  </div>
+                )}
 
-                {/* Section Selection */}
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-gold uppercase tracking-widest flex items-center gap-2">
-                    <School size={12} /> Assigned Section
-                  </label>
-                  <select 
-                    className="w-full bg-white/5 dark:bg-black/20 border-b border-gold/20 p-4 outline-none focus:border-gold transition-all text-xl serif text-ink dark:text-gold appearance-none"
-                    value={formData.section}
-                    onChange={e => setFormData({...formData, section: e.target.value})}
-                  >
-                    <option className="bg-dark-bg" value="A">Section A</option>
-                    <option className="bg-dark-bg" value="B">Section B</option>
-                    <option className="bg-dark-bg" value="C">Section C</option>
-                    <option className="bg-dark-bg" value="D">Section D</option>
-                  </select>
-                </div>
+                {/* Section Selection (Students only) */}
+                {formData.category === "STUDENT" && (
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold text-brown-primary uppercase tracking-widest flex items-center gap-2">
+                      <School size={12} /> Assigned Section
+                    </label>
+                    <select 
+                      className="w-full theme-cinematic-input border-b border-gold-soft/40 p-4 rounded-none text-xl serif text-brown-primary appearance-none"
+                      value={formData.section}
+                      onChange={e => setFormData({...formData, section: e.target.value})}
+                    >
+                      <option value="A">Section A</option>
+                      <option value="B">Section B</option>
+                      <option value="C">Section C</option>
+                      <option value="D">Section D</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Role/Category Badge (Faculty/Legend only) */}
+                {formData.category !== "STUDENT" && (
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold text-brown-secondary uppercase tracking-widest flex items-center gap-2">
+                      <Star size={12} /> Archival Status
+                    </label>
+                    <div className="w-full p-4 text-gold-primary font-bold serif text-xl border-b border-gold-soft/20 bg-card-tone rounded-xl">
+                      {formData.category}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Action Button */}
@@ -208,7 +237,7 @@ export default function SettingsPage() {
                 <button 
                   type="submit"
                   disabled={saving}
-                  className="gold-button w-full py-6 rounded-2xl font-bold uppercase tracking-[0.4em] text-sm shadow-2xl flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50"
+                  className="theme-cinematic-btn-primary w-full py-6 rounded-2xl font-bold uppercase tracking-[0.4em] text-sm flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50"
                 >
                   {saving ? (
                     <>

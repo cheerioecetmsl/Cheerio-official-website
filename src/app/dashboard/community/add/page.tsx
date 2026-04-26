@@ -6,6 +6,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { UploadCloud, Check, AlertCircle, Sparkles, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function AddMemberPage() {
   const [loading, setLoading] = useState(false);
@@ -47,10 +48,11 @@ export default function AddMemberPage() {
       const data = new FormData();
       data.append("file", file);
       data.append("upload_preset", "Cheerio-2026");
-      // Route to organizers or seniors subfolder
-      data.append("folder", `Cheerio/${formData.role}s`);
+      // Route to hierarchical community subfolders
+      const folderName = formData.role.charAt(0).toUpperCase() + formData.role.slice(1) + "s";
+      data.append("folder", `Cheerio/Community/${folderName}`);
 
-      const res = await fetch(`https://api.cloudinary.com/v1_1/dyvobdjp5/image/upload`, {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: "POST",
         body: data,
       });
@@ -67,15 +69,15 @@ export default function AddMemberPage() {
 
       setSuccess(true);
       setTimeout(() => router.push(`/dashboard/community/${formData.role}s`), 2000);
-    } catch (err: any) {
-      setError(err.message || "Failed to add member");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to add member");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-parchment dark:bg-dark-bg py-24 px-8">
+    <main className="min-h-screen py-24 px-8">
       <ReturnToDashboard />
       
       <div className="max-w-4xl mx-auto space-y-12">
@@ -102,7 +104,14 @@ export default function AddMemberPage() {
               </label>
               <div className="relative group aspect-[4/5] rounded-[3rem] overflow-hidden border-2 border-dashed border-gold/20 hover:border-gold transition-all duration-500 bg-gold/5 flex flex-col items-center justify-center cursor-pointer overflow-hidden">
                 {preview ? (
-                  <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="relative w-full h-full">
+                    <Image 
+                      src={preview} 
+                      alt="Preview" 
+                      fill
+                      className="object-cover" 
+                    />
+                  </div>
                 ) : (
                   <div className="text-center space-y-4 p-8">
                     <UploadCloud size={48} className="text-gold/40 mx-auto group-hover:scale-110 transition-transform" />

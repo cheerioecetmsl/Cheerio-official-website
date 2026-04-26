@@ -23,6 +23,32 @@
 
   --font-serif: "EB Garamond", serif;
   --font-sans: "Inter", sans-serif;
+  --font-circuit: "Share Tech Mono", monospace;
+
+  /* New Cinematic Parchment Theme Variables */
+  --color-parchment-base: #F5E6CC;
+  --color-parchment-contrast: #EAD3A7;
+  --color-card-tone: #FFF3D6;
+  --color-brown-primary: #6B4423;
+  --color-brown-secondary: #8B5E3C;
+  --color-gold-primary: #D4AF37;
+  --color-gold-soft: #CFAE70;
+  --color-theme-text-primary: #2B1B12;
+  --color-theme-text-secondary: #4A3426;
+  --color-input-bg: #FFF8E6;
+
+  /* Rich Dark Footer Palette */
+  --color-footer-bg: #1C0F08;
+  --color-footer-burgundy: #7D2B3A;
+  --color-footer-rust: #A0522D;
+  --color-footer-forest: #2D4A3E;
+  --color-footer-sepia: #8B7355;
+  --color-footer-slate: #4A5568;
+  --color-footer-text-bright: #E8D5B7;
+  --color-footer-text-mid: #B8956A;
+  --color-footer-text-muted: #7A6145;
+  --color-footer-gold: #D4AF37;
+  --color-footer-accent: #C17F35;
 }
 
 :root {
@@ -91,3 +117,167 @@ h1, h2, h3, h4, .serif {
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+/* Custom Cinematic Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(18, 18, 18, 0.5);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-gold);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-glow);
+}
+
+/* Firefox Support */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gold) transparent;
+}
+
+/* ========================================= */
+/* --- CINEMATIC PARCHMENT THEME SCOPE ---   */
+/* ========================================= */
+.theme-cinematic {
+  --background: var(--color-parchment-base);
+  --foreground: var(--color-theme-text-primary);
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+.theme-cinematic .glass-card {
+  background: var(--color-card-tone) !important;
+  backdrop-filter: none !important;
+  border: 1px solid var(--color-gold-soft) !important;
+  box-shadow: 0 8px 32px rgba(107, 68, 35, 0.15) !important;
+}
+
+.theme-cinematic .gold-button,
+.theme-cinematic-btn-primary {
+  background: var(--color-gold-primary) !important;
+  color: var(--color-theme-text-primary) !important;
+  border: none;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
+  transition: all 0.3s ease;
+}
+
+.theme-cinematic .gold-button:hover,
+.theme-cinematic-btn-primary:hover {
+  background: var(--color-gold-soft) !important;
+  color: var(--color-theme-text-primary) !important;
+  box-shadow: 0 6px 20px rgba(207, 174, 112, 0.5);
+  transform: translateY(-2px);
+}
+
+.theme-cinematic-btn-secondary {
+  background: transparent !important;
+  border: 1px solid var(--color-brown-secondary) !important;
+  color: var(--color-brown-primary) !important;
+  transition: all 0.3s ease;
+}
+
+.theme-cinematic-btn-secondary:hover {
+  background: var(--color-parchment-contrast) !important;
+}
+
+.theme-cinematic-input {
+  background: var(--color-input-bg) !important;
+  border: 1px solid var(--color-gold-soft) !important;
+  color: var(--color-theme-text-primary) !important;
+  transition: border-color 0.3s ease;
+}
+
+.theme-cinematic-input:focus {
+  border-color: var(--color-gold-primary) !important;
+  outline: none;
+}
+
+.theme-cinematic-input::placeholder {
+  color: var(--color-brown-secondary) !important;
+  opacity: 0.7;
+}
+
+.theme-cinematic-divider {
+  border-color: var(--color-gold-soft) !important;
+  background-color: var(--color-gold-soft) !important;
+}
+
+/* Theme Card - parchment card style */
+.theme-card {
+  background: var(--color-card-tone) !important;
+  border: 1px solid var(--color-gold-soft) !important;
+  box-shadow: 0 8px 32px rgba(107, 68, 35, 0.12) !important;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.theme-card:hover {
+  box-shadow: 0 12px 40px rgba(107, 68, 35, 0.2) !important;
+}
+
+/* Force specific structural elements to use secondary background when requested */
+.theme-cinematic-alt-bg {
+  background-color: var(--color-parchment-contrast) !important;
+}
+
+/* Dashboard layout override: all pages inside .theme-cinematic inherit the parchment base */
+.theme-cinematic main {
+  background-color: var(--color-parchment-base);
+  color: var(--color-theme-text-primary);
+}
+
+/* Cinematic scrollbar (parchment variant) */
+.theme-cinematic ::-webkit-scrollbar-track {
+  background: var(--color-parchment-contrast);
+}
+
+.theme-cinematic ::-webkit-scrollbar-thumb {
+  background: var(--color-gold-primary);
+}
+
+/* =========================================== */
+/* --- CIRCUIT / ELECTRONIC COMPONENT FONT --- */
+/* =========================================== */
+.font-circuit {
+  font-family: var(--font-circuit), "Share Tech Mono", monospace !important;
+  letter-spacing: 0.08em;
+}
+
+/* =========================================== */
+/* --- DEEP DARK FOOTER STYLES              --- */
+/* =========================================== */
+.footer-dark {
+  background-color: var(--color-footer-bg);
+}
+
+.footer-text-bright  { color: var(--color-footer-text-bright); }
+.footer-text-mid     { color: var(--color-footer-text-mid); }
+.footer-text-muted   { color: var(--color-footer-text-muted); }
+.footer-text-gold    { color: var(--color-footer-gold); }
+.footer-text-burgundy{ color: var(--color-footer-burgundy); }
+.footer-text-rust    { color: var(--color-footer-rust); }
+.footer-text-forest  { color: var(--color-footer-forest); }
+.footer-text-sepia   { color: var(--color-footer-sepia); }
+.footer-text-accent  { color: var(--color-footer-accent); }
+
+.footer-divider {
+  border-color: rgba(212, 175, 55, 0.15);
+}
+
+.footer-icon-box {
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  transition: all 0.3s ease;
+}
+
+.footer-icon-box:hover {
+  background-color: rgba(212, 175, 55, 0.1);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+

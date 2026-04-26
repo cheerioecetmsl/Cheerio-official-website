@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { X, Camera, ExternalLink, Mail, Sparkles, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 interface Person {
   id: string;
@@ -31,7 +32,7 @@ export default function OrganizersPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-parchment dark:bg-dark-bg py-24 px-8">
+    <main className="min-h-screen py-24 px-8">
       <ReturnToDashboard />
       
       <div className="max-w-7xl mx-auto space-y-12">
@@ -65,10 +66,11 @@ export default function OrganizersPage() {
               >
                 <div className="aspect-[4/5] rounded-[2rem] overflow-hidden relative shadow-2xl bg-zinc-900">
                   {member.imageURL ? (
-                    <img 
+                    <Image 
                       src={member.imageURL} 
                       alt={member.name}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                      fill
+                      className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-zinc-800">
@@ -108,10 +110,11 @@ export default function OrganizersPage() {
 
             <div className="w-full md:w-1/2 h-64 md:h-auto bg-zinc-900">
               {selectedMember.imageURL ? (
-                <img 
+                <Image 
                   src={selectedMember.imageURL} 
                   alt={selectedMember.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-zinc-800">
@@ -134,7 +137,7 @@ export default function OrganizersPage() {
               <div className="space-y-4">
                 <h4 className="text-gold/40 font-bold uppercase tracking-widest text-[10px]">The Legacy</h4>
                 <p className="text-ink/60 dark:text-dark-text/60 italic serif text-lg leading-relaxed">
-                  "{selectedMember.description}"
+                  &quot;{selectedMember.description}&quot;
                 </p>
               </div>
 

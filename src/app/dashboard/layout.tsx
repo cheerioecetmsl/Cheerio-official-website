@@ -2,6 +2,7 @@
 
 import { Sidebar } from "@/components/Sidebar";
 import { BackgroundScanner } from "@/components/BackgroundScanner";
+import { CinematicDecor } from "@/components/CinematicDecor";
 
 export default function DashboardLayout({
   children,
@@ -9,9 +10,11 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-parchment dark:bg-dark-bg">
+    <div className="theme-cinematic min-h-screen">
       <Sidebar />
       <BackgroundScanner />
+      {/* Bollywood cinematic decor — scattered SVG icons, pointer-events none */}
+      <CinematicDecor />
       {/* 
           Mobile Optimization: 
           - pl-0 on mobile (sidebar is hidden or icons only)

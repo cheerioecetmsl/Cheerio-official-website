@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { X, GraduationCap, Quote, Sparkles, Loader2, BookOpen, Star } from "lucide-react";
+import Image from "next/image";
 
 interface Person {
   id: string;
@@ -67,7 +68,7 @@ export default function FacultyPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-parchment dark:bg-dark-bg py-24 px-8">
+    <main className="min-h-screen py-24 px-8">
       <ReturnToDashboard />
       
       <div className="max-w-7xl mx-auto space-y-12">
@@ -92,7 +93,23 @@ export default function FacultyPage() {
             <p className="text-amber-500/40 font-bold uppercase tracking-widest text-sm italic serif">The Mentors are currently in the library.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12 pt-8">
+          <div className="space-y-16">
+            {/* Hero Group Photo */}
+            <div className="relative aspect-[16/9] w-full rounded-[3rem] overflow-hidden border border-amber-500/20 shadow-2xl group">
+              <Image 
+                src="/assets/faculty_group.jpg" 
+                fill 
+                className="object-cover transition-transform duration-1000 group-hover:scale-105" 
+                alt="Faculty Group" 
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-12">
+                <p className="text-amber-500 font-bold uppercase tracking-[0.3em] text-xs">The Mentors</p>
+                <h2 className="text-4xl font-bold text-white serif mt-2">Guiding the 2026 Vision.</h2>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
             {members.map((member) => (
               <div 
                 key={member.id}
@@ -102,10 +119,11 @@ export default function FacultyPage() {
                 {/* Profile Card */}
                 <div className="relative aspect-square rounded-full overflow-hidden border-4 border-amber-500/10 transition-all duration-700 group-hover:scale-105 group-hover:shadow-[0_0_80px_rgba(245,158,11,0.15)] group-hover:border-amber-500/40 cursor-pointer bg-zinc-900">
                   {member.imageURL ? (
-                    <img 
+                    <Image 
                       src={member.imageURL} 
                       alt={member.name}
-                      className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-1000"
+                      fill
+                      className="object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-1000"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-zinc-800 uppercase">
@@ -117,7 +135,7 @@ export default function FacultyPage() {
                   <div className="absolute inset-0 bg-amber-900/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center p-8 text-center">
                     <BookOpen size={32} className="text-gold/40 mx-auto mb-4" />
                     <p className="text-sm text-white italic serif mb-4 line-clamp-3">
-                      "{member.description}"
+                      &quot;{member.description}&quot;
                     </p>
                     <Star size={16} className="text-amber-500 mx-auto" />
                   </div>
@@ -133,6 +151,7 @@ export default function FacultyPage() {
                 </div>
               </div>
             ))}
+            </div>
           </div>
         )}
       </div>
@@ -155,10 +174,11 @@ export default function FacultyPage() {
 
             <div className="w-full md:w-2/5 h-80 md:h-auto relative bg-zinc-900">
               {selectedMember.imageURL ? (
-                <img 
+                <Image 
                   src={selectedMember.imageURL} 
                   alt={selectedMember.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-8xl font-bold text-zinc-800">
@@ -185,7 +205,7 @@ export default function FacultyPage() {
                   <div className="h-px flex-grow bg-amber-500/10" />
                 </div>
                 <p className="text-xl md:text-2xl text-ink/80 dark:text-dark-text/80 italic serif leading-relaxed text-center">
-                  "{selectedMember.description}"
+                  &quot;{selectedMember.description}&quot;
                 </p>
                 <div className="h-px w-full bg-amber-500/10" />
               </div>

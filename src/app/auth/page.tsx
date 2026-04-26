@@ -4,6 +4,7 @@ import { auth } from "@/lib/firebase";
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -16,8 +17,8 @@ export default function AuthPage() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       router.push("/onboarding");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     }
   };
 
@@ -26,7 +27,7 @@ export default function AuthPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/onboarding");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError("Invalid email or password. Please try again.");
     }
   };
@@ -43,7 +44,13 @@ export default function AuthPage() {
           onClick={handleGoogleSignIn}
           className="w-full mb-4 flex items-center justify-center gap-3 bg-white text-ink border border-ink/10 py-3 rounded-lg hover:bg-gray-50 transition-all font-medium"
         >
-          <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
+          <Image 
+            src="https://www.google.com/favicon.ico" 
+            alt="Google" 
+            width={20}
+            height={20}
+            className="w-5 h-5" 
+          />
           Continue with Google
         </button>
 

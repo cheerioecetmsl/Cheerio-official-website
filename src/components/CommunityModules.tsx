@@ -1,12 +1,23 @@
 "use client";
 
 import { Search, Filter, Mail, Camera } from "lucide-react";
+import Image from "next/image";
 
-export const ProfileCard = ({ profile }: { profile: any }) => (
+export interface ArchiveProfile {
+  id: string;
+  name: string;
+  photoURL: string;
+  role?: string;
+  year: string;
+  section?: string;
+  narrative?: string;
+}
+
+export const ProfileCard = ({ profile }: { profile: ArchiveProfile }) => (
   <div className="glass-card p-6 rounded-3xl border-gold/10 hover:border-gold/30 transition-all group">
     <div className="relative w-24 h-24 mx-auto mb-6">
-      <div className="w-full h-full rounded-full border-2 border-gold/20 overflow-hidden group-hover:border-gold transition-colors">
-        <img src={profile.photoURL} alt={profile.name} className="w-full h-full object-cover" />
+      <div className="relative w-full h-full rounded-full border-2 border-gold/20 overflow-hidden group-hover:border-gold transition-colors">
+        <Image src={profile.photoURL} alt={profile.name} fill sizes="96px" className="object-cover" />
       </div>
       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gold text-ink text-[8px] font-bold px-2 py-1 rounded-full uppercase tracking-widest whitespace-nowrap">
         {profile.role || profile.year}
@@ -20,7 +31,7 @@ export const ProfileCard = ({ profile }: { profile: any }) => (
       </p>
       {profile.narrative && (
         <p className="pt-4 text-[11px] text-ink/60 dark:text-dark-text/60 italic serif leading-relaxed">
-          "{profile.narrative}"
+          &quot;{profile.narrative}&quot;
         </p>
       )}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, X, Trophy, Camera, Users, Megaphone } from "lucide-react";
 
@@ -8,7 +8,7 @@ interface Step {
   title: string;
   description: string;
   targetId: string;
-  icon: any;
+  icon: React.ComponentType<{ size: number }>;
   position: "top" | "bottom" | "left" | "right";
 }
 
@@ -43,17 +43,18 @@ const steps: Step[] = [
   }
 ];
 
-export function TutorialOverlay({ onComplete, isFaculty }: { onComplete: () => void; isFaculty?: boolean }) {
+export function TutorialOverlay({ isOpen, onClose, onComplete, isFaculty }: { isOpen: boolean; onClose: () => void; onComplete?: () => void; isFaculty?: boolean }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [coords, setCoords] = useState({ top: 0, left: 0, width: 0, height: 0 });
-  const [isReady, setIsReady] = useState(false);
 
-  const filteredSteps = steps.filter(step => {
+  const filteredSteps = useMemo(() => steps.filter(step => {
     if (isFaculty && step.targetId === "stats-section") return false;
     return true;
-  });
+  }), [isFaculty]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const updateCoords = () => {
       const step = filteredSteps[currentStep];
       if (!step) return;
@@ -61,114 +62,108 @@ export function TutorialOverlay({ onComplete, isFaculty }: { onComplete: () => v
       if (el) {
         const rect = el.getBoundingClientRect();
         setCoords({
-          top: rect.top,
-          left: rect.left,
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
           width: rect.width,
           height: rect.height
         });
-        
-        // Scroll into view if needed
-        if (rect.top < 0 || rect.bottom > window.innerHeight) {
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
       }
     };
 
-    // Delay slightly to ensure layout is settled
-    const timer = setTimeout(() => {
-      updateCoords();
-      setIsReady(true);
-    }, 500);
-
+    updateCoords();
+    const interval = setInterval(updateCoords, 200);
     window.addEventListener("resize", updateCoords);
-    window.addEventListener("scroll", updateCoords);
+    
     return () => {
-      clearTimeout(timer);
+      clearInterval(interval);
       window.removeEventListener("resize", updateCoords);
-      window.removeEventListener("scroll", updateCoords);
     };
-  }, [currentStep]);
+  }, [currentStep, isOpen, filteredSteps]);
 
   const handleNext = () => {
     if (currentStep < filteredSteps.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else {
-      onComplete();
+      if (onComplete) onComplete();
+      onClose();
     }
   };
 
-  const activeStep = filteredSteps[currentStep];
-  const Icon = activeStep?.icon;
+  if (!isOpen || !filteredSteps[currentStep]) return null;
 
-  if (!isReady || !activeStep) return null;
+  const activeStep = filteredSteps[currentStep];
+  const Icon = activeStep.icon;
 
   return (
-    <div className="fixed inset-0 z-[100] pointer-events-none">
-      {/* Background Dimmer with Spotlight Hole */}
-      <div 
-        className="absolute inset-0 bg-black/80 transition-all duration-700 pointer-events-auto"
-        style={{
-          maskImage: `radial-gradient(circle ${Math.max(coords.width, coords.height) / 1.5}px at ${coords.left + coords.width / 2}px ${coords.top + coords.height / 2}px, transparent 100%, black 100%)`,
-          WebkitMaskImage: `radial-gradient(circle ${Math.max(coords.width, coords.height) / 1.5}px at ${coords.left + coords.width / 2}px ${coords.top + coords.height / 2}px, transparent 100%, black 100%)`
-        }}
+    <div className="absolute inset-0 z-[100] pointer-events-none">
+      {/* Dimmed Background */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/60 pointer-events-auto backdrop-blur-[2px]"
+        onClick={onClose}
       />
 
       <AnimatePresence mode="wait">
         <motion.div
           key={currentStep}
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
+          initial={{ opacity: 0, y: 10, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
+          exit={{ opacity: 0, scale: 0.98 }}
           className="absolute z-[110] pointer-events-auto"
           style={{
-            top: activeStep.position === "bottom" ? coords.top + coords.height + 24 : 
-                 activeStep.position === "top" ? coords.top - 280 : 
-                 coords.top + coords.height / 2 - 120,
-            left: activeStep.position === "right" ? coords.left + coords.width + 24 : 
+            top: activeStep.position === "bottom" ? coords.top + coords.height + 20 : 
+                 activeStep.position === "top" ? coords.top - 220 : 
+                 coords.top + coords.height / 2 - 100,
+            left: Math.max(20, Math.min(window.innerWidth - 340, 
+                  activeStep.position === "right" ? coords.left + coords.width + 20 : 
                   activeStep.position === "left" ? coords.left - 340 : 
-                  coords.left + coords.width / 2 - 160,
+                  coords.left + coords.width / 2 - 160)),
             width: "320px"
           }}
         >
-          {/* Tooltip Card */}
-          <div className="glass-card p-8 rounded-[2.5rem] border-gold/20 shadow-[0_32px_128px_rgba(0,0,0,0.8)] bg-zinc-900/90 backdrop-blur-xl relative overflow-hidden">
-            {/* Pointer Arrow */}
-            <div 
-              className={`absolute w-4 h-4 bg-zinc-900 border-l border-t border-gold/20 rotate-45 transition-all ${
-                activeStep.position === "bottom" ? "-top-2 left-1/2 -translate-x-1/2" :
-                activeStep.position === "top" ? "-bottom-2 left-1/2 -translate-x-1/2 rotate-[225deg]" :
-                activeStep.position === "right" ? "top-1/2 -left-2 -translate-y-1/2 -rotate-45" :
-                "top-1/2 -right-2 -translate-y-1/2 rotate-[135deg]"
-              }`}
-            />
+          {/* Spotlight Highlight */}
+          <div 
+            className="fixed z-[-1] rounded-2xl border-2 border-gold/50 shadow-[0_0_40px_rgba(212,175,55,0.4)] bg-gold/5"
+            style={{
+              top: coords.top - window.scrollY - 10,
+              left: coords.left - window.scrollX - 10,
+              width: coords.width + 20,
+              height: coords.height + 20,
+              position: 'fixed'
+            }}
+          />
 
-            <div className="space-y-6">
+          {/* Tutorial Card */}
+          <div className="glass-card p-6 rounded-[2rem] border-gold/30 shadow-2xl bg-zinc-900/95 backdrop-blur-xl">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="p-3 bg-gold/10 rounded-2xl text-gold">
-                  <Icon size={24} />
+                <div className="p-2.5 bg-gold/20 rounded-xl text-gold border border-gold/20">
+                  <Icon size={20} />
                 </div>
                 <button 
-                  onClick={onComplete}
-                  className="p-2 text-white/20 hover:text-white transition-colors"
+                  onClick={onClose}
+                  className="p-1.5 text-white/20 hover:text-white transition-colors"
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
               </div>
 
-              <div className="space-y-2">
-                <span className="text-[10px] font-bold text-gold uppercase tracking-[0.4em]">Step {currentStep + 1} of {filteredSteps.length}</span>
-                <h3 className="text-2xl font-bold text-white serif">{activeStep.title}</h3>
-                <p className="text-sm text-white/60 leading-relaxed italic serif">
-                  "{activeStep.description}"
+              <div className="space-y-1">
+                <span className="text-[9px] font-bold text-gold uppercase tracking-[0.3em]">Neural Link {currentStep + 1}/{filteredSteps.length}</span>
+                <h3 className="text-xl font-bold text-white serif tracking-tight">{activeStep.title}</h3>
+                <p className="text-xs text-white/50 leading-relaxed italic serif">
+                  &quot;{activeStep.description}&quot;
                 </p>
               </div>
 
-              <div className="flex items-center gap-4 pt-4">
+              <div className="flex items-center gap-3 pt-2">
                 <button 
                   onClick={handleNext}
-                  className="flex-1 gold-button py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 shadow-lg"
+                  className="flex-1 bg-gold text-ink py-3.5 rounded-xl font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:scale-[1.02] active:scale-95 transition-all"
                 >
-                  {currentStep === steps.length - 1 ? "Finish induction" : "Next Anchor"}
+                  {currentStep === filteredSteps.length - 1 ? "Complete Sync" : "Next Anchor"}
                   <ChevronRight size={14} />
                 </button>
               </div>
@@ -177,13 +172,13 @@ export function TutorialOverlay({ onComplete, isFaculty }: { onComplete: () => v
         </motion.div>
       </AnimatePresence>
 
-      {/* Skip Button (Bottom Right) */}
-      <div className="fixed bottom-12 right-12 z-[110] pointer-events-auto">
+      {/* Skip Controls */}
+      <div className="fixed bottom-8 right-8 z-[110] pointer-events-auto">
         <button 
-          onClick={onComplete}
-          className="text-[10px] font-bold text-white/40 hover:text-gold uppercase tracking-[0.3em] transition-all flex items-center gap-2 group"
+          onClick={onClose}
+          className="text-[9px] font-bold text-white/40 hover:text-gold uppercase tracking-[0.3em] transition-all flex items-center gap-2 group bg-zinc-900/50 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/5 shadow-xl hover:border-gold/20"
         >
-          Skip Induction <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+          Skip Induction <X size={12} className="group-hover:rotate-90 transition-transform" />
         </button>
       </div>
     </div>

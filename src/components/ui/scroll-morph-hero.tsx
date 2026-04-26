@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, useTransform, useSpring, useScroll } from "framer-motion";
+import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -59,10 +60,12 @@ function FlipCard({
                     className="absolute inset-0 h-full w-full overflow-hidden rounded-lg shadow-lg bg-white border border-gold/10"
                     style={{ backfaceVisibility: "hidden" }}
                 >
-                    <img
+                    <Image
                         src={src || "/gallery/pic-1.jpeg"}
                         alt={`hero-${index}`}
-                        className="h-full w-full object-cover md:grayscale brightness-90 group-hover:grayscale-0 transition-all duration-500"
+                        fill
+                        sizes="70px"
+                        className="object-cover md:grayscale brightness-90 group-hover:grayscale-0 transition-all duration-500"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = `/gallery/pic-${(index % 12) + 1}.jpeg`;
@@ -88,6 +91,22 @@ function FlipCard({
 
 // --- Main Hero Component ---
 const TOTAL_IMAGES = 20;
+
+// Stable scatter positions generated once outside the component
+const STABLE_SCATTER = Array.from({ length: TOTAL_IMAGES }, (_, i) => {
+    // Deterministic "randomness" based on index
+    const seedX = Math.sin(i * 123.456);
+    const seedY = Math.cos(i * 789.012);
+    const seedRot = Math.sin(i * 345.678);
+    
+    return {
+        x: seedX * 1000,
+        y: seedY * 600,
+        rotation: seedRot * 90,
+        scale: 0.6,
+        opacity: 0,
+    };
+});
 
 const DEFAULT_IMAGES = Array.from({ length: TOTAL_IMAGES }, (_, i) => `/gallery/pic-${((i % 12) + 1)}.jpeg`);
 
@@ -176,14 +195,8 @@ export default function IntroAnimation() {
     }, []);
 
     const scatterPositions = useMemo(() => {
-        return images.map(() => ({
-            x: (Math.random() - 0.5) * 2000,
-            y: (Math.random() - 0.5) * 1200,
-            rotation: (Math.random() - 0.5) * 180,
-            scale: 0.6,
-            opacity: 0,
-        }));
-    }, [images]);
+        return STABLE_SCATTER;
+    }, []);
 
     const contentOpacity = useTransform(scrollYProgress, [0.4, 0.6], [0, 1]);
 
@@ -202,9 +215,12 @@ export default function IntroAnimation() {
                         }}
                         className="flex flex-col items-center transition-all duration-300"
                     >
-                        <img 
+                        <Image 
                             src="/assets/cheerio logo.png" 
                             alt="Cheerio Logo" 
+                            width={350}
+                            height={350}
+                            priority
                             className="w-[150px] md:w-[350px] h-auto opacity-90"
                         />
                         <motion.p 
@@ -224,9 +240,12 @@ export default function IntroAnimation() {
                     }}
                     className="absolute z-10 flex flex-col items-center justify-center pointer-events-none"
                 >
-                    <img 
+                    <Image 
                         src="/assets/cheerio writing 1.png" 
                         alt="Cheerio Writing" 
+                        width={1000}
+                        height={300}
+                        style={{ height: "auto" }}
                         className="w-[450px] md:w-[1000px] h-auto opacity-100"
                     />
                 </motion.div>
@@ -236,9 +255,9 @@ export default function IntroAnimation() {
                     style={{ opacity: contentOpacity }}
                     className="absolute bottom-[15%] z-10 flex flex-col items-center justify-center text-center pointer-events-none px-4"
                 >
-                    <h2 className="text-3xl md:text-7xl font-bold serif text-ink dark:text-gold tracking-tighter mb-4">
+                    <h1 className="text-3xl md:text-7xl font-bold serif text-ink dark:text-gold tracking-tighter mb-4">
                         The Vault is Open
-                    </h2>
+                    </h1>
                     <p className="text-xs md:text-lg text-ink-soft dark:text-dark-text-secondary max-w-lg serif italic leading-relaxed">
                         Scroll deeper to shuffle the memories of the Batch of 2026.
                     </p>

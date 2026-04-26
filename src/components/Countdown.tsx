@@ -33,17 +33,6 @@ export const Countdown = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const TimeUnit = ({ value, label }: { value: number; label: string }) => (
-    <div className="flex flex-col items-center">
-      <div className="text-xl sm:text-2xl md:text-6xl font-bold serif text-gold tabular-nums leading-none">
-        {value.toString().padStart(2, "0")}
-      </div>
-      <div className="text-[7px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.4em] font-bold text-dark-text/40 mt-1 md:mt-2">
-        {label}
-      </div>
-    </div>
-  );
-
   return (
     <div className="glass-card p-6 md:p-10 rounded-3xl border-gold/20 flex flex-col items-center justify-center space-y-6 md:space-y-8 animate-in fade-in zoom-in duration-700">
       <div className="text-center space-y-1 md:space-y-2">
@@ -66,3 +55,14 @@ export const Countdown = () => {
     </div>
   );
 };
+
+const TimeUnit = ({ value, label }: { value: number; label: string }) => (
+  <div className="flex flex-col items-center">
+    <div className="text-xl sm:text-2xl md:text-6xl font-bold serif text-gold tabular-nums leading-none">
+      {value.toString().padStart(2, "0")}
+    </div>
+    <div className="text-[7px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.4em] font-bold text-dark-text/40 mt-1 md:mt-2">
+      {label}
+    </div>
+  </div>
+);

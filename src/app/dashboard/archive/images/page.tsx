@@ -8,9 +8,18 @@ import { ReturnToDashboard } from "@/components/Sidebar";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 import Link from "next/link";
+import Image from "next/image";
+
+interface ArchivePhoto {
+  id: string;
+  url: string;
+  event?: string;
+  createdAt?: string | number | Date;
+  uploadedBy?: string;
+}
 
 export default function ImageArchive() {
-  const [photos, setPhotos] = useState<any[]>([]);
+  const [photos, setPhotos] = useState<ArchivePhoto[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [downloading, setDownloading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -25,7 +34,7 @@ export default function ImageArchive() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ArchivePhoto));
       setPhotos(docs);
       setLoading(false);
     }, (err) => {
@@ -70,19 +79,19 @@ export default function ImageArchive() {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-parchment dark:bg-dark-bg text-gold serif text-2xl animate-pulse">Opening the Vault...</div>;
+  if (loading) return <div className="theme-cinematic min-h-screen flex items-center justify-center text-brown-primary serif text-2xl animate-pulse">Opening the Vault...</div>;
 
   return (
-    <main className="min-h-screen bg-parchment dark:bg-dark-bg py-24 px-8">
+    <main className="min-h-screen py-24 px-8">
       <ReturnToDashboard />
       <div className="max-w-7xl mx-auto space-y-12">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-2">
-            <span className="text-gold uppercase tracking-[0.4em] text-[10px] font-bold serif">The Archive</span>
-            <h1 className="text-5xl font-bold text-ink dark:text-gold serif">Image Legacy</h1>
-            <p className="text-ink/60 dark:text-dark-text/60 italic serif">Preserving every frame of our story.</p>
+            <span className="text-brown-secondary uppercase tracking-[0.4em] text-[10px] font-bold serif">The Archive</span>
+            <h1 className="text-5xl font-bold text-brown-primary serif">Image Legacy</h1>
+            <p className="text-brown-secondary italic serif">Preserving every frame of our story.</p>
           </div>
           
           <div className="flex items-center gap-4">
@@ -90,13 +99,13 @@ export default function ImageArchive() {
               <button 
                 onClick={downloadAsZip}
                 disabled={downloading}
-                className="gold-button px-6 py-3 rounded-xl flex items-center gap-2 text-xs font-bold uppercase tracking-widest shadow-xl animate-in fade-in slide-in-from-right-4"
+                className="theme-cinematic-btn-primary px-6 py-3 rounded-xl flex items-center gap-2 text-xs font-bold uppercase tracking-widest animate-in fade-in slide-in-from-right-4"
               >
                 <Download size={16} />
                 {downloading ? "Archiving..." : `Download Zip (${selected.length})`}
               </button>
             )}
-            <button className="p-3 bg-ink/5 dark:bg-white/5 border border-gold/10 rounded-full text-gold">
+            <button className="p-3 bg-card-tone border border-gold-soft/30 rounded-full text-gold-primary">
               <Filter size={20} />
             </button>
           </div>
@@ -111,9 +120,11 @@ export default function ImageArchive() {
                 onClick={() => toggleSelect(photo.id)}
                 className="relative aspect-[4/5] rounded-3xl overflow-hidden cursor-pointer group border border-gold/10 hover:border-gold/40 transition-all"
               >
-                <img 
+                <Image 
                   src={photo.url} 
-                  className={`w-full h-full object-cover transition-transform duration-700 ${
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  className={`object-cover transition-transform duration-700 ${
                     selected.includes(photo.id) ? "scale-95" : "group-hover:scale-110"
                   }`}
                   alt="Memory"
@@ -144,16 +155,16 @@ export default function ImageArchive() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-40 text-center space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            <div className="w-24 h-24 rounded-full bg-gold/10 flex items-center justify-center text-gold/40 border border-gold/5">
+            <div className="w-24 h-24 rounded-full bg-card-tone flex items-center justify-center text-gold-soft border border-gold-soft/30">
               <Grid size={48} strokeWidth={1} />
             </div>
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold serif text-ink dark:text-gold uppercase tracking-tighter">The Vault is Silent</h2>
-              <p className="text-ink/40 dark:text-dark-text/40 italic serif max-w-md mx-auto">No memories have been recorded yet. Be the first to add a frame to the 2026 legacy.</p>
+              <h2 className="text-3xl font-bold serif text-brown-primary uppercase tracking-tighter">The Vault is Silent</h2>
+              <p className="text-brown-secondary italic serif max-w-md mx-auto">No memories have been recorded yet. Be the first to add a frame to the 2026 legacy.</p>
             </div>
             <Link 
               href="/dashboard/upload/image"
-              className="gold-button px-8 py-4 rounded-2xl flex items-center gap-3 text-xs font-bold uppercase tracking-widest shadow-2xl transition-all hover:scale-105"
+              className="theme-cinematic-btn-primary px-8 py-4 rounded-2xl flex items-center gap-3 text-xs font-bold uppercase tracking-widest transition-all hover:scale-105"
             >
               <PlusCircle size={20} />
               Begin the Archive (+25 XP)

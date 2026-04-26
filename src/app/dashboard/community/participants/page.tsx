@@ -36,7 +36,7 @@ const categories = [
 
 export default function CommunityHub() {
   return (
-    <main className="min-h-screen bg-parchment dark:bg-dark-bg py-24 px-8 overflow-hidden">
+    <main className="min-h-screen py-24 px-8 overflow-hidden">
       <ReturnToDashboard />
       
       {/* Background Decorative Elements */}
@@ -48,13 +48,13 @@ export default function CommunityHub() {
       <div className="max-w-6xl mx-auto space-y-16 relative z-10">
         {/* Header */}
         <div className="text-center space-y-6">
-          <div className="inline-flex items-center gap-3 px-6 py-2 bg-gold/5 border border-gold/10 rounded-full text-gold text-[10px] font-bold tracking-[0.4em] uppercase">
+          <div className="inline-flex items-center gap-3 px-6 py-2 bg-card-tone border border-gold-soft/30 rounded-full text-gold-primary text-[10px] font-bold tracking-[0.4em] uppercase">
             <Sparkles size={14} /> The 2026 Directory
           </div>
-          <h1 className="text-6xl md:text-8xl font-bold text-ink dark:text-gold serif tracking-tight">
+          <h1 className="text-6xl md:text-8xl font-bold text-brown-primary serif tracking-tight">
             Our People.
           </h1>
-          <p className="text-ink/60 dark:text-dark-text/60 italic serif text-xl max-w-2xl mx-auto leading-relaxed">
+          <p className="text-brown-secondary italic serif text-xl max-w-2xl mx-auto leading-relaxed">
             Every story in the Cheerio archive is powered by the people who lived it. Explore our community.
           </p>
         </div>
@@ -67,31 +67,31 @@ export default function CommunityHub() {
               href={category.path}
               className="group relative block"
             >
-              <div className={`relative h-[500px] rounded-[4rem] border border-gold/10 overflow-hidden bg-gradient-to-br ${category.color} transition-all duration-700 group-hover:scale-[1.02] group-hover:border-gold/40 group-hover:shadow-[0_0_100px_rgba(212,175,55,0.1)]`}>
+              <div className={`relative h-[500px] rounded-[4rem] border border-gold-soft/30 overflow-hidden bg-gradient-to-br ${category.color} transition-all duration-700 group-hover:scale-[1.02] group-hover:border-gold-primary/40 group-hover:shadow-[0_0_80px_rgba(207,174,112,0.15)]`}>
                 
                 {/* Visual Accent */}
                 <div className="absolute top-12 right-12 opacity-10 group-hover:opacity-30 group-hover:scale-110 transition-all duration-700">
-                  <category.icon size={180} className="text-gold" />
+                  <category.icon size={180} className="text-gold-primary" />
                 </div>
 
                 {/* Content */}
                 <div className="absolute inset-0 p-12 md:p-16 flex flex-col justify-end">
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <span className="text-gold font-bold uppercase tracking-[0.3em] text-xs block">
+                      <span className="text-gold-primary font-bold uppercase tracking-[0.3em] text-xs block">
                         {category.count}
                       </span>
-                      <h2 className="text-5xl md:text-6xl font-bold text-ink dark:text-gold serif">
+                      <h2 className="text-5xl md:text-6xl font-bold text-brown-primary serif">
                         {category.name}
                       </h2>
                     </div>
                     
-                    <p className="text-ink/60 dark:text-dark-text/60 text-lg serif italic max-w-xs transition-colors group-hover:text-ink dark:group-hover:text-dark-text">
+                    <p className="text-brown-secondary text-lg serif italic max-w-xs transition-colors group-hover:text-brown-primary">
                       {category.description}
                     </p>
 
                     <div className="pt-8">
-                      <div className="inline-flex items-center gap-4 text-gold font-bold uppercase tracking-widest text-[10px] group-hover:gap-6 transition-all">
+                      <div className="inline-flex items-center gap-4 text-gold-primary font-bold uppercase tracking-widest text-[10px] group-hover:gap-6 transition-all">
                         Enter Directory <ArrowRight size={16} />
                       </div>
                     </div>
@@ -105,15 +105,6 @@ export default function CommunityHub() {
           ))}
         </div>
 
-        {/* Call to Action */}
-        <div className="text-center pt-16">
-          <Link 
-            href="/dashboard/community/add"
-            className="inline-flex items-center gap-4 px-10 py-5 bg-gold text-ink rounded-full font-bold uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(212,175,55,0.3)]"
-          >
-            Add Community Member
-          </Link>
-        </div>
       </div>
     </main>
   );

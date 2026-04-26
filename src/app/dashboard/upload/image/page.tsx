@@ -5,6 +5,7 @@ import { auth, db } from "@/lib/firebase";
 import { doc, updateDoc, increment, collection, addDoc } from "firebase/firestore";
 import { Image as ImageIcon, Upload, CheckCircle, ArrowLeft, X, Loader2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ReturnToDashboard } from "@/components/Sidebar";
 
@@ -40,16 +41,16 @@ export default function ImageUpload() {
         const data = new FormData();
         data.append("file", file);
         data.append("upload_preset", "Cheerio-2026");
-        data.append("folder", "Cheerio/images");
+        data.append("folder", "Cheerio/Archives/Images");
 
-        const res = await fetch(`https://api.cloudinary.com/v1_1/dyvobdjp5/image/upload`, {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, {
           method: "POST",
           body: data
         });
         const resData = await res.json();
 
         // Update Firestore for each image
-        await addDoc(collection(db, "archive"), {
+        await addDoc(collection(db, "archives"), {
           url: resData.secure_url,
           type: "image",
           userId: auth.currentUser!.uid,
@@ -80,30 +81,30 @@ export default function ImageUpload() {
   };
 
   return (
-    <main className="min-h-screen bg-parchment dark:bg-dark-bg py-24 px-8 flex items-center justify-center">
+    <main className="min-h-screen py-24 px-8 flex items-center justify-center">
       <div className="max-w-3xl w-full">
         
         <ReturnToDashboard />
 
-        <div className="glass-card p-12 rounded-[3rem] border-gold/20 text-center space-y-8">
+        <div className="theme-card p-12 rounded-[3rem] text-center space-y-8">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 rounded-full text-gold text-[9px] font-bold tracking-widest uppercase">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-soft/20 rounded-full text-gold-primary text-[9px] font-bold tracking-widest uppercase">
               <ImageIcon size={12} /> Image Archival
             </div>
-            <h1 className="text-4xl font-bold text-ink dark:text-gold serif">Seal Memories.</h1>
-            <p className="text-ink/60 dark:text-dark-text/60 italic serif">Upload frames to earn +10 Legacy XP per image.</p>
+            <h1 className="text-4xl font-bold text-brown-primary serif">Seal Memories.</h1>
+            <p className="text-brown-secondary italic serif">Upload frames to earn +10 Legacy XP per image.</p>
           </div>
 
           {!success ? (
             <div className="space-y-8">
               <div className={`relative min-h-[300px] rounded-3xl border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden ${
-                previews.length > 0 ? "border-gold/40 p-6" : "border-gold/10 hover:border-gold/20 p-12"
+                previews.length > 0 ? "border-gold-primary/50 p-6" : "border-gold-soft/30 hover:border-gold-soft/60 p-12"
               }`}>
                 {previews.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full">
                     {previews.map((src, idx) => (
-                      <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden group border border-gold/10 bg-black/5">
-                        <img src={src} className="w-full h-full object-cover" alt={`Preview ${idx}`} />
+                      <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden group border border-gold-soft/30 bg-card-tone">
+                        <Image src={src} fill className="object-cover" alt={`Preview ${idx}`} />
                         <button 
                           onClick={(e) => { e.preventDefault(); removeFile(idx); }}
                           className="absolute top-2 right-2 p-1.5 bg-red-900/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -112,7 +113,7 @@ export default function ImageUpload() {
                         </button>
                       </div>
                     ))}
-                    <label className="relative aspect-square rounded-2xl border-2 border-dashed border-gold/20 flex flex-col items-center justify-center cursor-pointer hover:bg-gold/5 transition-all text-gold/40">
+                    <label className="relative aspect-square rounded-2xl border-2 border-dashed border-gold-soft/30 flex flex-col items-center justify-center cursor-pointer hover:bg-gold-soft/10 transition-all text-gold-soft">
                       <Upload size={24} />
                       <span className="text-[8px] font-bold uppercase mt-2">Add More</span>
                       <input type="file" onChange={handleFiles} multiple className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
@@ -120,10 +121,10 @@ export default function ImageUpload() {
                   </div>
                 ) : (
                   <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-gold/5 rounded-full flex items-center justify-center text-gold/40 mx-auto">
+                    <div className="w-16 h-16 bg-card-tone rounded-full flex items-center justify-center text-gold-soft mx-auto">
                       <Upload size={32} />
                     </div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-gold/40">Drag or click to choose frames</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-brown-secondary">Drag or click to choose frames</p>
                     <input type="file" onChange={handleFiles} multiple className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
                   </div>
                 )}
@@ -132,7 +133,7 @@ export default function ImageUpload() {
               <button 
                 onClick={uploadBatch}
                 disabled={files.length === 0 || uploading}
-                className="gold-button w-full py-5 rounded-2xl font-bold uppercase tracking-[0.3em] shadow-2xl disabled:opacity-50 flex items-center justify-center gap-3"
+                className="theme-cinematic-btn-primary w-full py-5 rounded-2xl font-bold uppercase tracking-[0.3em] disabled:opacity-50 flex items-center justify-center gap-3"
               >
                 {uploading ? (
                   <>
@@ -146,16 +147,16 @@ export default function ImageUpload() {
             </div>
           ) : (
             <div className="py-12 space-y-8 animate-in zoom-in duration-700">
-              <div className="w-24 h-24 bg-gold/10 rounded-full flex items-center justify-center text-gold mx-auto shadow-[0_0_50px_rgba(212,175,55,0.2)]">
+              <div className="w-24 h-24 bg-card-tone rounded-full flex items-center justify-center text-gold-primary mx-auto shadow-[0_0_50px_rgba(207,174,112,0.2)]">
                 <CheckCircle size={48} />
               </div>
               <div className="space-y-2">
-                <h3 className="text-3xl font-bold text-ink dark:text-gold serif">Legacy Preserved.</h3>
-                <p className="text-gold font-bold uppercase tracking-widest text-sm">+{10 * files.length} XP Awarded</p>
+                <h3 className="text-3xl font-bold text-brown-primary serif">Legacy Preserved.</h3>
+                <p className="text-gold-primary font-bold uppercase tracking-widest text-sm">+{10 * files.length} XP Awarded</p>
               </div>
               <div className="flex gap-4">
-                <button onClick={() => { setSuccess(false); setPreviews([]); setFiles([]); setUploadedCount(0); }} className="flex-1 py-4 border border-gold/20 rounded-xl text-xs font-bold uppercase tracking-widest text-gold">Add More</button>
-                <Link href="/dashboard" className="flex-1 py-4 bg-gold text-ink rounded-xl text-xs font-bold uppercase tracking-widest shadow-xl">Go to Dashboard</Link>
+                <button onClick={() => { setSuccess(false); setPreviews([]); setFiles([]); setUploadedCount(0); }} className="flex-1 py-4 border border-gold-soft/40 rounded-xl text-xs font-bold uppercase tracking-widest text-gold-primary">Add More</button>
+                <Link href="/dashboard" className="flex-1 py-4 bg-gold-primary text-theme-text-primary rounded-xl text-xs font-bold uppercase tracking-widest text-center">Go to Dashboard</Link>
               </div>
             </div>
           )}

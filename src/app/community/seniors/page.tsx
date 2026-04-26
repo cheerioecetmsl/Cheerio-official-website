@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { DirectoryHeader, ProfileCard } from "@/components/CommunityModules";
+import { DirectoryHeader, ProfileCard, ArchiveProfile } from "@/components/CommunityModules";
 
 export default function SeniorsPage() {
-  const [seniors, setSeniors] = useState<any[]>([]);
+  const [seniors, setSeniors] = useState<ArchiveProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function SeniorsPage() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      setSeniors(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setSeniors(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ArchiveProfile)));
       setLoading(false);
     });
 

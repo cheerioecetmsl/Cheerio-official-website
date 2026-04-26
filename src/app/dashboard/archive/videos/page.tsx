@@ -6,9 +6,21 @@ import Link from "next/link";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import Image from "next/image";
+
+interface ArchiveVideo {
+  id: string;
+  url: string;
+  thumbnail?: string;
+  title: string;
+  event?: string;
+  duration?: string;
+  uploadedBy?: string;
+  createdAt?: string | number | Date;
+}
 
 export default function VideoArchive() {
-  const [videos, setVideos] = useState<any[]>([]);
+  const [videos, setVideos] = useState<ArchiveVideo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,7 +31,7 @@ export default function VideoArchive() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ArchiveVideo));
       setVideos(docs);
       setLoading(false);
     }, (err) => {
@@ -30,10 +42,10 @@ export default function VideoArchive() {
     return () => unsubscribe();
   }, []);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-parchment dark:bg-dark-bg text-gold serif text-2xl animate-pulse">Consulting the Reel...</div>;
+  if (loading) return <div className="theme-cinematic min-h-screen flex items-center justify-center text-brown-primary serif text-2xl animate-pulse">Consulting the Reel...</div>;
 
   return (
-    <main className="min-h-screen bg-parchment dark:bg-dark-bg py-24 px-8">
+    <main className="min-h-screen py-24 px-8">
       <ReturnToDashboard />
       <div className="max-w-7xl mx-auto space-y-12">
         
@@ -60,7 +72,13 @@ export default function VideoArchive() {
             {videos.map((video) => (
               <div key={video.id} className="glass-card rounded-3xl border-gold/10 overflow-hidden group bg-gradient-to-br from-gold/5 to-transparent">
                 <div className="relative aspect-video">
-                  <img src={video.thumbnail || video.url.replace('.mp4', '.jpg')} className="w-full h-full object-cover" alt={video.title} />
+                  <Image 
+                    src={video.thumbnail || video.url.replace('.mp4', '.jpg')} 
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover" 
+                    alt={video.title} 
+                  />
                   <div className="absolute inset-0 bg-ink/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Link 
                       href={video.url}

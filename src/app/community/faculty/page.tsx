@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { DirectoryHeader, ProfileCard } from "@/components/CommunityModules";
+import { DirectoryHeader, ProfileCard, ArchiveProfile } from "@/components/CommunityModules";
 
 export default function FacultyPage() {
-  const [faculty, setFaculty] = useState<any[]>([]);
+  const [faculty, setFaculty] = useState<ArchiveProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function FacultyPage() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      setFaculty(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setFaculty(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ArchiveProfile)));
       setLoading(false);
     });
 
