@@ -212,7 +212,7 @@ export default function LegacyPage() {
   );
 }
 
-function Trophy({ size, className }: { size: number, className: string }) {
+function Trophy({ size, className = "" }: { size: number, className?: string }) {
   return (
     <svg 
       width={size} 
