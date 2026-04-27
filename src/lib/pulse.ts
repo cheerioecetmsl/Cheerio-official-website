@@ -19,6 +19,14 @@ export interface PulseProgress {
   status: string;
 }
 
+const loadCrossDomainImage = (url: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => resolve(img);
+  img.onerror = (e) => reject(new Error(`Failed to load image: ${url}`));
+  img.src = url;
+});
+
 export const runPulseScan = async (
   onProgress?: (progress: PulseProgress) => void, 
   forceAll = true
@@ -103,7 +111,22 @@ export const runPulseScan = async (
       const optimizedUrl = item.url.replace('/upload/', '/upload/w_800,c_limit,q_auto,f_auto/');
       
       try {
-        const img = await faceapi.fetchImage(optimizedUrl);
+        const loadImg = (url: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => resolve(img);
+          img.onerror = (e) => reject(new Error(`Failed to load image: ${url}`));
+          img.src = url;
+        });
+
+        let img: HTMLImageElement;
+        try {
+          img = await loadImg(optimizedUrl);
+        } catch (e) {
+          // Fallback to original URL if the Cloudinary transformation fails
+          img = await loadImg(item.url);
+        }
+
         const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
         const results = detections.map(d => faceMatcher.findBestMatch(d.descriptor));
         const isMe = results.some(r => r.label !== 'unknown' && r.distance < 0.45);
@@ -120,8 +143,8 @@ export const runPulseScan = async (
           matchCount++;
           matchedUrls.push(item.url);
         }
-      } catch (err) {
-        console.warn("[Pulse Engine] Frame analysis disruption:", optimizedUrl);
+      } catch (err: any) {
+        console.warn("[Pulse Engine] Frame analysis disruption for URL:", item.url, "Error:", err?.message || err);
       }
 
       const stepProgress = 30 + ((i + 1) / totalDocs) * 70;
