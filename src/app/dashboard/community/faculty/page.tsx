@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { X, GraduationCap, Quote, Sparkles, Loader2, BookOpen, Star } from "lucide-react";
+import { InstagramIcon, FacebookIcon, GithubIcon, LinkedinIcon } from "@/components/SocialIcons";
 import Image from "next/image";
 
 interface Person {
@@ -14,6 +15,10 @@ interface Person {
   description: string;
   imageURL?: string;
   category: string;
+  instagram?: string;
+  facebook?: string;
+  github?: string;
+  linkedin?: string;
 }
 
 export default function FacultyPage() {
@@ -36,7 +41,11 @@ export default function FacultyPage() {
         role: doc.data().role,
         description: doc.data().description || doc.data().narrative,
         imageURL: doc.data().imageURL || doc.data().photoURL,
-        category: doc.data().category
+        category: doc.data().category,
+        instagram: doc.data().instagram,
+        facebook: doc.data().facebook,
+        github: doc.data().github,
+        linkedin: doc.data().linkedin
       })) as Person[];
       combineAndSet();
     });
@@ -48,7 +57,11 @@ export default function FacultyPage() {
         role: doc.data().role || "Esteemed Faculty",
         description: doc.data().narrative || doc.data().description,
         imageURL: doc.data().photoURL || doc.data().imageURL,
-        category: doc.data().category
+        category: doc.data().category,
+        instagram: doc.data().instagram,
+        facebook: doc.data().facebook,
+        github: doc.data().github,
+        linkedin: doc.data().linkedin
       })) as Person[];
       combineAndSet();
     });
@@ -218,7 +231,29 @@ export default function FacultyPage() {
                 <div className="h-px w-full bg-amber-500/10" />
               </div>
 
-              <div className="pt-8 flex justify-center">
+              <div className="pt-8 flex flex-col items-center gap-8">
+                <div className="flex gap-6">
+                  {selectedMember.instagram && (
+                    <a href={selectedMember.instagram} target="_blank" rel="noopener noreferrer" className="p-3 bg-amber-500/10 text-amber-600 rounded-full hover:bg-amber-500 hover:text-black transition-all">
+                      <InstagramIcon size={20} />
+                    </a>
+                  )}
+                  {selectedMember.facebook && (
+                    <a href={selectedMember.facebook} target="_blank" rel="noopener noreferrer" className="p-3 bg-amber-500/10 text-amber-600 rounded-full hover:bg-amber-500 hover:text-black transition-all">
+                      <FacebookIcon size={20} />
+                    </a>
+                  )}
+                  {selectedMember.github && (
+                    <a href={selectedMember.github} target="_blank" rel="noopener noreferrer" className="p-3 bg-amber-500/10 text-amber-600 rounded-full hover:bg-amber-500 hover:text-black transition-all">
+                      <GithubIcon size={20} />
+                    </a>
+                  )}
+                  {selectedMember.linkedin && (
+                    <a href={selectedMember.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 bg-amber-500/10 text-amber-600 rounded-full hover:bg-amber-500 hover:text-black transition-all">
+                      <LinkedinIcon size={20} />
+                    </a>
+                  )}
+                </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
                     <p className="text-[10px] font-bold text-amber-600/40 uppercase tracking-widest">Legacy Contribution</p>

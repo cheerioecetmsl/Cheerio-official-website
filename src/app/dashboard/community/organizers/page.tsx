@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { X, Camera, ExternalLink, Mail, Sparkles, Loader2 } from "lucide-react";
+import { InstagramIcon, FacebookIcon, GithubIcon, LinkedinIcon } from "@/components/SocialIcons";
 import Image from "next/image";
 
 interface Person {
@@ -14,6 +15,10 @@ interface Person {
   description: string;
   imageURL?: string;
   category: string;
+  instagram?: string;
+  facebook?: string;
+  github?: string;
+  linkedin?: string;
 }
 
 export default function OrganizersPage() {
@@ -24,7 +29,14 @@ export default function OrganizersPage() {
   useEffect(() => {
     const q = query(collection(db, "people"), where("category", "==", "COUNCIL"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Person[];
+      const data = snapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data(),
+        instagram: doc.data().instagram,
+        facebook: doc.data().facebook,
+        github: doc.data().github,
+        linkedin: doc.data().linkedin
+      })) as Person[];
       setMembers(data);
       setLoading(false);
     });
@@ -150,15 +162,26 @@ export default function OrganizersPage() {
               </div>
 
               <div className="flex gap-4 pt-4">
-                <button className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
-                  <Camera size={20} />
-                </button>
-                <button className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
-                  <ExternalLink size={20} />
-                </button>
-                <button className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
-                  <Mail size={20} />
-                </button>
+                {selectedMember.instagram && (
+                  <a href={selectedMember.instagram} target="_blank" rel="noopener noreferrer" className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
+                    <InstagramIcon size={20} />
+                  </a>
+                )}
+                {selectedMember.facebook && (
+                  <a href={selectedMember.facebook} target="_blank" rel="noopener noreferrer" className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
+                    <FacebookIcon size={20} />
+                  </a>
+                )}
+                {selectedMember.github && (
+                  <a href={selectedMember.github} target="_blank" rel="noopener noreferrer" className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
+                    <GithubIcon size={20} />
+                  </a>
+                )}
+                {selectedMember.linkedin && (
+                  <a href={selectedMember.linkedin} target="_blank" rel="noopener noreferrer" className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
+                    <LinkedinIcon size={20} />
+                  </a>
+                )}
               </div>
             </div>
           </div>

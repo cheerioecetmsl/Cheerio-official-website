@@ -1,28 +1,51 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Camera, Link2, Heart, Sparkles } from "lucide-react";
+import { InstagramIcon, FacebookIcon, GithubIcon, LinkedinIcon } from "./SocialIcons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 export function Footer() {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const [socialLinks, setSocialLinks] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchLinks = async () => {
+      try {
+        const docSnap = await getDoc(doc(db, "settings", "global"));
+        if (docSnap.exists()) {
+          const links = docSnap.data().socialLinks || {};
+          const formatted = [];
+          if (links.instagram) formatted.push({ icon: InstagramIcon, href: links.instagram, label: "Instagram" });
+          if (links.facebook) formatted.push({ icon: FacebookIcon, href: links.facebook, label: "Facebook" });
+          if (links.github) formatted.push({ icon: GithubIcon, href: links.github, label: "GitHub" });
+          if (links.linkedin) formatted.push({ icon: LinkedinIcon, href: links.linkedin, label: "LinkedIn" });
+          setSocialLinks(formatted);
+        } else {
+          // Fallback if no settings exist
+          setSocialLinks([
+            { icon: InstagramIcon, href: "https://instagram.com/cheerio.2026", label: "Instagram" },
+            { icon: LinkedinIcon, href: "https://linkedin.com", label: "LinkedIn" },
+          ]);
+        }
+      } catch (err) {
+        console.error("Footer Social Error:", err);
+      }
+    };
+    fetchLinks();
+  }, []);
 
   if (isHome) {
-    return <LandingFooter />;
+    return <LandingFooter socialLinks={socialLinks} />;
   }
-  return <ThemedFooter />;
+  return <ThemedFooter socialLinks={socialLinks} />;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Landing page footer
-// ─────────────────────────────────────────────────────────────────────────────
-function LandingFooter() {
-  const socialLinks = [
-    { icon: Camera, href: "https://instagram.com/cheerio.2026", label: "Instagram" },
-    { icon: Link2, href: "https://linkedin.com/company/cheerio-2026", label: "LinkedIn" },
-  ];
-
+function LandingFooter({ socialLinks }: { socialLinks: any[] }) {
   return (
     <footer className="w-full bg-zinc-950 border-t border-gold/10 relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
@@ -97,12 +120,7 @@ function LandingFooter() {
 // ─────────────────────────────────────────────────────────────────────────────
 // Themed footer (all dashboard / interior pages)
 // ─────────────────────────────────────────────────────────────────────────────
-function ThemedFooter() {
-  const socialLinks = [
-    { icon: Camera, href: "https://instagram.com/cheerio.2026", label: "Instagram" },
-    { icon: Link2, href: "https://linkedin.com/company/cheerio-2026", label: "LinkedIn" },
-  ];
-
+function ThemedFooter({ socialLinks }: { socialLinks: any[] }) {
   return (
     <footer className="footer-dark w-full relative overflow-hidden border-t-2" style={{ borderColor: 'var(--color-footer-burgundy)' }}>
 

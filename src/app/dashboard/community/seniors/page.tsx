@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { X, Heart, Award, Quote, Sparkles, Loader2 } from "lucide-react";
+import { InstagramIcon, FacebookIcon, GithubIcon, LinkedinIcon } from "@/components/SocialIcons";
 import Image from "next/image";
 
 interface Person {
@@ -14,6 +15,10 @@ interface Person {
   description: string;
   imageURL?: string;
   category: string;
+  instagram?: string;
+  facebook?: string;
+  github?: string;
+  linkedin?: string;
 }
 
 export default function SeniorsPage() {
@@ -36,7 +41,11 @@ export default function SeniorsPage() {
         role: doc.data().role,
         description: doc.data().description || doc.data().narrative,
         imageURL: doc.data().imageURL || doc.data().photoURL,
-        category: doc.data().category
+        category: doc.data().category,
+        instagram: doc.data().instagram,
+        facebook: doc.data().facebook,
+        github: doc.data().github,
+        linkedin: doc.data().linkedin
       })) as Person[];
       combineAndSet();
     });
@@ -48,7 +57,11 @@ export default function SeniorsPage() {
         role: doc.data().role || "Class of 2026 Legend",
         description: doc.data().narrative || doc.data().description,
         imageURL: doc.data().photoURL || doc.data().imageURL,
-        category: doc.data().category
+        category: doc.data().category,
+        instagram: doc.data().instagram,
+        facebook: doc.data().facebook,
+        github: doc.data().github,
+        linkedin: doc.data().linkedin
       })) as Person[];
       combineAndSet();
     });
@@ -220,7 +233,33 @@ export default function SeniorsPage() {
                 <div className="h-px w-full bg-gold-primary/10" />
               </div>
 
-              <div className="pt-8 flex justify-center">
+              <div className="pt-8 flex flex-col items-center gap-6">
+                {/* Social Links */}
+                <div className="flex gap-4 pt-4">
+                  {selectedMember.instagram && (
+                    <a href={selectedMember.instagram} target="_blank" rel="noopener noreferrer" className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
+                      <InstagramIcon size={20} />
+                    </a>
+                  )}
+                  {selectedMember.facebook && (
+                    <a href={selectedMember.facebook} target="_blank" rel="noopener noreferrer" className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
+                      <FacebookIcon size={20} />
+                    </a>
+                  )}
+                  {selectedMember.github && (
+                    <a href={selectedMember.github} target="_blank" rel="noopener noreferrer" className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
+                      <GithubIcon size={20} />
+                    </a>
+                  )}
+                  {selectedMember.linkedin && (
+                    <a href={selectedMember.linkedin} target="_blank" rel="noopener noreferrer" className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
+                      <LinkedinIcon size={20} />
+                    </a>
+                  )}
+                </div>
+                
+                <div className="h-px w-24 bg-gold-primary/10" />
+                
                 <button className="flex items-center gap-3 px-8 py-4 bg-gold-primary/5 border border-gold-primary/10 text-gold-primary rounded-full hover:bg-gold-primary/10 transition-all font-bold uppercase tracking-widest text-[10px]">
                   <Heart size={16} /> Legacy Approved
                 </button>

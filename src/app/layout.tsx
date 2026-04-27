@@ -3,6 +3,7 @@ import { Inter, EB_Garamond, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import PWARegistration from "@/components/PWARegistration";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -29,14 +30,22 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Cheerio 2026",
   },
+  applicationName: "Cheerio 2026",
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
-    icon: "/assets/pwa-logo.png",
-    apple: "/assets/pwa-logo.png",
+    icon: "/assets/cheerio logo copy.png",
+    apple: "/assets/cheerio logo copy.png",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#D4AF37",
+  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -47,6 +56,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${ebGaramond.variable} ${shareTechMono.variable} antialiased film-grain min-h-screen bg-dark-bg text-dark-text`}>
+        <PWARegistration />
         <Navbar />
         {children}
         <Footer />
