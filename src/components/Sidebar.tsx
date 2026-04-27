@@ -18,8 +18,9 @@ import {
   School
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
+import { LogoutModal } from "@/components/LogoutModal";
 
 const navItems = [
   { name: "Image Archive", icon: ImageIcon, path: "/dashboard/archive/images" },
@@ -53,7 +54,9 @@ export const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [sidebarHeight, setSidebarHeight] = useState(0);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     // Non-cascading mount to satisfy strict linting and ensure hydration stability
@@ -65,7 +68,18 @@ export const Sidebar = () => {
     const updateHeight = () => setSidebarHeight(window.innerHeight);
     updateHeight();
     window.addEventListener('resize', updateHeight);
-    return () => window.removeEventListener('resize', updateHeight);
+
+    // Listen for external requests to open the sidebar (e.g. from the tutorial)
+    const handleOpenRequest = () => setIsExpanded(true);
+    const handleCloseRequest = () => setIsExpanded(false);
+    window.addEventListener('open-sidebar', handleOpenRequest);
+    window.addEventListener('close-sidebar', handleCloseRequest);
+
+    return () => {
+      window.removeEventListener('resize', updateHeight);
+      window.removeEventListener('open-sidebar', handleOpenRequest);
+      window.removeEventListener('close-sidebar', handleCloseRequest);
+    };
   }, []);
 
   if (!isMounted) return null;
@@ -221,7 +235,7 @@ export const Sidebar = () => {
                 <span className="font-bold tracking-widest uppercase text-xs">Settings</span>
               </Link>
               <button 
-                onClick={() => auth.signOut()}
+                onClick={() => setShowLogoutModal(true)}
                 className="flex items-center w-full p-5 gap-6 rounded-2xl text-red-600 hover:bg-red-500/10 transition-all duration-300"
               >
                 <LogOut size={28} className="flex-shrink-0" />
@@ -252,7 +266,7 @@ export const Sidebar = () => {
           </Link>
 
           <button 
-            onClick={() => auth.signOut()}
+            onClick={() => setShowLogoutModal(true)}
             className={`flex items-center gap-4 w-full rounded-2xl text-red-600/80 hover:text-red-600 hover:bg-red-500/10 transition-all duration-500 ${
               isExpanded ? "p-4 justify-start" : "w-12 h-12 justify-center"
             }`}
@@ -262,6 +276,12 @@ export const Sidebar = () => {
           </button>
         </div>
       </aside>
+
+      {/* Logout confirmation modal */}
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onCancel={() => setShowLogoutModal(false)}
+      />
     </>
   );
 };
@@ -271,7 +291,7 @@ export const Sidebar = () => {
 export const ReturnToDashboard = () => (
   <Link 
     href="/dashboard"
-    className="fixed top-19 left-8 md:top-8 md:left-28 z-40 flex items-center gap-2 text-gold-primary font-bold uppercase tracking-widest text-[10px] hover:-translate-x-2 transition-transform"
+    className="fixed top-19 left-8 md:top-8 md:left-28 z-40 flex items-center gap-2 text-brown-primary font-bold uppercase tracking-widest text-[10px] hover:-translate-x-2 transition-transform"
   >
     <ArrowLeft size={16} /> Back to Dashboard
   </Link>

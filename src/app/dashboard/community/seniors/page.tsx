@@ -103,9 +103,9 @@ export default function SeniorsPage() {
                 alt="Legends Group" 
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-12">
-                <p className="text-gold font-bold uppercase tracking-[0.3em] text-xs">The Legends</p>
-                <h2 className="text-4xl font-bold text-white serif mt-2">Class of 2026 Legends.</h2>
+              <div className="absolute inset-0 bg-gradient-to-t from-parchment-base/80 via-transparent to-transparent flex flex-col justify-end p-12">
+                <p className="text-gold-primary font-bold uppercase tracking-[0.3em] text-xs">The Legends</p>
+                <h2 className="text-4xl font-bold text-brown-primary serif mt-2">Class of 2026 Legends.</h2>
               </div>
             </div>
 
@@ -124,6 +124,10 @@ export default function SeniorsPage() {
                       alt={member.name}
                       fill
                       className="object-cover grayscale-[50%] group-hover:grayscale-0 transition-all duration-700"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.id}`;
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-zinc-800 uppercase">
@@ -132,13 +136,13 @@ export default function SeniorsPage() {
                   )}
                   
                   {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8 text-center">
-                    <Quote size={24} className="text-gold/40 mx-auto mb-4" />
-                    <p className="text-sm text-white/80 italic serif mb-6 line-clamp-3 leading-relaxed">
+                  <div className="absolute inset-0 bg-gradient-to-t from-parchment-base/95 via-parchment-base/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8 text-center">
+                    <Quote size={24} className="text-gold-primary/40 mx-auto mb-4" />
+                    <p className="text-sm text-brown-secondary/80 italic serif mb-6 line-clamp-3 leading-relaxed">
                       &quot;{member.description}&quot;
                     </p>
-                    <div className="h-px w-12 bg-gold/40 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-gold serif tracking-widest uppercase">{member.name}</h3>
+                    <div className="h-px w-12 bg-gold-primary/40 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-brown-primary serif tracking-widest uppercase">{member.name}</h3>
                   </div>
                 </div>
 
@@ -161,14 +165,14 @@ export default function SeniorsPage() {
       {selectedMember && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
           <div 
-            className="absolute inset-0 bg-black/95 backdrop-blur-3xl"
+            className="absolute inset-0 bg-parchment-base/95 backdrop-blur-3xl"
             onClick={() => setSelectedMember(null)}
           />
           
-          <div className="relative glass-card max-w-5xl w-full rounded-[4rem] border-gold/20 overflow-hidden animate-in zoom-in fade-in duration-700 flex flex-col md:flex-row h-full max-h-[85vh] md:h-auto">
+          <div className="relative glass-card max-w-5xl w-full rounded-[4rem] border-gold-primary/20 overflow-hidden animate-in zoom-in fade-in duration-700 flex flex-col md:flex-row h-full max-h-[85vh] md:h-auto">
             <button 
               onClick={() => setSelectedMember(null)}
-              className="absolute top-8 right-8 p-4 bg-gold text-ink rounded-full z-10 hover:scale-110 transition-transform shadow-2xl"
+              className="absolute top-8 right-8 p-4 bg-gold-primary text-black rounded-full z-10 hover:scale-110 transition-transform shadow-2xl"
             >
               <X size={24} />
             </button>
@@ -180,6 +184,10 @@ export default function SeniorsPage() {
                   alt={selectedMember.name}
                   fill
                   className="object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedMember.id}`;
+                  }}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-8xl font-bold text-zinc-800">
@@ -189,31 +197,31 @@ export default function SeniorsPage() {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent to-dark-bg/10 hidden md:block" />
             </div>
 
-            <div className="w-full md:w-3/5 p-12 md:p-20 flex flex-col justify-center space-y-12 overflow-y-auto">
+            <div className="w-full md:w-3/5 p-12 md:p-20 flex flex-col justify-center space-y-12 overflow-y-auto bg-card-tone">
               <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 text-gold font-bold uppercase tracking-[0.4em] text-[10px]">
+                <div className="inline-flex items-center gap-2 text-gold-primary font-bold uppercase tracking-[0.4em] text-[10px]">
                   <Award size={14} /> Distinguished Legend
                 </div>
-                <h2 className="text-5xl md:text-7xl font-bold text-ink dark:text-gold serif leading-tight">
+                <h2 className="text-5xl md:text-7xl font-bold text-brown-primary serif leading-tight">
                   {selectedMember.name}
                 </h2>
-                <p className="text-gold font-bold uppercase tracking-widest text-xs">{selectedMember.role}</p>
+                <p className="text-gold-primary font-bold uppercase tracking-widest text-xs">{selectedMember.role}</p>
               </div>
 
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-px flex-grow bg-gold/10" />
-                  <Quote size={24} className="text-gold/20" />
-                  <div className="h-px flex-grow bg-gold/10" />
+                  <div className="h-px flex-grow bg-gold-primary/10" />
+                  <Quote size={24} className="text-gold-primary/20" />
+                  <div className="h-px flex-grow bg-gold-primary/10" />
                 </div>
-                <p className="text-xl md:text-2xl text-ink/80 dark:text-dark-text/80 italic serif leading-relaxed text-center">
+                <p className="text-xl md:text-2xl text-brown-secondary/80 italic serif leading-relaxed text-center">
                   &quot;{selectedMember.description}&quot;
                 </p>
-                <div className="h-px w-full bg-gold/10" />
+                <div className="h-px w-full bg-gold-primary/10" />
               </div>
 
               <div className="pt-8 flex justify-center">
-                <button className="flex items-center gap-3 px-8 py-4 bg-gold/5 border border-gold/10 text-gold rounded-full hover:bg-gold/10 transition-all font-bold uppercase tracking-widest text-[10px]">
+                <button className="flex items-center gap-3 px-8 py-4 bg-gold-primary/5 border border-gold-primary/10 text-gold-primary rounded-full hover:bg-gold-primary/10 transition-all font-bold uppercase tracking-widest text-[10px]">
                   <Heart size={16} /> Legacy Approved
                 </button>
               </div>

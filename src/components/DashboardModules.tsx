@@ -40,7 +40,7 @@ export const HypeBoard = () => {
           </div>
           <h3 className="font-bold uppercase tracking-widest text-sm text-brown-primary">Notification Bar</h3>
         </div>
-        <span className="text-[10px] font-bold text-gold-primary bg-gold-soft/20 px-2 py-1 rounded animate-pulse">LIVE</span>
+        <span className="text-[10px] font-bold text-brown-primary bg-gold-soft/20 px-2 py-1 rounded animate-pulse">LIVE</span>
       </div>
 
       <div className="space-y-6 flex-grow">
@@ -54,12 +54,12 @@ export const HypeBoard = () => {
           updates.map((update) => (
             <div key={update.id} className="group cursor-pointer">
               <div className="flex justify-between items-start mb-1">
-                <span className="text-[9px] font-bold tracking-[0.2em] text-gold-primary uppercase">{update.tag || "Update"}</span>
+                <span className="text-[9px] font-bold tracking-[0.2em] text-brown-primary uppercase">{update.tag || "Update"}</span>
                 <span className="text-[9px] text-brown-secondary uppercase">
                   {update.createdAt?.toDate ? new Date(update.createdAt.toDate()).toLocaleDateString() : "Just now"}
                 </span>
               </div>
-              <h4 className="font-bold serif text-brown-primary group-hover:text-gold-primary transition-colors">{update.title}</h4>
+              <h4 className="font-bold serif text-brown-primary group-hover:text-black transition-colors">{update.title}</h4>
               <p className="text-xs text-brown-secondary leading-relaxed mt-1">{update.content}</p>
               <div className="h-px w-full bg-brown-secondary/30 mt-4 group-last:hidden" />
             </div>
@@ -71,7 +71,7 @@ export const HypeBoard = () => {
         )}
       </div>
 
-      <button className="mt-8 text-[10px] font-bold uppercase tracking-widest text-gold-primary hover:underline">
+      <button className="mt-8 text-[10px] font-bold uppercase tracking-widest text-brown-primary hover:underline">
         Archive Feed
       </button>
     </div>
@@ -90,7 +90,7 @@ export const UserStats = ({ xp = 0, name = "Archivist" }) => {
           <h2 className="text-xl md:text-3xl font-bold serif text-brown-primary truncate max-w-[200px]">{name}</h2>
           <p className="text-[10px] text-brown-secondary font-bold uppercase tracking-[0.3em] mt-1">Archivist Rank</p>
         </div>
-        <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-gold-primary flex items-center justify-center text-gold-primary font-bold serif text-lg md:text-2xl shadow-lg shadow-gold-soft/20 flex-shrink-0">
+        <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-gold-primary flex items-center justify-center text-brown-primary font-bold serif text-lg md:text-2xl shadow-lg shadow-gold-soft/20 flex-shrink-0">
           {level}
         </div>
       </div>
@@ -99,7 +99,7 @@ export const UserStats = ({ xp = 0, name = "Archivist" }) => {
         <div>
           <div className="flex justify-between items-end mb-2">
             <span className="text-[10px] font-bold uppercase tracking-widest text-brown-secondary">Legacy Progress</span>
-            <span className="text-xs font-bold text-gold-primary tabular-nums">{xp} / {nextLevelXP} XP</span>
+            <span className="text-xs font-bold text-brown-primary tabular-nums">{xp} / {nextLevelXP} XP</span>
           </div>
           <div className="h-2 w-full bg-card-tone rounded-full overflow-hidden">
             <div 

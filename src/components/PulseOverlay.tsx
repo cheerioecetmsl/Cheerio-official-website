@@ -48,7 +48,7 @@ export const PulseOverlay = ({ isOpen, onClose }: { isOpen: boolean, onClose: ()
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/90 backdrop-blur-2xl"
+          className="absolute inset-0 bg-parchment-base/90 backdrop-blur-2xl"
           onClick={status !== "scanning" ? onClose : undefined}
         />
         
@@ -56,37 +56,37 @@ export const PulseOverlay = ({ isOpen, onClose }: { isOpen: boolean, onClose: ()
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative glass-card max-w-2xl w-full rounded-[3rem] border-gold/20 overflow-hidden bg-zinc-950 shadow-[0_0_100px_rgba(212,175,55,0.1)]"
+          className="relative glass-card max-w-2xl w-full rounded-[3rem] border-gold-soft/20 overflow-hidden bg-card-tone shadow-[0_0_100px_rgba(107,68,35,0.1)]"
         >
           {status !== "scanning" && (
             <button 
               onClick={onClose}
-              className="absolute top-6 right-6 p-3 bg-white/5 hover:bg-white/10 rounded-full transition-colors z-10"
+              className="absolute top-6 right-6 p-3 bg-brown-primary/5 hover:bg-brown-primary/10 rounded-full transition-colors z-10"
             >
-              <X size={20} className="text-white/40" />
+              <X size={20} className="text-brown-primary/40" />
             </button>
           )}
 
           <div className="p-8 md:p-12 space-y-8 text-center">
             {/* Header Icon */}
             <div className="relative inline-block">
-              <div className="absolute inset-0 bg-gold/20 blur-3xl rounded-full" />
-              <div className="relative w-24 h-24 bg-gradient-to-br from-gold/20 to-amber-500/20 rounded-[2rem] border border-gold/30 flex items-center justify-center mx-auto">
-                {status === "idle" && <Zap className="text-gold animate-pulse" size={40} />}
-                {status === "scanning" && <Loader2 className="text-gold animate-spin" size={40} />}
+              <div className="absolute inset-0 bg-gold-soft/20 blur-3xl rounded-full" />
+              <div className="relative w-24 h-24 bg-gradient-to-br from-gold-soft/20 to-amber-500/20 rounded-[2rem] border border-gold-soft/30 flex items-center justify-center mx-auto">
+                {status === "idle" && <Zap className="text-gold-primary animate-pulse" size={40} />}
+                {status === "scanning" && <Loader2 className="text-gold-primary animate-spin" size={40} />}
                 {status === "completed" && <CheckCircle className="text-emerald-500" size={40} />}
                 {status === "error" && <X className="text-rose-500" size={40} />}
               </div>
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-3xl md:text-4xl font-bold text-white serif tracking-tight">
+              <h2 className="text-3xl md:text-4xl font-bold text-brown-primary serif tracking-tight">
                 {status === "idle" && "Global Pulse Engine."}
                 {status === "scanning" && "Scanning Archives."}
                 {status === "completed" && "Archival Discovery Sync."}
                 {status === "error" && "Engine Interrupted."}
               </h2>
-              <p className="text-white/40 text-sm font-medium tracking-[0.2em] uppercase">
+              <p className="text-brown-secondary/60 text-sm font-bold tracking-[0.2em] uppercase">
                 {status === "idle" && "Biometric Identity Verification"}
                 {status === "scanning" && "Neural Cross-Reference in Progress"}
                 {status === "completed" && "Sync Finalized Successfully"}
@@ -98,15 +98,15 @@ export const PulseOverlay = ({ isOpen, onClose }: { isOpen: boolean, onClose: ()
             <div className="min-h-[120px] flex items-center justify-center py-4">
               {status === "idle" && (
                 <div className="space-y-6 max-w-md">
-                  <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-start gap-4 text-left">
-                    <Smartphone className="text-gold mt-1 shrink-0" size={20} />
-                    <p className="text-white/60 text-sm leading-relaxed">
+                  <div className="p-4 bg-brown-primary/5 rounded-2xl border border-brown-primary/10 flex items-start gap-4 text-left">
+                    <Smartphone className="text-gold-primary mt-1 shrink-0" size={20} />
+                    <p className="text-brown-primary/70 text-sm leading-relaxed">
                       For maximum efficiency, keep your device open. The engine will scan every newly archived image for your biometric signature.
                     </p>
                   </div>
                   <button 
                     onClick={handleStartScan}
-                    className="w-full py-5 bg-gold text-ink font-bold rounded-2xl hover:scale-105 transition-all shadow-[0_0_40px_rgba(212,175,55,0.3)] active:scale-95"
+                    className="w-full py-5 bg-gold-primary text-black font-bold rounded-2xl hover:scale-105 transition-all shadow-[0_0_40px_rgba(212,175,55,0.3)] active:scale-95"
                   >
                     Initialize Scan
                   </button>
@@ -115,26 +115,26 @@ export const PulseOverlay = ({ isOpen, onClose }: { isOpen: boolean, onClose: ()
 
               {status === "scanning" && (
                 <div className="w-full space-y-6">
-                  <div className="relative h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="relative h-2 w-full bg-brown-primary/5 rounded-full overflow-hidden">
                     <motion.div 
-                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-gold to-amber-500"
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-gold-primary to-amber-500"
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
                       transition={{ type: "spring", bounce: 0, duration: 0.5 }}
                     />
                   </div>
                   <div className="flex flex-col gap-3">
-                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-white/30">
-                      <span className="text-gold animate-pulse">{statusText}</span>
-                      <span className="text-gold">{Math.round(progress)}%</span>
+                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-brown-primary/30">
+                      <span className="text-brown-primary animate-pulse">{statusText}</span>
+                      <span className="text-brown-primary">{Math.round(progress)}%</span>
                     </div>
                     {total > 0 && (
                       <div className="flex justify-between items-center">
-                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                          Found: <span className="text-gold">{matchCount}</span>
+                        <p className="text-[10px] font-bold text-brown-primary/20 uppercase tracking-widest">
+                          Found: <span className="text-brown-primary font-black">{matchCount}</span>
                         </p>
-                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                          Processed: <span className="text-white/60">{current} / {total}</span>
+                        <p className="text-[10px] font-bold text-brown-primary/20 uppercase tracking-widest">
+                          Processed: <span className="text-brown-primary/60">{current} / {total}</span>
                         </p>
                       </div>
                     )}
@@ -145,18 +145,18 @@ export const PulseOverlay = ({ isOpen, onClose }: { isOpen: boolean, onClose: ()
               {status === "completed" && (
                 <div className="space-y-6 w-full">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-6 bg-white/5 rounded-3xl border border-white/10">
-                      <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1">Found Memories</p>
-                      <p className="text-4xl font-bold text-gold serif">{matchCount}</p>
+                    <div className="p-6 bg-brown-primary/5 rounded-3xl border border-brown-primary/10">
+                      <p className="text-brown-secondary/40 text-[10px] font-bold uppercase tracking-widest mb-1">Found Memories</p>
+                      <p className="text-4xl font-bold text-brown-primary serif">{matchCount}</p>
                     </div>
-                    <div className="p-6 bg-white/5 rounded-3xl border border-white/10">
-                      <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1">Sync Status</p>
-                      <p className="text-xl font-bold text-emerald-500 serif mt-2 uppercase tracking-tight">Verified</p>
+                    <div className="p-6 bg-brown-primary/5 rounded-3xl border border-brown-primary/10">
+                      <p className="text-brown-secondary/40 text-[10px] font-bold uppercase tracking-widest mb-1">Sync Status</p>
+                      <p className="text-xl font-bold text-emerald-600 serif mt-2 uppercase tracking-tight">Verified</p>
                     </div>
                   </div>
                   <button 
                     onClick={onClose}
-                    className="w-full py-5 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all"
+                    className="w-full py-5 bg-brown-primary/10 text-brown-primary font-bold rounded-2xl hover:bg-brown-primary/20 transition-all"
                   >
                     Finalize Archival Session
                   </button>
@@ -175,7 +175,7 @@ export const PulseOverlay = ({ isOpen, onClose }: { isOpen: boolean, onClose: ()
                   {errorMessage.includes("IDENT_MISSING") ? (
                     <button 
                       onClick={() => window.location.href = "/dashboard/settings"}
-                      className="w-full py-5 bg-gold text-ink font-bold rounded-2xl hover:scale-105 transition-all shadow-[0_0_40px_rgba(212,175,55,0.3)]"
+                      className="w-full py-5 bg-gold-primary text-black font-bold rounded-2xl hover:scale-105 transition-all shadow-[0_0_40px_rgba(212,175,55,0.3)]"
                     >
                       Update Profile Photo
                     </button>
@@ -192,9 +192,9 @@ export const PulseOverlay = ({ isOpen, onClose }: { isOpen: boolean, onClose: ()
             </div>
 
             {/* Footer */}
-            <div className="pt-4 flex items-center justify-center gap-6 text-[10px] font-bold uppercase tracking-[0.3em] text-white/20">
+            <div className="pt-4 flex items-center justify-center gap-6 text-[10px] font-bold uppercase tracking-[0.3em] text-brown-secondary/40">
               <span className="flex items-center gap-2"><ShieldCheck size={12} /> Secure Auth</span>
-              <div className="w-1 h-1 bg-white/10 rounded-full" />
+              <div className="w-1 h-1 bg-brown-secondary/20 rounded-full" />
               <span className="flex items-center gap-2"><Sparkles size={12} /> AI Assisted</span>
             </div>
           </div>

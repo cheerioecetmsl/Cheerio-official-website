@@ -14,7 +14,17 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
-      }
+      },
+      {
+        // Google profile photos (Gmail / Google Sign-In)
+        protocol: 'https',
+        hostname: '**.googleusercontent.com',
+      },
+      {
+        // DiceBear avatars used in leaderboard
+        protocol: 'https',
+        hostname: 'api.dicebear.com',
+      },
     ],
   },
 };

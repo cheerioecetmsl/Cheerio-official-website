@@ -5,10 +5,12 @@ import { auth, db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { Camera, ChevronRight, Check, GraduationCap, Star, User, BookOpen, Hash, FileText, RefreshCw, ArrowRight, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Camera, ChevronRight, Check, GraduationCap, Star, User, BookOpen, Hash, FileText, RefreshCw, ArrowRight, Loader2, CheckCircle2, AlertTriangle, X, Compass } from "lucide-react";
 import confetti from "canvas-confetti";
 import { User as FirebaseUser } from "firebase/auth";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import { archiveProfilePhoto } from "@/lib/image-archive";
 
 interface OnboardingFormData {
   name: string;
@@ -29,6 +31,8 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [faceStatus, setFaceStatus] = useState<'idle'|'checking'|'face-found'|'no-face'|'error'>('idle');
   const [gmailPhotoURL, setGmailPhotoURL] = useState('');
+  const [skipTutorial, setSkipTutorial] = useState(false);
+  const [showTutorialModal, setShowTutorialModal] = useState(false);
   const hiddenImgRef = useRef<HTMLImageElement | null>(null);
   const [formData, setFormData] = useState<OnboardingFormData>({
     name: "",
@@ -50,9 +54,17 @@ export default function OnboardingPage() {
       if (!faceapi.nets.tinyFaceDetector.isLoaded) {
         await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
       }
+
+      // Google profile photos don't support CORS from the browser.
+      // Route them through our server-side proxy so face-api.js can
+      // read the pixel data via canvas without a security error.
+      const detectionUrl = url.includes('googleusercontent.com')
+        ? `/api/img-proxy?url=${encodeURIComponent(url)}`
+        : url;
+
       const img = new window.Image();
       img.crossOrigin = 'anonymous';
-      img.src = url;
+      img.src = detectionUrl;
       await new Promise<void>((resolve, reject) => {
         img.onload  = () => resolve();
         img.onerror = () => reject(new Error('load failed'));
@@ -73,10 +85,21 @@ export default function OnboardingPage() {
       if (u) {
         setUser(u);
         setFormData(prev => ({ ...prev, name: u.displayName || '' }));
-        if (u.photoURL) {
-          setGmailPhotoURL(u.photoURL);
-          setFormData(prev => ({ ...prev, photoURL: u.photoURL! }));
-          runFaceDetection(u.photoURL);
+
+        // Prefer the ORIGINAL Google account photo from providerData.
+        // u.photoURL gets overwritten if updateProfile() was ever called
+        // (e.g. from a previous onboarding or settings page), which causes
+        // it to point to a Cloudinary URL instead of the Gmail photo.
+        // u.providerData[].photoURL is always the raw OAuth provider photo.
+        const googleProvider = u.providerData.find(
+          (p) => p.providerId === 'google.com'
+        );
+        const gmailPhoto = googleProvider?.photoURL || u.photoURL;
+
+        if (gmailPhoto) {
+          setGmailPhotoURL(gmailPhoto);
+          setFormData(prev => ({ ...prev, photoURL: gmailPhoto }));
+          runFaceDetection(gmailPhoto);
         }
       } else {
         router.push('/');
@@ -137,25 +160,33 @@ export default function OnboardingPage() {
   };
 
   const handleComplete = async () => {
+    setShowTutorialModal(true);
+  };
+
+  const finalizeOnboarding = async (skipped: boolean) => {
     if (!user) return;
     setLoading(true);
     try {
       const isPending = formData.year === "4th Year" || formData.year === "Faculty";
       
+      // Archive Google photo to Cloudinary if necessary
+      const archivedPhotoURL = await archiveProfilePhoto(formData.photoURL);
+      
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
         ...formData,
+        photoURL: archivedPhotoURL, // Use archived URL
         xp: 0,
         photoCount: 0,
         createdAt: new Date().toISOString(),
         status: isPending ? "pending" : "approved",
-        hasSeenTutorial: false,
+        hasSeenTutorial: skipped, 
       });
       router.push("/dashboard");
     } catch (err) {
       console.error(err);
-      alert("Failed to save profile");
+      alert("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -212,8 +243,8 @@ export default function OnboardingPage() {
                   </div>
                 )}
                 {faceStatus === 'no-face' && (
-                  <div className="absolute -bottom-1 -right-1 p-2 rounded-full border border-amber-400 shadow" style={{ background: 'var(--color-parchment-base)' }}>
-                    <AlertTriangle size={18} className="text-amber-500" />
+                  <div className="absolute -bottom-1 -right-1 p-2 rounded-full shadow" style={{ background: '#FEF2F2', border: '2px solid #EF4444' }}>
+                    <AlertTriangle size={18} className="text-red-500" />
                   </div>
                 )}
 
@@ -230,7 +261,7 @@ export default function OnboardingPage() {
 
               {/* ── Contextual Callout ── */}
               {faceStatus === 'checking' && (
-                <p className="text-xs text-brown-secondary italic animate-pulse">Checking your photo for a face...</p>
+                <p className="text-xs text-brown-secondary italic animate-pulse serif">Checking your photo for a face...</p>
               )}
 
               {faceStatus === 'face-found' && (
@@ -261,26 +292,44 @@ export default function OnboardingPage() {
               )}
 
               {faceStatus === 'no-face' && (
-                <div className="flex items-start gap-3 rounded-2xl px-4 py-3 text-left max-w-xs border border-amber-400/50" style={{ background: 'rgba(251,191,36,0.06)' }}>
-                  <ArrowRight size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold leading-snug" style={{ color: 'var(--color-brown-primary)' }}>
-                      Do you want to keep this as your profile picture and change it later, or will you change it now to your own face?
-                    </p>
-                    <div className="flex gap-2 flex-wrap">
-                      <button
-                        type="button"
-                        className="flex items-center gap-1 px-3 py-1.5 border border-amber-400 text-amber-700 rounded-lg text-[10px] font-bold uppercase tracking-wider"
-                      >
-                        Keep it
-                      </button>
-                      <label
-                        htmlFor="photo-upload-input"
-                        className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-amber-600 transition-colors"
-                      >
-                        <RefreshCw size={11} /> Change now
-                      </label>
-                    </div>
+                <div
+                  className="rounded-2xl px-4 py-4 text-left w-full max-w-xs space-y-3"
+                  style={{
+                    background: 'rgba(239,68,68,0.07)',
+                    border: '1.5px solid rgba(239,68,68,0.45)',
+                  }}
+                >
+                  {/* Header */}
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle size={14} className="text-red-500 flex-shrink-0" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-red-500">
+                      No human face detected
+                    </span>
+                  </div>
+
+                  {/* Message */}
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-brown-primary)' }}>
+                    We couldn&apos;t find a face in this photo. Would you like to add your own face now, or keep this and change it later?
+                  </p>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    {/* Keep it for now — muted */}
+                    <button
+                      type="button"
+                      className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all hover:border-red-400 hover:text-red-500"
+                      style={{ borderColor: 'rgba(239,68,68,0.3)', color: 'var(--color-brown-secondary)' }}
+                    >
+                      Keep &amp; change later
+                    </button>
+                    {/* Put my face now — red CTA */}
+                    <label
+                      htmlFor="photo-upload-input"
+                      className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer text-black transition-all hover:brightness-110 active:scale-95"
+                      style={{ background: '#EF4444' }}
+                    >
+                      <RefreshCw size={11} /> Put my face now
+                    </label>
                   </div>
                 </div>
               )}
@@ -295,7 +344,7 @@ export default function OnboardingPage() {
                 </label>
               )}
               {faceStatus === 'error' && formData.photoURL && (
-                <p className="text-xs text-brown-secondary/60 italic">Photo loaded. You can change it anytime.</p>
+                <p className="text-xs text-brown-secondary/60 italic serif">Photo loaded. You can change it anytime.</p>
               )}
 
             </div>
@@ -464,14 +513,63 @@ export default function OnboardingPage() {
                   : "The ledger is ready. Your journey with the 2026 batch begins now."}
               </p>
             </div>
-            <button 
+
+            <button
               onClick={handleComplete}
               className="theme-cinematic-btn-primary w-full py-6 rounded-2xl font-bold tracking-widest uppercase text-xl transition-all"
             >
-              Begin the Journey
+              {loading ? 'Sealing...' : 'Begin the Journey'}
             </button>
           </div>
         )}
+
+        <AnimatePresence>
+          {showTutorialModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-parchment-base/80 backdrop-blur-md"
+              />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                className="relative w-full max-w-md bg-parchment-base border border-gold-soft/30 rounded-[2.5rem] p-10 shadow-2xl text-center space-y-8"
+              >
+                <div className="w-20 h-20 bg-gold-primary/10 rounded-full flex items-center justify-center text-gold-primary mx-auto shadow-inner">
+                  <Compass size={36} className="animate-pulse" />
+                </div>
+                
+                <div className="space-y-4">
+                  <h2 className="text-3xl font-bold serif text-brown-primary">The Path Ahead</h2>
+                  <p className="text-brown-secondary italic serif text-lg leading-relaxed">
+                    Would you like a quick guided tour of the dashboard, or are you ready to explore on your own?
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <button
+                    onClick={() => finalizeOnboarding(false)}
+                    disabled={loading}
+                    className="w-full py-5 bg-gold-primary text-theme-text-primary rounded-2xl font-bold tracking-widest uppercase text-sm shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle2 size={18} /> Show me around!
+                  </button>
+                  <button
+                    onClick={() => finalizeOnboarding(true)}
+                    disabled={loading}
+                    className="w-full py-5 border border-gold-soft/50 text-brown-secondary rounded-2xl font-bold tracking-widest uppercase text-sm hover:bg-gold-soft/10 transition-all flex items-center justify-center gap-2"
+                  >
+                    <X size={16} /> Skip the tutorial
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
 
       </div>
     </main>

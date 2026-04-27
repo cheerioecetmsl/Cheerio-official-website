@@ -3,6 +3,7 @@
 import { Sidebar } from "@/components/Sidebar";
 import { BackgroundScanner } from "@/components/BackgroundScanner";
 import { CinematicDecor } from "@/components/CinematicDecor";
+import { AuthGuard } from "@/components/AuthGuard";
 
 export default function DashboardLayout({
   children,
@@ -11,6 +12,7 @@ export default function DashboardLayout({
 }>) {
   return (
     <div className="theme-cinematic min-h-screen">
+      <AuthGuard />
       <Sidebar />
       <BackgroundScanner />
       {/* Bollywood cinematic decor — scattered SVG icons, pointer-events none */}

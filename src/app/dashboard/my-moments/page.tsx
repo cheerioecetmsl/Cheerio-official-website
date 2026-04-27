@@ -13,6 +13,8 @@ import { PulseOverlay } from "@/components/PulseOverlay";
 import { runPulseScan } from "@/lib/pulse";
 import { IdentityGate } from "@/components/IdentityGate";
 
+import { Pagination } from "@/components/Pagination";
+
 interface FoundMemory {
   id: string;
   url: string;
@@ -25,6 +27,8 @@ export default function MyMoments() {
   const [loading, setLoading] = useState(true);
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [isPulseOpen, setIsPulseOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -42,6 +46,11 @@ export default function MyMoments() {
     });
     return () => unsubscribe();
   }, []);
+
+  // Pagination Logic
+  const totalPages = Math.ceil(memories.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedMemories = memories.slice(startIndex, startIndex + itemsPerPage);
 
   const downloadSingle = async (url: string, id: string) => {
     try {
@@ -124,9 +133,9 @@ export default function MyMoments() {
               )}
               <button 
                 onClick={() => setIsPulseOpen(true)}
-                className="bg-card-tone border border-gold-soft/30 hover:border-gold-primary text-gold-primary flex items-center gap-3 px-8 py-5 rounded-2xl font-bold uppercase tracking-widest text-sm shadow-2xl transition-all"
+                className="bg-card-tone border border-gold-soft/30 hover:border-gold-primary text-brown-primary flex items-center gap-3 px-8 py-5 rounded-2xl font-bold uppercase tracking-widest text-sm shadow-2xl transition-all"
               >
-                <Zap size={20} className="fill-gold" />
+                <Zap size={20} className="fill-gold-primary" />
                 Initialize Pulse
               </button>
             </div>
@@ -152,54 +161,65 @@ export default function MyMoments() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {memories.map((m, i) => (
-                <div 
-                  key={m.id} 
-                  className="group relative aspect-[4/5] rounded-[2rem] overflow-hidden border border-gold-soft/40 shadow-2xl bg-card-tone animate-in fade-in slide-in-from-bottom-4 duration-700"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <Image 
-                    src={m.url} 
-                    fill
-                    className="object-cover transition-transform duration-1000 group-hover:scale-110" 
-                    alt="Moment" 
-                  />
-                  
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="absolute bottom-0 left-0 right-0 p-8 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <p className="text-[10px] font-bold text-gold uppercase tracking-widest">Reclaimed Moment</p>
-                          <p className="text-xs text-white/60 italic serif">{new Date(m.detectedAt).toLocaleDateString()}</p>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {paginatedMemories.map((m, i) => (
+                  <div 
+                    key={m.id} 
+                    className="group relative aspect-[4/5] rounded-[2rem] overflow-hidden border border-gold-soft/40 shadow-2xl bg-card-tone animate-in fade-in slide-in-from-bottom-4 duration-700"
+                    style={{ animationDelay: `${i * 100}ms` }}
+                  >
+                    <Image 
+                      src={m.url} 
+                      fill
+                      className="object-cover transition-transform duration-1000 group-hover:scale-110" 
+                      alt="Moment" 
+                    />
+                    
+                    {/* Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-parchment-base/95 via-parchment-base/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="absolute bottom-0 left-0 right-0 p-8 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <p className="text-[10px] font-bold text-brown-primary uppercase tracking-widest">Reclaimed Moment</p>
+                            <p className="text-xs text-brown-secondary/60 italic serif">{new Date(m.detectedAt).toLocaleDateString()}</p>
+                          </div>
+                          <div className="bg-gold-soft/20 p-2 rounded-full text-brown-primary">
+                            <CheckCircle size={14} />
+                          </div>
                         </div>
-                        <div className="bg-gold/20 p-2 rounded-full text-gold">
-                          <CheckCircle size={14} />
+                        
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => downloadSingle(m.url, m.id)}
+                            className="flex-1 bg-gold-primary text-black py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white transition-colors"
+                          >
+                            <Download size={14} /> Download
+                          </button>
+                          <button className="p-3 border border-brown-primary/20 rounded-xl text-brown-primary hover:bg-gold-soft/10 transition-colors">
+                            <Share2 size={14} />
+                          </button>
                         </div>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => downloadSingle(m.url, m.id)}
-                          className="flex-1 bg-gold text-ink py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white transition-colors"
-                        >
-                          <Download size={14} /> Download
-                        </button>
-                        <button className="p-3 border border-white/20 rounded-xl text-white hover:bg-white/10 transition-colors">
-                          <Share2 size={14} />
-                        </button>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Initial Badge */}
-                  <div className="absolute top-6 right-6 px-3 py-1 bg-gold/80 backdrop-blur-md rounded-full text-[8px] font-bold text-ink uppercase tracking-widest group-hover:opacity-0 transition-opacity">
-                    Verified
+                    {/* Initial Badge */}
+                    <div className="absolute top-6 right-6 px-3 py-1 bg-gold-soft/80 backdrop-blur-md rounded-full text-[8px] font-bold text-black uppercase tracking-widest group-hover:opacity-0 transition-opacity">
+                      Verified
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+
+              <Pagination 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            </>
           )}
 
           {/* Stats Footer */}

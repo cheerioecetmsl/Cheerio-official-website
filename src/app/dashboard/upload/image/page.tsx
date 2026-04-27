@@ -107,9 +107,10 @@ export default function ImageUpload() {
                         <Image src={src} fill className="object-cover" alt={`Preview ${idx}`} />
                         <button 
                           onClick={(e) => { e.preventDefault(); removeFile(idx); }}
-                          className="absolute top-2 right-2 p-1.5 bg-red-900/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 p-3 bg-red-600 text-black rounded-full shadow-2xl z-20 transition-all hover:bg-red-700 active:scale-90 flex items-center justify-center border-2 border-black/20"
+                          title="Remove image"
                         >
-                          <X size={14} />
+                          <X size={18} strokeWidth={3} />
                         </button>
                       </div>
                     ))}

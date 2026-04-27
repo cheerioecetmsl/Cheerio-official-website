@@ -80,8 +80,8 @@ function FlipCard({
                     style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                 >
                     <div className="text-center">
-                        <p className="text-[8px] font-bold text-gold uppercase tracking-[0.3em] mb-1">Vault</p>
-                        <p className="text-[9px] font-medium text-parchment serif">2026</p>
+                        <p className="text-[8px] font-bold text-gold-primary uppercase tracking-[0.3em] mb-1">Vault</p>
+                        <p className="text-[9px] font-medium text-black serif">2026</p>
                     </div>
                 </div>
             </motion.div>
@@ -218,14 +218,15 @@ export default function IntroAnimation() {
                         <Image 
                             src="/assets/cheerio logo.png" 
                             alt="Cheerio Logo" 
-                            width={350}
-                            height={350}
-                            priority
-                            className="w-[150px] md:w-[350px] h-auto opacity-90"
+                        width={350}
+                        height={350}
+                        priority
+                        style={{ width: "auto", height: "auto" }}
+                        className="w-[150px] md:w-[350px] h-auto opacity-90"
                         />
                         <motion.p 
                             style={{ opacity: supportTextOpacity }}
-                            className="text-[10px] md:text-sm font-bold tracking-[1em] text-ink/40 dark:text-gold/40 uppercase mt-[-20px]"
+                            className="text-[10px] md:text-sm font-bold tracking-[1em] text-brown-secondary/40 uppercase mt-[-20px]"
                         >
                           The Final Archive
                         </motion.p>
@@ -245,8 +246,9 @@ export default function IntroAnimation() {
                         alt="Cheerio Writing" 
                         width={1000}
                         height={300}
-                        style={{ height: "auto" }}
-                        className="w-[450px] md:w-[1000px] h-auto opacity-100"
+                        style={{ width: "auto", height: "auto" }}
+                        className="w-[300px] md:w-[1000px] h-auto opacity-100"
+                        priority
                     />
                 </motion.div>
 
@@ -255,10 +257,10 @@ export default function IntroAnimation() {
                     style={{ opacity: contentOpacity }}
                     className="absolute bottom-[15%] z-10 flex flex-col items-center justify-center text-center pointer-events-none px-4"
                 >
-                    <h1 className="text-3xl md:text-7xl font-bold serif text-ink dark:text-gold tracking-tighter mb-4">
+                    <h1 className="text-3xl md:text-7xl font-bold serif text-brown-primary tracking-tighter mb-4">
                         The Vault is Open
                     </h1>
-                    <p className="text-xs md:text-lg text-ink-soft dark:text-dark-text-secondary max-w-lg serif italic leading-relaxed">
+                    <p className="text-xs md:text-lg text-brown-secondary max-w-lg serif italic leading-relaxed">
                         Scroll deeper to shuffle the memories of the Batch of 2026.
                     </p>
                 </motion.div>

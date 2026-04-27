@@ -15,28 +15,28 @@ interface Step {
 const steps: Step[] = [
   {
     title: "Legacy Ledger",
-    description: "Track your rank and Legacy XP as you archive the year's greatest moments.",
+    description: "Track your rank and XP.",
     targetId: "stats-section",
     icon: Trophy,
     position: "bottom"
   },
   {
     title: "Neural Face Discovery",
-    description: "Our AI scanner finds you in the archives automatically. Check 'My Moments' to see your story unfold.",
+    description: "AI scanner finds your face.",
     targetId: "scanner-nav",
     icon: Camera,
     position: "right"
   },
   {
     title: "The Community Hub",
-    description: "Connect with Organizers, Participants, and our Batch Legends in the central directory.",
+    description: "Connect with the 2026 Batch.",
     targetId: "community-nav",
     icon: Users,
     position: "right"
   },
   {
     title: "The Pulse",
-    description: "Stay synchronized with real-time updates and hype directly from the Architects.",
+    description: "Real-time updates from Architects.",
     targetId: "pulse-section",
     icon: Megaphone,
     position: "top"
@@ -80,6 +80,32 @@ export function TutorialOverlay({ isOpen, onClose, onComplete, isFaculty }: { is
     };
   }, [currentStep, isOpen, filteredSteps]);
 
+  // Auto-scroll and handle mobile sidebar
+  useEffect(() => {
+    if (!isOpen) return;
+    const step = filteredSteps[currentStep];
+    if (!step) return;
+
+    const isMobile = window.innerWidth < 768;
+    const isSidebarItem = ["scanner-nav", "community-nav"].includes(step.targetId);
+
+    if (isMobile && isSidebarItem) {
+      window.dispatchEvent(new CustomEvent('open-sidebar'));
+    } else if (isMobile && !isSidebarItem) {
+      window.dispatchEvent(new CustomEvent('close-sidebar'));
+    }
+
+    // Small delay so layout animations (like sidebar opening) settle before we scroll
+    const t = setTimeout(() => {
+      const el = document.getElementById(step.targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, isMobile && isSidebarItem ? 300 : 120);
+
+    return () => clearTimeout(t);
+  }, [currentStep, isOpen, filteredSteps]);
+
   const handleNext = () => {
     if (currentStep < filteredSteps.length - 1) {
       setCurrentStep(prev => prev + 1);
@@ -94,15 +120,45 @@ export function TutorialOverlay({ isOpen, onClose, onComplete, isFaculty }: { is
   const activeStep = filteredSteps[currentStep];
   const Icon = activeStep.icon;
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isSidebarItem = activeStep.targetId.includes('nav');
+  const effectivePosition = (isMobile && isSidebarItem) ? "bottom" : activeStep.position;
+
+  const holeTop = coords.top - (typeof window !== 'undefined' ? window.scrollY : 0) - 10;
+  const holeLeft = coords.left - (typeof window !== 'undefined' ? window.scrollX : 0) - 10;
+  const holeWidth = coords.width + 20;
+  const holeHeight = coords.height + 20;
+
+  const punchPath = `polygon(
+    0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
+    ${holeLeft}px ${holeTop}px, 
+    ${holeLeft}px ${holeTop + holeHeight}px, 
+    ${holeLeft + holeWidth}px ${holeTop + holeHeight}px, 
+    ${holeLeft + holeWidth}px ${holeTop}px, 
+    ${holeLeft}px ${holeTop}px
+  )`;
+
   return (
     <div className="absolute inset-0 z-[100] pointer-events-none">
-      {/* Dimmed Background */}
+      {/* Blurred Backdrop with Punch-Through Hole */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 pointer-events-auto backdrop-blur-[2px]"
+        className="fixed inset-0 bg-parchment-base/60 backdrop-blur-[3px] pointer-events-auto"
+        style={{ clipPath: punchPath }}
         onClick={onClose}
+      />
+
+      {/* Decorative Border for the Hole */}
+      <div 
+        className="fixed z-[101] border-2 border-gold-soft/40 rounded-2xl pointer-events-none shadow-[0_0_20px_rgba(107,68,35,0.2)] transition-all duration-300"
+        style={{
+          top: holeTop,
+          left: holeLeft,
+          width: holeWidth,
+          height: holeHeight
+        }}
       />
 
       <AnimatePresence mode="wait">
@@ -113,58 +169,47 @@ export function TutorialOverlay({ isOpen, onClose, onComplete, isFaculty }: { is
           exit={{ opacity: 0, scale: 0.98 }}
           className="absolute z-[110] pointer-events-auto"
           style={{
-            top: activeStep.position === "bottom" ? coords.top + coords.height + 20 : 
-                 activeStep.position === "top" ? coords.top - 220 : 
-                 coords.top + coords.height / 2 - 100,
-            left: Math.max(20, Math.min(window.innerWidth - 340, 
-                  activeStep.position === "right" ? coords.left + coords.width + 20 : 
-                  activeStep.position === "left" ? coords.left - 340 : 
+            top: effectivePosition === "bottom" ? coords.top + coords.height + 20 : 
+                 effectivePosition === "top" ? coords.top - 200 : 
+                 coords.top + coords.height / 2 - 80,
+            left: isMobile ? Math.max(10, (window.innerWidth - 240) / 2) : 
+                  Math.max(20, Math.min(window.innerWidth - 340, 
+                  effectivePosition === "right" ? coords.left + coords.width + 20 : 
+                  effectivePosition === "left" ? coords.left - 340 : 
                   coords.left + coords.width / 2 - 160)),
-            width: "320px"
+            width: isMobile ? "240px" : "320px"
           }}
         >
-          {/* Spotlight Highlight */}
-          <div 
-            className="fixed z-[-1] rounded-2xl border-2 border-gold/50 shadow-[0_0_40px_rgba(212,175,55,0.4)] bg-gold/5"
-            style={{
-              top: coords.top - window.scrollY - 10,
-              left: coords.left - window.scrollX - 10,
-              width: coords.width + 20,
-              height: coords.height + 20,
-              position: 'fixed'
-            }}
-          />
-
           {/* Tutorial Card */}
-          <div className="glass-card p-6 rounded-[2rem] border-gold/30 shadow-2xl bg-zinc-900/95 backdrop-blur-xl">
-            <div className="space-y-4">
+          <div className={`glass-card ${isMobile ? 'p-3.5 rounded-[1.5rem]' : 'p-6 rounded-[2rem]'} border-gold-soft/30 shadow-2xl bg-card-tone/95 backdrop-blur-xl transition-all duration-300`}>
+            <div className={isMobile ? "space-y-2" : "space-y-4"}>
               <div className="flex items-center justify-between">
-                <div className="p-2.5 bg-gold/20 rounded-xl text-gold border border-gold/20">
-                  <Icon size={20} />
+                <div className={`${isMobile ? 'p-1.5 rounded-lg' : 'p-2.5 rounded-xl'} bg-gold-soft/20 text-gold-primary border border-gold-soft/20`}>
+                  <Icon size={isMobile ? 14 : 20} />
                 </div>
                 <button 
                   onClick={onClose}
-                  className="p-1.5 text-white/20 hover:text-white transition-colors"
+                  className="p-1.5 text-brown-primary/20 hover:text-brown-primary transition-colors"
                 >
-                  <X size={16} />
+                  <X size={isMobile ? 12 : 16} />
                 </button>
               </div>
 
               <div className="space-y-1">
-                <span className="text-[9px] font-bold text-gold uppercase tracking-[0.3em]">Neural Link {currentStep + 1}/{filteredSteps.length}</span>
-                <h3 className="text-xl font-bold text-white serif tracking-tight">{activeStep.title}</h3>
-                <p className="text-xs text-white/50 leading-relaxed italic serif">
+                <span className="text-[7px] md:text-[9px] font-bold text-gold-primary uppercase tracking-[0.3em]">Link {currentStep + 1}/{filteredSteps.length}</span>
+                <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-bold text-brown-primary serif tracking-tight leading-tight`}>{activeStep.title}</h3>
+                <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-brown-primary/60 leading-relaxed italic serif`}>
                   &quot;{activeStep.description}&quot;
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              <div className={`flex items-center gap-3 ${isMobile ? 'pt-1' : 'pt-2'}`}>
                 <button 
                   onClick={handleNext}
-                  className="flex-1 bg-gold text-ink py-3.5 rounded-xl font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:scale-[1.02] active:scale-95 transition-all"
+                  className={`flex-1 bg-gold-primary text-black ${isMobile ? 'py-2 rounded-lg text-[8px]' : 'py-3.5 rounded-xl text-[10px]'} font-bold uppercase tracking-widest flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:scale-[1.02] active:scale-95 transition-all`}
                 >
-                  {currentStep === filteredSteps.length - 1 ? "Complete Sync" : "Next Anchor"}
-                  <ChevronRight size={14} />
+                  {currentStep === filteredSteps.length - 1 ? "Complete" : "Next"}
+                  <ChevronRight size={isMobile ? 10 : 14} />
                 </button>
               </div>
             </div>
@@ -173,12 +218,12 @@ export function TutorialOverlay({ isOpen, onClose, onComplete, isFaculty }: { is
       </AnimatePresence>
 
       {/* Skip Controls */}
-      <div className="fixed bottom-8 right-8 z-[110] pointer-events-auto">
+      <div className="fixed bottom-6 right-6 z-[110] pointer-events-auto">
         <button 
           onClick={onClose}
-          className="text-[9px] font-bold text-white/40 hover:text-gold uppercase tracking-[0.3em] transition-all flex items-center gap-2 group bg-zinc-900/50 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/5 shadow-xl hover:border-gold/20"
+          className={`${isMobile ? 'text-[7px] px-3 py-1.5' : 'text-[9px] px-5 py-2.5'} font-bold text-brown-primary/40 hover:text-gold-primary uppercase tracking-[0.3em] transition-all flex items-center gap-2 group bg-card-tone/50 backdrop-blur-md rounded-full border border-brown-primary/5 shadow-xl hover:border-gold/20`}
         >
-          Skip Induction <X size={12} className="group-hover:rotate-90 transition-transform" />
+          Skip <X size={isMobile ? 10 : 12} className="group-hover:rotate-90 transition-transform" />
         </button>
       </div>
     </div>

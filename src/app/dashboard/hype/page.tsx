@@ -51,13 +51,13 @@ export default function HypePage() {
       <div className="max-w-4xl mx-auto space-y-12">
         
         {/* Header */}
-        <div className="flex items-center justify-between gap-8 border-b border-gold/20 pb-12">
+        <div className="flex items-center justify-between gap-8 border-b border-gold-soft/20 pb-12">
           <div className="space-y-2">
-            <span className="text-gold uppercase tracking-[0.4em] text-[10px] font-bold serif">Cheerio Notifications</span>
-            <h1 className="text-5xl font-bold text-ink dark:text-gold serif">The Notification Bar.</h1>
-            <p className="text-ink/60 dark:text-dark-text/60 italic serif text-lg">Every update, every milestone, every cheer.</p>
+            <span className="text-brown-primary uppercase tracking-[0.4em] text-[10px] font-bold serif">Cheerio Notifications</span>
+            <h1 className="text-5xl font-bold text-brown-primary serif">The Notification Bar.</h1>
+            <p className="text-brown-secondary/60 italic serif text-lg">Every update, every milestone, every cheer.</p>
           </div>
-          <div className="w-20 h-20 bg-gold text-ink rounded-3xl flex items-center justify-center shadow-2xl rotate-3">
+          <div className="w-20 h-20 bg-gold-soft/30 text-brown-primary rounded-3xl flex items-center justify-center shadow-2xl rotate-3 border border-gold-soft/20">
             <Megaphone size={32} />
           </div>
         </div>
@@ -81,13 +81,13 @@ export default function HypePage() {
                 )}
                 
                 {/* Timeline Dot */}
-                <div className="absolute left-0 top-0 w-12 h-12 rounded-2xl bg-card-tone border border-gold-soft/30 flex items-center justify-center text-gold-primary group-hover:bg-gold-primary group-hover:text-theme-text-primary transition-all duration-500 shadow-xl">
+                <div className="absolute left-0 top-0 w-12 h-12 rounded-2xl bg-card-tone border border-gold-soft/30 flex items-center justify-center text-brown-primary group-hover:bg-gold-primary group-hover:text-black transition-all duration-500 shadow-xl">
                   <Zap size={20} />
                 </div>
 
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-gold-primary uppercase tracking-[0.3em] bg-card-tone px-3 py-1 rounded-full border border-gold-soft/30">{item.tag}</span>
+                    <span className="text-[10px] font-bold text-brown-primary uppercase tracking-[0.3em] bg-card-tone px-3 py-1 rounded-full border border-gold-soft/30">{item.tag}</span>
                     <div className="flex items-center gap-2 text-brown-secondary text-[10px] font-bold uppercase">
                       <Calendar size={12} />
                       {item.date}
@@ -155,10 +155,10 @@ export default function HypePage() {
                   ) : null}
 
                   <div className="pt-4 flex gap-6">
-                    <button className="text-[10px] font-bold uppercase tracking-widest text-gold-primary hover:underline flex items-center gap-2">
+                    <button className="text-[10px] font-bold uppercase tracking-widest text-brown-primary hover:underline flex items-center gap-2">
                       <Zap size={14} /> Boost
                     </button>
-                    <button className="text-[10px] font-bold uppercase tracking-widest text-gold-primary hover:underline">Share Update</button>
+                    <button className="text-[10px] font-bold uppercase tracking-widest text-brown-primary hover:underline">Share Update</button>
                   </div>
                 </div>
               </div>

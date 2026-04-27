@@ -16,6 +16,8 @@ import { HypeUpdate } from "@/components/DashboardModules";
 import { SeniorInvitation } from "@/components/SeniorInvitation";
 import { PulseOverlay } from "@/components/PulseOverlay";
 import { Zap } from "lucide-react";
+import { LogoutModal } from "@/components/LogoutModal";
+import { archiveProfilePhoto } from "@/lib/image-archive";
 
 interface UserArchiveData {
   name: string;
@@ -37,6 +39,7 @@ export default function DashboardPage() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [showSeniorInvite, setShowSeniorInvite] = useState(false);
   const [showPulse, setShowPulse] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [userRank, setUserRank] = useState<number | null>(null);
   const hasTriggeredRef = useRef({ tutorial: false, invite: false });
 
@@ -61,6 +64,18 @@ export default function DashboardPage() {
             hasTriggeredRef.current.tutorial = true;
             setShowTutorial(true);
           }
+
+          // Auto-migrate Google photos to Cloudinary if detected
+          if (data.photoURL && data.photoURL.includes('googleusercontent.com')) {
+            console.log("[Migration] Google photo detected, archiving to Cloudinary...");
+            archiveProfilePhoto(data.photoURL).then(async (archivedURL) => {
+              if (archivedURL !== data.photoURL) {
+                await updateDoc(docRef, { photoURL: archivedURL });
+                setUserData((prev: any) => ({ ...prev, photoURL: archivedURL }));
+              }
+            });
+          }
+
           setLoading(false);
         } else {
           router.push("/onboarding");
@@ -145,8 +160,8 @@ export default function DashboardPage() {
       <div className="fixed top-0 left-0 w-full z-40 md:hidden flex justify-between items-center p-6 bg-brown-primary/80 backdrop-blur-md border-b border-gold-soft/30">
         <div className="w-12 h-12" />
         <button 
-          onClick={() => auth.signOut()}
-          className="text-[10px] font-bold uppercase tracking-widest text-gold-primary border border-gold-primary/50 px-4 py-2 rounded-full active:bg-gold-soft/20 transition-colors"
+          onClick={() => setShowLogoutModal(true)}
+          className="text-[10px] font-bold uppercase tracking-widest text-black border border-brown-primary/50 px-4 py-2 rounded-full active:bg-gold-soft/20 transition-colors"
         >
           Logout
         </button>
@@ -173,15 +188,17 @@ export default function DashboardPage() {
               <UserStats name={userData?.name} xp={userData?.xp} />
             </div>
             <button 
-              onClick={() => setShowPulse(true)}
+              onClick={() => router.push('/dashboard/my-moments')}
               className="md:w-64 h-full bg-gold-soft/20 hover:bg-gold-soft/40 border border-gold-soft/40 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-3 transition-all group"
             >
-              <div className="p-3 bg-gold-primary/20 rounded-2xl text-gold-primary group-hover:scale-110 transition-transform">
+              <div className="p-3 bg-gold-soft/20 rounded-2xl text-brown-primary group-hover:scale-110 transition-transform">
                 <Zap size={24} fill="currentColor" />
               </div>
               <div className="text-center">
-                <p className="text-gold-primary font-bold uppercase tracking-[0.2em] text-[10px]">Global Pulse</p>
-                <p className="text-brown-secondary/70 text-[8px] font-bold uppercase tracking-widest mt-1">Initialize Sync</p>
+                <p className="text-brown-primary font-bold uppercase tracking-[0.1em] text-[11px] leading-tight mb-1">Face Discovery</p>
+                <p className="text-brown-secondary/80 text-[9px] font-bold italic leading-relaxed">
+                  Do you want to find your face in the sea of images in cheerio-2026? Click here.
+                </p>
               </div>
             </button>
           </div>
@@ -190,7 +207,7 @@ export default function DashboardPage() {
         <PulseOverlay isOpen={showPulse} onClose={() => setShowPulse(false)} />
 
         <div className="animate-bounce pt-8 md:pt-12">
-          <ChevronDown className="text-gold-primary/50" size={32} />
+          <ChevronDown className="text-brown-primary/50" size={32} />
         </div>
       </section>
 
@@ -216,12 +233,12 @@ export default function DashboardPage() {
         <div className="w-full max-w-3xl" id="pulse-section">
           <Link href="/dashboard/hype" className="block theme-card p-12 rounded-[3rem] relative group overflow-hidden border border-gold-soft/30 hover:border-gold-primary/50 transition-all duration-700">
             <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 bg-gold-soft/30 rounded-2xl text-gold-primary">
+              <div className="p-3 bg-gold-soft/30 rounded-2xl text-brown-primary">
                 <TrendingUp size={24} />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold-primary">The Pulse</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-brown-primary">The Pulse</span>
               <div className="ml-auto px-3 py-1 bg-gold-soft/20 rounded-full border border-gold-soft/40">
-                <span className="text-[8px] font-bold text-gold-primary uppercase animate-pulse">Live</span>
+                <span className="text-[8px] font-bold text-brown-primary uppercase animate-pulse">Live</span>
               </div>
             </div>
             
@@ -234,10 +251,10 @@ export default function DashboardPage() {
                   pulseItems.map((item, i) => (
                     <div key={item.id} className={`space-y-4 ${i !== 0 ? "opacity-50 hover:opacity-100 transition-opacity" : ""}`}>
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-gold-primary uppercase tracking-[0.3em]">{item.tag}</span>
+                        <span className="text-[10px] font-bold text-brown-primary uppercase tracking-[0.3em]">{item.tag}</span>
                         <div className="flex items-center gap-3">
                           {item.mediaGallery && item.mediaGallery.length > 0 && (
-                            <span className="flex items-center gap-1 text-[8px] font-bold text-gold-primary/70 uppercase tracking-widest">
+                            <span className="flex items-center gap-1 text-[8px] font-bold text-brown-primary/70 uppercase tracking-widest">
                               <Files size={10} /> {item.mediaGallery.length} Assets
                             </span>
                           )}
@@ -254,7 +271,7 @@ export default function DashboardPage() {
               </div>
             </div>
             
-            <div className="absolute bottom-12 right-12 flex items-center gap-3 text-gold-primary opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute bottom-12 right-12 flex items-center gap-3 text-brown-primary opacity-0 group-hover:opacity-100 transition-opacity">
               <span className="text-[10px] font-bold uppercase tracking-widest">Archive Feed</span>
               <ArrowUpRight size={16} />
             </div>
@@ -266,7 +283,7 @@ export default function DashboardPage() {
       {!isFaculty && (
         <section className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 bg-parchment-contrast">
           <div className="text-center mb-10 md:mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gold-soft/30 rounded-full text-gold-primary text-[8px] md:text-[10px] font-bold tracking-[0.3em] uppercase">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gold-soft/30 rounded-full text-brown-primary text-[8px] md:text-[10px] font-bold tracking-[0.3em] uppercase">
               <Trophy size={14} /> Hall of Legacy
             </div>
             <h2 className="text-3xl md:text-6xl font-bold serif text-brown-primary">Batch Rankings</h2>
@@ -278,7 +295,7 @@ export default function DashboardPage() {
               <>
                 {leaderboard.map((user, i) => (
                   <div key={user.id} className={`flex items-center gap-4 md:gap-8 p-4 md:p-8 border-b border-brown-secondary/20 last:border-none hover:bg-gold-soft/10 transition-all ${user.id === auth.currentUser?.uid ? "bg-gold-soft/20 border-l-4 border-l-gold-primary" : ""}`}>
-                    <div className="text-2xl md:text-3xl font-bold serif text-gold-primary/60 w-8 md:w-12 text-center">#{i + 1}</div>
+                    <div className="text-2xl md:text-3xl font-bold serif text-brown-primary/60 w-8 md:w-12 text-center">#{i + 1}</div>
                     <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-gold-soft/50 shadow-xl flex-shrink-0 bg-gold-soft/20">
                       <Image 
                         src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} 
@@ -286,6 +303,10 @@ export default function DashboardPage() {
                         sizes="64px"
                         className="object-cover" 
                         alt={user.name} 
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
+                        }}
                       />
                     </div>
                     <div className="flex-grow min-w-0">
@@ -293,7 +314,7 @@ export default function DashboardPage() {
                       <p className="text-[8px] md:text-xs text-brown-secondary font-bold uppercase tracking-widest truncate">Rank: {user.rank || "Archivist"} | {user.memoryCount || 0} Memories</p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="text-xl md:text-3xl font-bold text-gold-primary tabular-nums">{user.xp || 0}</div>
+                      <div className="text-xl md:text-3xl font-bold text-brown-primary tabular-nums">{user.xp || 0}</div>
                       <div className="text-[8px] md:text-[10px] font-bold text-brown-secondary/70 uppercase tracking-[0.2em]">Legacy XP</div>
                     </div>
                   </div>
@@ -302,9 +323,9 @@ export default function DashboardPage() {
                 {/* Show Current User if not in Top 10 */}
                 {userRank && userRank > 10 && (
                   <>
-                    <div className="p-4 text-center text-gold-primary/50 italic serif border-b border-brown-secondary/20">... descending into the archives ...</div>
+                    <div className="p-4 text-center text-brown-primary/50 italic serif border-b border-brown-secondary/20">... descending into the archives ...</div>
                     <div className="flex items-center gap-4 md:gap-8 p-4 md:p-8 bg-gold-soft/20 border-l-4 border-l-gold-primary">
-                      <div className="text-2xl md:text-3xl font-bold serif text-gold-primary w-8 md:w-12 text-center">#{userRank}</div>
+                      <div className="text-2xl md:text-3xl font-bold serif text-brown-primary w-8 md:w-12 text-center">#{userRank}</div>
                       <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-gold-primary shadow-xl flex-shrink-0">
                         <Image 
                           src={userData.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${auth.currentUser?.uid}`} 
@@ -312,6 +333,10 @@ export default function DashboardPage() {
                           sizes="64px"
                           className="object-cover" 
                           alt="You" 
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${auth.currentUser?.uid}`;
+                          }}
                         />
                       </div>
                       <div className="flex-grow min-w-0">
@@ -319,7 +344,7 @@ export default function DashboardPage() {
                         <p className="text-[8px] md:text-xs text-brown-secondary font-bold uppercase tracking-widest truncate">{userData.rank || "Archivist"} | {userData.memoryCount || 0} Memories</p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <div className="text-xl md:text-3xl font-bold text-gold-primary tabular-nums">{userData.xp || 0}</div>
+                        <div className="text-xl md:text-3xl font-bold text-brown-primary tabular-nums">{userData.xp || 0}</div>
                         <div className="text-[8px] md:text-[10px] font-bold text-brown-secondary/70 uppercase tracking-[0.2em]">Legacy XP</div>
                       </div>
                     </div>
@@ -330,7 +355,7 @@ export default function DashboardPage() {
               <div className="p-20 text-center text-brown-secondary/50 serif italic">No legends recorded yet.</div>
             )}
             <div className="p-8 text-center bg-brown-secondary/10">
-              <Link href="/dashboard/community/participants" className="text-gold-primary font-bold uppercase tracking-[0.3em] text-xs hover:underline flex items-center justify-center gap-2">
+              <Link href="/dashboard/community/participants" className="text-brown-primary font-bold uppercase tracking-[0.3em] text-xs hover:underline flex items-center justify-center gap-2">
                 View All Archivists <ArrowRight size={14} />
               </Link>
             </div>
@@ -348,6 +373,10 @@ export default function DashboardPage() {
         onClose={() => setShowTutorial(false)}
         isFaculty={isFaculty}
         onComplete={handleTutorialComplete}
+      />
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onCancel={() => setShowLogoutModal(false)}
       />
     </main>
   );

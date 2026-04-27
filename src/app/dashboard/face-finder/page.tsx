@@ -89,11 +89,11 @@ export default function FaceFinder() {
           
           {/* Header */}
           <div className="text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold/10 rounded-full text-gold text-[10px] font-bold tracking-[0.3em] uppercase">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold-soft/10 rounded-full text-brown-primary text-[10px] font-bold tracking-[0.3em] uppercase">
               <Sparkles size={14} /> AI Recognition Engine
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-ink dark:text-gold serif">Find Your Moments.</h1>
-            <p className="text-ink/60 dark:text-dark-text/60 italic serif text-lg max-w-2xl mx-auto">
+            <h1 className="text-5xl md:text-6xl font-bold text-brown-primary serif">Find Your Moments.</h1>
+            <p className="text-brown-secondary/60 italic serif text-lg max-w-2xl mx-auto">
               Our neural engine scans every pixel in the batch archive to reclaim your story. 
             </p>
           </div>
@@ -121,6 +121,10 @@ export default function FaceFinder() {
                   fill
                   className="object-cover" 
                   alt="Reference" 
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${auth.currentUser?.uid || 'placeholder'}`;
+                  }}
                 />
               </div>
               {scanning && (
@@ -143,19 +147,19 @@ export default function FaceFinder() {
 
               {scanning && (
                 <div className="space-y-4 text-center">
-                  <div className="h-2 w-full bg-ink/5 dark:bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-gold transition-all duration-300 shadow-[0_0_10px_#d4af37]" style={{ width: `${progress}%` }} />
+                  <div className="h-2 w-full bg-brown-primary/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-gold-primary transition-all duration-300 shadow-[0_0_10px_#d4af37]" style={{ width: `${progress}%` }} />
                   </div>
                   <div className="flex flex-col gap-3">
-                    <p className="text-xs text-gold font-bold uppercase tracking-widest animate-pulse">
+                    <p className="text-xs text-brown-primary font-bold uppercase tracking-widest animate-pulse">
                       {status}
                     </p>
-                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-gold/40">
-                      <span>Processed: <span className="text-white/60">{current} / {total}</span></span>
+                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-brown-secondary/40">
+                      <span>Processed: <span className="text-black font-bold">{current} / {total}</span></span>
                       <span>{Math.round(progress)}% Complete</span>
                     </div>
                     {matchCount > 0 && (
-                      <p className="text-[10px] font-bold text-green-500 uppercase tracking-widest">
+                      <p className="text-[10px] font-bold text-green-700 uppercase tracking-widest">
                         Reclaimed: {matchCount} Moments
                       </p>
                     )}
@@ -165,28 +169,28 @@ export default function FaceFinder() {
 
               {results.length > 0 && !scanning && (
                 <div className="text-center space-y-8 animate-in zoom-in fade-in duration-700">
-                  <div className="flex items-center justify-center gap-3 text-gold">
-                    <CheckCircle size={28} className="text-green-500 shadow-xl" />
+                  <div className="flex items-center justify-center gap-3 text-brown-primary">
+                    <CheckCircle size={28} className="text-green-700 shadow-xl" />
                     <span className="text-2xl font-bold serif tracking-widest uppercase">{results.length} Moments Reclaimed!</span>
                   </div>
                   <div className="grid grid-cols-2 gap-6">
                     {results.map((url, i) => (
-                      <div key={i} className="group relative aspect-square rounded-3xl overflow-hidden border-2 border-gold/20 shadow-2xl">
+                      <div key={i} className="group relative aspect-square rounded-3xl overflow-hidden border-2 border-gold-soft/20 shadow-2xl">
                         <Image 
                           src={url} 
                           fill
                           className="object-cover group-hover:scale-110 transition-transform duration-1000" 
                           alt="Found" 
                         />
-                        <div className="absolute inset-0 bg-gold/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <span className="text-[8px] font-bold text-ink bg-gold px-3 py-1 rounded-full uppercase tracking-widest">Moment {i+1}</span>
+                        <div className="absolute inset-0 bg-gold-soft/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <span className="text-[8px] font-bold text-black bg-gold-soft px-3 py-1 rounded-full uppercase tracking-widest">Moment {i+1}</span>
                         </div>
                       </div>
                     ))}
                   </div>
                   <button 
                     onClick={() => setResults([])}
-                    className="px-8 py-3 border border-gold/20 rounded-xl text-gold font-bold uppercase tracking-widest text-[10px] hover:bg-gold/5 transition-all"
+                    className="px-8 py-3 border border-gold-soft/20 rounded-xl text-brown-primary font-bold uppercase tracking-widest text-[10px] hover:bg-gold-soft/5 transition-all"
                   >
                     Initiate New Discovery
                   </button>
@@ -197,21 +201,21 @@ export default function FaceFinder() {
 
           {/* Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="glass-card p-8 rounded-3xl border-gold/10 space-y-4">
-              <h4 className="text-gold font-bold uppercase tracking-widest text-xs">Biometric Extraction</h4>
-              <p className="text-xs text-ink/60 dark:text-dark-text/60 leading-relaxed serif italic">
+            <div className="glass-card p-8 rounded-3xl border-gold-soft/10 space-y-4">
+              <h4 className="text-brown-primary font-bold uppercase tracking-widest text-xs">Biometric Extraction</h4>
+              <p className="text-xs text-brown-secondary/60 leading-relaxed serif italic">
                 We extract a unique facial descriptor from your profile portrait to serve as a neural fingerprint.
               </p>
             </div>
-            <div className="glass-card p-8 rounded-3xl border-gold/10 space-y-4">
-              <h4 className="text-gold font-bold uppercase tracking-widest text-xs">Neural Archive Scan</h4>
-              <p className="text-xs text-ink/60 dark:text-dark-text/60 leading-relaxed serif italic">
+            <div className="glass-card p-8 rounded-3xl border-gold-soft/10 space-y-4">
+              <h4 className="text-brown-primary font-bold uppercase tracking-widest text-xs">Neural Archive Scan</h4>
+              <p className="text-xs text-brown-secondary/60 leading-relaxed serif italic">
                 Our engine performs a sequential analysis of every memory in the vault, comparing signatures in real-time.
               </p>
             </div>
-            <div className="glass-card p-8 rounded-3xl border-gold/10 space-y-4">
-              <h4 className="text-gold font-bold uppercase tracking-widest text-xs">Precision Discovery</h4>
-              <p className="text-xs text-ink/60 dark:text-dark-text/60 leading-relaxed serif italic">
+            <div className="glass-card p-8 rounded-3xl border-gold-soft/10 space-y-4">
+              <h4 className="text-brown-primary font-bold uppercase tracking-widest text-xs">Precision Discovery</h4>
+              <p className="text-xs text-brown-secondary/60 leading-relaxed serif italic">
                 Only memories with a high neural similarity score are surfaced, ensuring you reclaim only verified moments.
               </p>
             </div>

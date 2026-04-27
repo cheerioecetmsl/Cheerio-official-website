@@ -86,8 +86,8 @@ export default function AddMemberPage() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold/10 rounded-full text-gold text-[10px] font-bold tracking-[0.3em] uppercase">
             <Sparkles size={14} /> Growing the Legacy
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-ink dark:text-gold serif text-glow">Enroll Member.</h1>
-          <p className="text-ink/60 dark:text-dark-text/60 italic serif text-lg">
+          <h1 className="text-5xl md:text-6xl font-bold text-brown-primary serif text-glow">Enroll Member.</h1>
+          <p className="text-brown-secondary italic serif text-lg">
             Add a new visionary or legend to the Cheerio community.
           </p>
         </div>
@@ -99,10 +99,10 @@ export default function AddMemberPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Photo Upload Section */}
             <div className="space-y-6">
-              <label className="text-gold font-bold uppercase tracking-widest text-[10px] block">
+              <label className="text-gold-primary font-bold uppercase tracking-widest text-[10px] block">
                 Official Photo
               </label>
-              <div className="relative group aspect-[4/5] rounded-[3rem] overflow-hidden border-2 border-dashed border-gold/20 hover:border-gold transition-all duration-500 bg-gold/5 flex flex-col items-center justify-center cursor-pointer overflow-hidden">
+              <div className="relative group aspect-[4/5] rounded-[3rem] overflow-hidden border-2 border-dashed border-gold-soft/20 hover:border-gold-primary transition-all duration-500 bg-gold-soft/5 flex flex-col items-center justify-center cursor-pointer overflow-hidden">
                 {preview ? (
                   <div className="relative w-full h-full">
                     <Image 
@@ -114,8 +114,8 @@ export default function AddMemberPage() {
                   </div>
                 ) : (
                   <div className="text-center space-y-4 p-8">
-                    <UploadCloud size={48} className="text-gold/40 mx-auto group-hover:scale-110 transition-transform" />
-                    <p className="text-gold/60 font-bold uppercase tracking-widest text-[10px]">
+                    <UploadCloud size={48} className="text-gold-primary/40 mx-auto group-hover:scale-110 transition-transform" />
+                    <p className="text-gold-primary/60 font-bold uppercase tracking-widest text-[10px]">
                       Drop portrait here or click to browse
                     </p>
                   </div>
@@ -132,25 +132,25 @@ export default function AddMemberPage() {
             {/* Fields Section */}
             <div className="space-y-8">
               <div className="space-y-2">
-                <label className="text-gold font-bold uppercase tracking-widest text-[10px] block">Full Name</label>
+                <label className="text-gold-primary font-bold uppercase tracking-widest text-[10px] block">Full Name</label>
                 <input 
                   type="text" 
                   required
                   placeholder="e.g. John Doe"
-                  className="w-full bg-gold/5 border-b-2 border-gold/20 p-4 text-ink dark:text-white serif text-xl focus:border-gold outline-none transition-all placeholder:text-gold/20"
+                  className="w-full bg-gold-soft/5 border-b-2 border-gold-soft/20 p-4 text-black serif text-xl focus:border-gold-primary outline-none transition-all placeholder:text-brown-secondary/20"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                 />
               </div>
 
               <div className="space-y-4">
-                <label className="text-gold font-bold uppercase tracking-widest text-[10px] block">Community Role</label>
+                <label className="text-gold-primary font-bold uppercase tracking-widest text-[10px] block">Community Role</label>
                 <div className="grid grid-cols-2 gap-4">
                   <button 
                     type="button"
                     onClick={() => setFormData({...formData, role: "organizer"})}
                     className={`py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] transition-all border ${
-                      formData.role === "organizer" ? "bg-gold text-ink border-gold" : "bg-gold/5 text-gold border-gold/10 hover:border-gold/40"
+                      formData.role === "organizer" ? "bg-gold-primary text-black border-gold-primary" : "bg-gold-soft/5 text-gold-primary border-gold-soft/10 hover:border-gold-primary/40"
                     }`}
                   >
                     Organizer
@@ -159,7 +159,7 @@ export default function AddMemberPage() {
                     type="button"
                     onClick={() => setFormData({...formData, role: "senior"})}
                     className={`py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] transition-all border ${
-                      formData.role === "senior" ? "bg-gold text-ink border-gold" : "bg-gold/5 text-gold border-gold/10 hover:border-gold/40"
+                      formData.role === "senior" ? "bg-gold-primary text-black border-gold-primary" : "bg-gold-soft/5 text-gold-primary border-gold-soft/10 hover:border-gold-primary/40"
                     }`}
                   >
                     Senior
@@ -168,11 +168,11 @@ export default function AddMemberPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-gold font-bold uppercase tracking-widest text-[10px] block">Department / Branch</label>
+                <label className="text-gold-primary font-bold uppercase tracking-widest text-[10px] block">Department / Branch</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Media Head or CSE"
-                  className="w-full bg-gold/5 border-b-2 border-gold/20 p-4 text-ink dark:text-white serif text-xl focus:border-gold outline-none transition-all placeholder:text-gold/20"
+                  className="w-full bg-gold-soft/5 border-b-2 border-gold-soft/20 p-4 text-black serif text-xl focus:border-gold-primary outline-none transition-all placeholder:text-brown-secondary/20"
                   value={formData.department}
                   onChange={(e) => setFormData({...formData, department: e.target.value})}
                 />
@@ -184,14 +184,14 @@ export default function AddMemberPage() {
                   <input 
                     type="url" 
                     placeholder="Instagram URL"
-                    className="w-full bg-gold/5 border-b-2 border-gold/20 p-4 text-xs focus:border-gold outline-none transition-all"
+                    className="w-full bg-gold-soft/5 border-b-2 border-gold-soft/20 p-4 text-xs text-black focus:border-gold-primary outline-none transition-all"
                     value={formData.instagram}
                     onChange={(e) => setFormData({...formData, instagram: e.target.value})}
                   />
                   <input 
                     type="url" 
                     placeholder="LinkedIn URL"
-                    className="w-full bg-gold/5 border-b-2 border-gold/20 p-4 text-xs focus:border-gold outline-none transition-all"
+                    className="w-full bg-gold-soft/5 border-b-2 border-gold-soft/20 p-4 text-xs text-black focus:border-gold-primary outline-none transition-all"
                     value={formData.linkedin}
                     onChange={(e) => setFormData({...formData, linkedin: e.target.value})}
                   />
@@ -201,12 +201,12 @@ export default function AddMemberPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-gold font-bold uppercase tracking-widest text-[10px] block">The Bio / Legacy Message</label>
+            <label className="text-gold-primary font-bold uppercase tracking-widest text-[10px] block">The Bio / Legacy Message</label>
             <textarea 
               required
               rows={4}
               placeholder="Tell their story in a few sentences..."
-              className="w-full bg-gold/5 border-b-2 border-gold/20 p-6 text-ink dark:text-white serif text-xl focus:border-gold outline-none transition-all resize-none placeholder:text-gold/20"
+              className="w-full bg-gold-soft/5 border-b-2 border-gold-soft/20 p-6 text-black serif text-xl focus:border-gold-primary outline-none transition-all resize-none placeholder:text-brown-secondary/20"
               value={formData.bio}
               onChange={(e) => setFormData({...formData, bio: e.target.value})}
             />
@@ -232,11 +232,11 @@ export default function AddMemberPage() {
             type="submit"
             disabled={loading}
             className={`w-full py-6 rounded-full font-bold uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-4 ${
-              loading ? "bg-gold/40 cursor-wait" : "bg-gold text-ink hover:scale-[1.02] active:scale-95 shadow-[0_20px_50px_rgba(212,175,55,0.3)]"
+              loading ? "bg-gold-primary/40 cursor-wait" : "bg-gold-primary text-black hover:scale-[1.02] active:scale-95 shadow-[0_20px_50px_rgba(212,175,55,0.3)]"
             }`}
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-ink/20 border-t-ink rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
             ) : (
               <>
                 <UserPlus size={20} /> Enroll into Legacy

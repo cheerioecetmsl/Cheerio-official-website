@@ -8,6 +8,7 @@ import { Camera, Save, User, Mail, GraduationCap, School, CheckCircle, Loader2, 
 import { ReturnToDashboard } from "@/components/Sidebar";
 import Image from "next/image";
 import { User as FirebaseUser } from "firebase/auth";
+import { archiveProfilePhoto } from "@/lib/image-archive";
 
 export default function SettingsPage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -74,18 +75,21 @@ export default function SettingsPage() {
     if (!user) return;
     setSaving(true);
     try {
+      // Archive Google photo to Cloudinary if necessary
+      const archivedPhotoURL = await archiveProfilePhoto(formData.photoURL);
+
       // 1. Update Firestore
       await updateDoc(doc(db, "users", user.uid), {
         name: formData.name,
         year: formData.year,
         section: formData.section,
-        photoURL: formData.photoURL
+        photoURL: archivedPhotoURL
       });
 
       // 2. Update Auth Profile
       await updateProfile(user, {
         displayName: formData.name,
-        photoURL: formData.photoURL
+        photoURL: archivedPhotoURL
       });
 
       setSuccess(true);
@@ -133,13 +137,17 @@ export default function SettingsPage() {
                           alt="Profile" 
                           fill
                           className="object-cover" 
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.uid || 'placeholder'}`;
+                          }}
                         />
                       </div>
                     ) : (
                       <div className="text-gold-soft"><User size={60} /></div>
                     )}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Camera size={32} className="text-white" />
+                      <Camera size={32} className="text-gold-primary" />
                     </div>
                   </div>
                   <input 
@@ -246,7 +254,7 @@ export default function SettingsPage() {
                     </>
                   ) : success ? (
                     <>
-                      <CheckCircle size={20} className="text-ink" />
+                      <CheckCircle size={20} className="text-black" />
                       Changes Saved
                     </>
                   ) : (

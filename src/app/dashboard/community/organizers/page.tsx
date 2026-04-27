@@ -41,8 +41,8 @@ export default function OrganizersPage() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold/10 rounded-full text-gold text-[10px] font-bold tracking-[0.3em] uppercase">
             <Sparkles size={14} /> The Architects of 2026
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-ink dark:text-gold serif">The Council.</h1>
-          <p className="text-ink/60 dark:text-dark-text/60 italic serif text-lg max-w-2xl mx-auto">
+          <h1 className="text-5xl md:text-6xl font-bold text-brown-primary serif">The Council.</h1>
+          <p className="text-brown-secondary italic serif text-lg max-w-2xl mx-auto">
             Meet the visionaries who are reconstructing our story, frame by frame.
           </p>
         </div>
@@ -71,20 +71,24 @@ export default function OrganizersPage() {
                       alt={member.name}
                       fill
                       className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.id}`;
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-zinc-800">
                       {member.name.charAt(0)}
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
-                    <p className="text-gold font-bold uppercase tracking-widest text-[10px] mb-1">Council Member</p>
-                    <h3 className="text-xl font-bold text-white serif">{member.name}</h3>
+                  <div className="absolute inset-0 bg-gradient-to-t from-parchment-base/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                    <p className="text-gold-primary font-bold uppercase tracking-widest text-[10px] mb-1">Council Member</p>
+                    <h3 className="text-xl font-bold text-brown-primary serif">{member.name}</h3>
                   </div>
                 </div>
                 <div className="mt-6 text-center">
-                  <h3 className="text-lg font-bold text-ink dark:text-gold uppercase tracking-widest">{member.name}</h3>
-                  <p className="text-[10px] text-ink/40 dark:text-dark-text/40 font-bold uppercase tracking-widest mt-1">{member.role}</p>
+                  <h3 className="text-lg font-bold text-brown-primary uppercase tracking-widest">{member.name}</h3>
+                  <p className="text-[10px] text-brown-secondary/40 font-bold uppercase tracking-widest mt-1">{member.role}</p>
                 </div>
               </div>
             ))}
@@ -96,14 +100,14 @@ export default function OrganizersPage() {
       {selectedMember && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
           <div 
-            className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
+            className="absolute inset-0 bg-parchment-base/95 backdrop-blur-2xl"
             onClick={() => setSelectedMember(null)}
           />
           
-          <div className="relative glass-card max-w-4xl w-full rounded-[3rem] border-gold/20 overflow-hidden animate-in zoom-in fade-in duration-500 flex flex-col md:flex-row h-full max-h-[80vh] md:h-auto">
+          <div className="relative glass-card max-w-4xl w-full rounded-[3rem] border-gold-primary/20 overflow-hidden animate-in zoom-in fade-in duration-500 flex flex-col md:flex-row h-full max-h-[80vh] md:h-auto bg-card-tone">
             <button 
               onClick={() => setSelectedMember(null)}
-              className="absolute top-6 right-6 p-3 bg-gold text-ink rounded-full z-10 hover:scale-110 transition-transform"
+              className="absolute top-6 right-6 p-3 bg-gold-primary text-black rounded-full z-10 hover:scale-110 transition-transform"
             >
               <X size={24} />
             </button>
@@ -115,6 +119,10 @@ export default function OrganizersPage() {
                   alt={selectedMember.name}
                   fill
                   className="object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedMember.id}`;
+                  }}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-zinc-800">
@@ -125,30 +133,30 @@ export default function OrganizersPage() {
 
             <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col justify-center space-y-8 overflow-y-auto">
               <div className="space-y-4">
-                <span className="text-gold font-bold uppercase tracking-[0.4em] text-[10px] block">
+                <span className="text-gold-primary font-bold uppercase tracking-[0.4em] text-[10px] block">
                   The Council
                 </span>
-                <h2 className="text-4xl md:text-5xl font-bold text-ink dark:text-gold serif leading-tight">
+                <h2 className="text-4xl md:text-5xl font-bold text-brown-primary serif leading-tight">
                   {selectedMember.name}
                 </h2>
-                <p className="text-gold font-bold uppercase tracking-widest text-[10px]">{selectedMember.role}</p>
+                <p className="text-gold-primary font-bold uppercase tracking-widest text-[10px]">{selectedMember.role}</p>
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-gold/40 font-bold uppercase tracking-widest text-[10px]">The Legacy</h4>
-                <p className="text-ink/60 dark:text-dark-text/60 italic serif text-lg leading-relaxed">
+                <h4 className="text-gold-primary/40 font-bold uppercase tracking-widest text-[10px]">The Legacy</h4>
+                <p className="text-brown-secondary/60 italic serif text-lg leading-relaxed">
                   &quot;{selectedMember.description}&quot;
                 </p>
               </div>
 
               <div className="flex gap-4 pt-4">
-                <button className="p-4 bg-gold/5 text-gold rounded-2xl hover:bg-gold hover:text-ink transition-all">
+                <button className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
                   <Camera size={20} />
                 </button>
-                <button className="p-4 bg-gold/5 text-gold rounded-2xl hover:bg-gold hover:text-ink transition-all">
+                <button className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
                   <ExternalLink size={20} />
                 </button>
-                <button className="p-4 bg-gold/5 text-gold rounded-2xl hover:bg-gold hover:text-ink transition-all">
+                <button className="p-4 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
                   <Mail size={20} />
                 </button>
               </div>

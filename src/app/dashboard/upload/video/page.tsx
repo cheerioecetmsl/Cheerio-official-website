@@ -102,9 +102,9 @@ export default function VideoUpload() {
                         <video src={src} className="w-full h-full object-cover" controls />
                         <button 
                           onClick={(e) => { e.preventDefault(); removeFile(idx); }}
-                          className="absolute top-2 right-2 p-1.5 bg-red-900/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                          className="absolute top-2 right-2 p-1.5 bg-red-900/80 text-black rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
                         >
-                          <Film size={14} className="text-white" />
+                          <Film size={14} className="text-black" />
                         </button>
                       </div>
                     ))}

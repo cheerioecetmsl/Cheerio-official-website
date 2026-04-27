@@ -20,7 +20,7 @@ export default function LeaderboardPage() {
         
         {/* Header */}
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold-soft/20 rounded-full text-gold-primary text-[10px] font-bold tracking-[0.3em] uppercase">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold-soft/20 rounded-full text-brown-primary text-[10px] font-bold tracking-[0.3em] uppercase">
             <Trophy size={14} /> The Hall of Legacy
           </div>
           <h1 className="text-5xl font-bold text-brown-primary serif">Top Archivists.</h1>
@@ -36,9 +36,9 @@ export default function LeaderboardPage() {
             <div className="relative w-16 h-16 rounded-full border-2 border-slate-300 overflow-hidden">
               <Image src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6" fill className="object-cover" alt="2nd" />
             </div>
-            <div className="h-32 w-full bg-silver/10 rounded-t-2xl flex flex-col items-center justify-center border-t-2 border-gray-400">
-              <Medal size={24} className="text-slate-400 mb-2" />
-              <span className="text-[10px] font-bold text-slate-400">980 XP</span>
+            <div className="h-32 w-full bg-gold-soft/10 rounded-t-2xl flex flex-col items-center justify-center border-t-2 border-brown-primary/10">
+              <Medal size={24} className="text-brown-secondary/40 mb-2" />
+              <span className="text-[10px] font-bold text-brown-secondary">980 XP</span>
             </div>
           </div>
 
@@ -48,8 +48,8 @@ export default function LeaderboardPage() {
               <Image src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d" fill className="object-cover" alt="1st" />
             </div>
             <div className="h-48 w-full bg-gold-soft/30 rounded-t-3xl flex flex-col items-center justify-center border-t-4 border-gold-primary relative">
-              <Trophy size={40} className="text-gold-primary mb-2" />
-              <span className="text-sm font-bold text-gold-primary">1250 XP</span>
+              <Trophy size={40} className="text-brown-primary mb-2" />
+              <span className="text-sm font-bold text-brown-primary">1250 XP</span>
               <div className="absolute -top-6 left-1/2 -translate-x-1/2">
                 <Star size={24} className="text-gold-primary fill-gold-primary animate-bounce" />
               </div>
@@ -61,9 +61,9 @@ export default function LeaderboardPage() {
             <div className="relative w-16 h-16 rounded-full border-2 border-amber-600 overflow-hidden">
               <Image src="https://images.unsplash.com/photo-1494790108377-be9c29b29330" fill className="object-cover" alt="3rd" />
             </div>
-            <div className="h-24 w-full bg-amber-600/20 dark:bg-amber-600/10 rounded-t-2xl flex flex-col items-center justify-center border-t-2 border-amber-600">
-              <Medal size={24} className="text-amber-700 mb-2" />
-              <span className="text-[10px] font-bold text-amber-700">850 XP</span>
+            <div className="h-24 w-full bg-gold-soft/10 rounded-t-2xl flex flex-col items-center justify-center border-t-2 border-brown-primary/10">
+              <Medal size={24} className="text-brown-secondary/40 mb-2" />
+              <span className="text-[10px] font-bold text-brown-secondary">850 XP</span>
             </div>
           </div>
         </div>
@@ -78,11 +78,11 @@ export default function LeaderboardPage() {
               </div>
               <div className="flex-grow">
                 <h3 className="font-bold text-brown-primary uppercase tracking-widest text-xs">{user.name}</h3>
-                <p className="text-[10px] text-ink/40 dark:text-dark-text/40 font-bold uppercase tracking-widest">Level {user.level} | {user.count} Contributions</p>
+                <p className="text-[10px] text-brown-secondary/40 font-bold uppercase tracking-widest">Level {user.level} | {user.count} Contributions</p>
               </div>
               <div className="text-right">
-                <div className="text-lg font-bold text-gold tabular-nums">{user.xp}</div>
-                <div className="text-[9px] font-bold text-ink/30 dark:text-dark-text/30 uppercase tracking-widest">XP Points</div>
+                <div className="text-lg font-bold text-brown-primary tabular-nums">{user.xp}</div>
+                <div className="text-[9px] font-bold text-brown-secondary/30 uppercase tracking-widest">XP Points</div>
               </div>
             </div>
           ))}

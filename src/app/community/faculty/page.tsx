@@ -25,7 +25,7 @@ export default function FacultyPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-parchment dark:bg-dark-bg py-24 px-8">
+    <main className="min-h-screen bg-parchment-base py-24 px-8">
       <div className="max-w-7xl mx-auto">
         <DirectoryHeader 
           title="The Mentors" 
@@ -33,9 +33,9 @@ export default function FacultyPage() {
         />
         
         {loading ? (
-          <div className="p-20 text-center text-gold/20 animate-pulse serif italic text-2xl">Consulting the Registry...</div>
+          <div className="p-20 text-center text-brown-secondary/20 animate-pulse serif italic text-2xl">Consulting the Registry...</div>
         ) : faculty.length === 0 ? (
-          <div className="p-20 text-center text-ink/20 dark:text-gold/20 serif italic text-xl">The Faculty wing is currently quiet...</div>
+          <div className="p-20 text-center text-brown-secondary/20 serif italic text-xl">The Faculty wing is currently quiet...</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {faculty.map((profile) => (

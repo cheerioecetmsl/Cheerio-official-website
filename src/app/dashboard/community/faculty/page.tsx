@@ -77,8 +77,8 @@ export default function FacultyPage() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 rounded-full text-amber-500 text-[10px] font-bold tracking-[0.3em] uppercase border border-amber-500/20">
             <GraduationCap size={14} /> The Pillars of Wisdom
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-ink dark:text-gold serif">The Mentors.</h1>
-          <p className="text-ink/60 dark:text-dark-text/60 italic serif text-lg max-w-2xl mx-auto">
+          <h1 className="text-5xl md:text-6xl font-bold text-brown-primary serif">The Mentors.</h1>
+          <p className="text-brown-secondary italic serif text-lg max-w-2xl mx-auto">
             Honoring the faculty and mentors who guided our journey with knowledge and grace.
           </p>
         </div>
@@ -103,9 +103,9 @@ export default function FacultyPage() {
                 alt="Faculty Group" 
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-12">
+              <div className="absolute inset-0 bg-gradient-to-t from-parchment-base/80 via-transparent to-transparent flex flex-col justify-end p-12">
                 <p className="text-amber-500 font-bold uppercase tracking-[0.3em] text-xs">The Mentors</p>
-                <h2 className="text-4xl font-bold text-white serif mt-2">Guiding the 2026 Vision.</h2>
+                <h2 className="text-4xl font-bold text-brown-primary serif mt-2">Guiding the 2026 Vision.</h2>
               </div>
             </div>
 
@@ -124,6 +124,10 @@ export default function FacultyPage() {
                       alt={member.name}
                       fill
                       className="object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-1000"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.id}`;
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-zinc-800 uppercase">
@@ -132,19 +136,19 @@ export default function FacultyPage() {
                   )}
                   
                   {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-amber-900/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center p-8 text-center">
-                    <BookOpen size={32} className="text-gold/40 mx-auto mb-4" />
-                    <p className="text-sm text-white italic serif mb-4 line-clamp-3">
+                  <div className="absolute inset-0 bg-parchment-base/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center p-8 text-center">
+                    <BookOpen size={32} className="text-gold-primary/40 mx-auto mb-4" />
+                    <p className="text-sm text-brown-primary italic serif mb-4 line-clamp-3">
                       &quot;{member.description}&quot;
                     </p>
-                    <Star size={16} className="text-amber-500 mx-auto" />
+                    <Star size={16} className="text-amber-600 mx-auto" />
                   </div>
                 </div>
 
                 {/* Bottom Label */}
                 <div className="mt-8 text-center space-y-2">
-                  <h3 className="text-2xl font-bold text-ink dark:text-gold serif tracking-tight">{member.name}</h3>
-                  <div className="flex items-center justify-center gap-2 text-amber-500/60 text-[10px] font-bold uppercase tracking-[0.2em]">
+                  <h3 className="text-2xl font-bold text-brown-primary serif tracking-tight">{member.name}</h3>
+                  <div className="flex items-center justify-center gap-2 text-brown-secondary/60 text-[10px] font-bold uppercase tracking-[0.2em]">
                     <GraduationCap size={12} />
                     {member.role}
                   </div>
@@ -160,14 +164,14 @@ export default function FacultyPage() {
       {selectedMember && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
           <div 
-            className="absolute inset-0 bg-black/95 backdrop-blur-3xl"
+            className="absolute inset-0 bg-parchment-base/95 backdrop-blur-3xl"
             onClick={() => setSelectedMember(null)}
           />
           
-          <div className="relative glass-card max-w-5xl w-full rounded-[4rem] border-amber-500/20 overflow-hidden animate-in zoom-in fade-in duration-700 flex flex-col md:flex-row h-full max-h-[85vh] md:h-auto">
+          <div className="relative glass-card max-w-5xl w-full rounded-[4rem] border-amber-500/20 overflow-hidden animate-in zoom-in fade-in duration-700 flex flex-col md:flex-row h-full max-h-[85vh] md:h-auto bg-card-tone">
             <button 
               onClick={() => setSelectedMember(null)}
-              className="absolute top-8 right-8 p-4 bg-amber-500 text-ink rounded-full z-10 hover:scale-110 transition-transform shadow-2xl"
+              className="absolute top-8 right-8 p-4 bg-amber-500 text-black rounded-full z-10 hover:scale-110 transition-transform shadow-2xl"
             >
               <X size={24} />
             </button>
@@ -179,6 +183,10 @@ export default function FacultyPage() {
                   alt={selectedMember.name}
                   fill
                   className="object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedMember.id}`;
+                  }}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-8xl font-bold text-zinc-800">
@@ -189,13 +197,13 @@ export default function FacultyPage() {
 
             <div className="w-full md:w-3/5 p-12 md:p-20 flex flex-col justify-center space-y-12 overflow-y-auto">
               <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 text-amber-500 font-bold uppercase tracking-[0.4em] text-[10px]">
+                <div className="inline-flex items-center gap-2 text-amber-600 font-bold uppercase tracking-[0.4em] text-[10px]">
                   <GraduationCap size={14} /> Distinguished Mentor
                 </div>
-                <h2 className="text-5xl md:text-7xl font-bold text-ink dark:text-gold serif leading-tight">
+                <h2 className="text-5xl md:text-7xl font-bold text-brown-primary serif leading-tight">
                   {selectedMember.name}
                 </h2>
-                <p className="text-amber-500 font-bold uppercase tracking-widest text-xs">{selectedMember.role}</p>
+                <p className="text-amber-600 font-bold uppercase tracking-widest text-xs">{selectedMember.role}</p>
               </div>
 
               <div className="space-y-6">
@@ -204,7 +212,7 @@ export default function FacultyPage() {
                   <Quote size={24} className="text-amber-500/20" />
                   <div className="h-px flex-grow bg-amber-500/10" />
                 </div>
-                <p className="text-xl md:text-2xl text-ink/80 dark:text-dark-text/80 italic serif leading-relaxed text-center">
+                <p className="text-xl md:text-2xl text-brown-secondary/80 italic serif leading-relaxed text-center">
                   &quot;{selectedMember.description}&quot;
                 </p>
                 <div className="h-px w-full bg-amber-500/10" />
@@ -213,13 +221,13 @@ export default function FacultyPage() {
               <div className="pt-8 flex justify-center">
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-[10px] font-bold text-amber-500/40 uppercase tracking-widest">Legacy Contribution</p>
-                    <p className="text-sm font-bold text-ink/60 dark:text-dark-text/60 uppercase tracking-widest">Academic Excellence</p>
+                    <p className="text-[10px] font-bold text-amber-600/40 uppercase tracking-widest">Legacy Contribution</p>
+                    <p className="text-sm font-bold text-brown-secondary/60 uppercase tracking-widest">Academic Excellence</p>
                   </div>
                   <div className="h-12 w-px bg-amber-500/10" />
                   <div className="text-center">
-                    <p className="text-[10px] font-bold text-amber-500/40 uppercase tracking-widest">Mentor Status</p>
-                    <p className="text-sm font-bold text-ink/60 dark:text-dark-text/60 uppercase tracking-widest">Active Guardian</p>
+                    <p className="text-[10px] font-bold text-amber-600/40 uppercase tracking-widest">Mentor Status</p>
+                    <p className="text-sm font-bold text-brown-secondary/60 uppercase tracking-widest">Active Guardian</p>
                   </div>
                 </div>
               </div>

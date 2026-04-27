@@ -84,7 +84,7 @@ export const Navbar = () => {
     <nav 
       className={`fixed top-0 left-0 w-full z-[110] px-6 py-4 flex justify-between items-center transition-all duration-700 ${
         isHome 
-          ? (isScrolled ? "bg-black/40 backdrop-blur-xl border-b border-gold/10" : "bg-transparent")
+          ? (isScrolled ? "bg-parchment-base/40 backdrop-blur-xl border-b border-gold-soft/10" : "bg-transparent")
           : "theme-cinematic-navbar shadow-md"
       }`}
       style={!isHome ? { backgroundColor: 'var(--color-brown-primary)', borderBottom: '1px solid var(--color-gold-soft)' } : {}}
@@ -100,12 +100,16 @@ export const Navbar = () => {
             width={48}
             height={48}
             className="h-8 md:h-12 w-auto object-contain"
-            style={{ filter: 'sepia(1) hue-rotate(330deg) saturate(2)' }} // attempt to vintage the logo a bit
+            style={{ 
+              filter: 'sepia(1) hue-rotate(330deg) saturate(2)',
+              width: "auto",
+              height: "auto"
+            }} 
           />
         )}
         <span 
           className="text-xl md:text-2xl font-bold serif tracking-widest pl-2 transition-all"
-          style={!isHome ? { color: 'var(--color-gold-primary)' } : { color: 'var(--color-gold)' }}
+          style={!isHome ? { color: 'var(--color-gold-primary)' } : { color: 'var(--color-gold-primary)' }}
         >
           CHEERIO <span style={!isHome ? { color: 'var(--color-gold-soft)' } : { color: 'var(--color-gold-soft)' }}>2026</span>
         </span>
@@ -124,7 +128,7 @@ export const Navbar = () => {
             <button 
               onClick={handleSignIn}
               disabled={isSigningIn}
-              className={isHome ? "px-6 py-2 border border-gold/40 text-gold hover:bg-gold hover:text-ink rounded-full text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all disabled:opacity-50" : "theme-cinematic-btn-secondary px-6 py-2 rounded-full text-[10px] md:text-sm font-bold uppercase tracking-wider disabled:opacity-50"}
+              className={isHome ? "px-6 py-2 border border-gold-soft/40 text-gold-primary hover:bg-gold-primary hover:text-black rounded-full text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all disabled:opacity-50" : "theme-cinematic-btn-secondary px-6 py-2 rounded-full text-[10px] md:text-sm font-bold uppercase tracking-wider disabled:opacity-50"}
             >
               {isSigningIn ? "Signing In..." : "Sign In"}
             </button>
