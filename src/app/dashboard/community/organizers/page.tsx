@@ -148,15 +148,15 @@ export default function OrganizersPage() {
             onClick={() => setSelectedMember(null)}
           />
           
-          <div className="relative glass-card max-w-5xl w-full rounded-[4rem] border-gold-primary/20 overflow-hidden animate-in zoom-in fade-in duration-700 flex flex-col md:flex-row h-full max-h-[85vh] md:h-auto bg-card-tone">
+          <div className="relative glass-card max-w-5xl w-full rounded-[2rem] md:rounded-[4rem] border-gold-primary/20 overflow-hidden animate-in zoom-in fade-in duration-700 flex flex-col md:flex-row h-full max-h-[90vh] md:h-auto md:max-h-[85vh] bg-card-tone">
             <button 
               onClick={() => setSelectedMember(null)}
-              className="absolute top-8 right-8 p-4 bg-gold-primary text-black rounded-full z-10 hover:scale-110 transition-transform shadow-2xl"
+              className="absolute top-4 right-4 md:top-8 md:right-8 p-3 md:p-4 bg-gold-primary text-black rounded-full z-10 hover:scale-110 transition-transform shadow-2xl"
             >
-              <X size={24} />
+              <X size={20} className="md:w-6 md:h-6" />
             </button>
 
-            <div className="w-full md:w-2/5 h-80 md:h-auto relative bg-zinc-900">
+            <div className="w-full md:w-2/5 h-[40%] md:h-auto relative bg-zinc-900 flex-shrink-0">
               {selectedMember.imageURL ? (
                 <Image 
                   src={selectedMember.imageURL} 
@@ -175,31 +175,31 @@ export default function OrganizersPage() {
               )}
             </div>
 
-            <div className="w-full md:w-3/5 p-12 md:p-20 flex flex-col justify-center space-y-12 overflow-y-auto">
+            <div className="w-full md:w-3/5 p-8 md:p-20 flex-1 min-h-0 flex flex-col justify-start md:justify-center space-y-8 md:space-y-12 overflow-y-auto">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 text-gold-primary font-bold uppercase tracking-[0.4em] text-[10px]">
                   <Sparkles size={14} /> The Architect
                 </div>
-                <h2 className="text-5xl md:text-7xl font-bold text-brown-primary serif leading-tight">
+                <h2 className="text-4xl md:text-6xl font-bold text-brown-primary serif leading-tight break-words">
                   {selectedMember.name}
                 </h2>
-                <p className="text-gold-primary font-bold uppercase tracking-widest text-xs">{selectedMember.role}</p>
+                <p className="text-gold-primary font-bold uppercase tracking-widest text-[10px] md:text-xs">{selectedMember.role}</p>
               </div>
 
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
                   <div className="h-px flex-grow bg-gold-primary/10" />
-                  <span className="text-gold-primary/20 italic serif text-sm">Vision</span>
+                  <span className="text-gold-primary/20 italic serif text-xs md:text-sm">Vision</span>
                   <div className="h-px flex-grow bg-gold-primary/10" />
                 </div>
-                <p className="text-xl md:text-2xl text-brown-secondary/80 italic serif leading-relaxed text-center">
+                <p className="text-lg md:text-xl text-brown-secondary/80 italic serif leading-relaxed text-center">
                   &quot;{selectedMember.description}&quot;
                 </p>
                 <div className="h-px w-full bg-gold-primary/10" />
               </div>
 
-              <div className="pt-8 flex flex-col items-center gap-8">
-                <div className="flex gap-6">
+              <div className="pt-4 md:pt-8 flex flex-col items-center gap-6 md:gap-8 pb-8 md:pb-0">
+                <div className="flex gap-4 md:gap-6">
                   {selectedMember.instagram && (
                     <a href={selectedMember.instagram} target="_blank" rel="noopener noreferrer" className="p-3 bg-gold-primary/10 text-gold-primary rounded-full hover:bg-gold-primary hover:text-black transition-all">
                       <InstagramIcon size={20} />
@@ -222,21 +222,21 @@ export default function OrganizersPage() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4 md:gap-6">
                   <div className="text-center">
-                    <p className="text-[10px] font-bold text-gold-primary/40 uppercase tracking-widest">Council Status</p>
-                    <p className="text-sm font-bold text-brown-secondary/60 uppercase tracking-widest">Vision Lead</p>
+                    <p className="text-[8px] md:text-[10px] font-bold text-gold-primary/40 uppercase tracking-widest">Council Status</p>
+                    <p className="text-xs md:text-sm font-bold text-brown-secondary/60 uppercase tracking-widest">Vision Lead</p>
                   </div>
-                  <div className="h-12 w-px bg-gold-primary/10" />
+                  <div className="h-10 md:h-12 w-px bg-gold-primary/10" />
                   <div className="text-center">
-                    <p className="text-[10px] font-bold text-gold-primary/40 uppercase tracking-widest">Specialization</p>
-                    <p className="text-sm font-bold text-brown-secondary/60 uppercase tracking-widest">Master Architect</p>
+                    <p className="text-[8px] md:text-[10px] font-bold text-gold-primary/40 uppercase tracking-widest">Specialization</p>
+                    <p className="text-xs md:text-sm font-bold text-brown-secondary/60 uppercase tracking-widest">Master Architect</p>
                   </div>
                 </div>
 
-                <div className="h-px w-24 bg-gold-primary/10" />
+                <div className="h-px w-16 md:w-24 bg-gold-primary/10" />
 
-                <button className="flex items-center gap-3 px-8 py-4 bg-gold-primary/5 border border-gold-primary/10 text-gold-primary rounded-full hover:bg-gold-primary/10 transition-all font-bold uppercase tracking-widest text-[10px]">
+                <button className="flex items-center gap-2 md:gap-3 px-6 py-3 md:px-8 md:py-4 bg-gold-primary/5 border border-gold-primary/10 text-gold-primary rounded-full hover:bg-gold-primary/10 transition-all font-bold uppercase tracking-widest text-[8px] md:text-[10px]">
                   <Sparkles size={16} /> Approved Architect
                 </button>
               </div>
