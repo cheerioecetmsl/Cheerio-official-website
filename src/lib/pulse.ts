@@ -60,7 +60,13 @@ export const runPulseScan = async (
 
     // 3. Get Reference Descriptor
     console.log("[Pulse Engine] Analyzing Profile Portrait:", userData.photoURL);
-    const refImg = await faceapi.fetchImage(userData.photoURL);
+    let refImg: HTMLImageElement;
+    try {
+      refImg = await loadCrossDomainImage(userData.photoURL);
+    } catch (e) {
+      console.warn("[Pulse Engine] Profile picture unavailable. Falling back to native fetch.", e);
+      refImg = await faceapi.fetchImage(userData.photoURL);
+    }
     const refDetection = await faceapi.detectSingleFace(refImg).withFaceLandmarks().withFaceDescriptor();
     
     if (!refDetection) {
@@ -111,20 +117,12 @@ export const runPulseScan = async (
       const optimizedUrl = item.url.replace('/upload/', '/upload/w_800,c_limit,q_auto,f_auto/');
       
       try {
-        const loadImg = (url: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
-          const img = new Image();
-          img.crossOrigin = "anonymous";
-          img.onload = () => resolve(img);
-          img.onerror = (e) => reject(new Error(`Failed to load image: ${url}`));
-          img.src = url;
-        });
-
         let img: HTMLImageElement;
         try {
-          img = await loadImg(optimizedUrl);
+          img = await loadCrossDomainImage(optimizedUrl);
         } catch (e) {
           // Fallback to original URL if the Cloudinary transformation fails
-          img = await loadImg(item.url);
+          img = await loadCrossDomainImage(item.url);
         }
 
         const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
@@ -144,7 +142,7 @@ export const runPulseScan = async (
           matchedUrls.push(item.url);
         }
       } catch (err: any) {
-        console.warn("[Pulse Engine] Frame analysis disruption for URL:", item.url, "Error:", err?.message || err);
+        console.warn(`[Pulse Engine] Skipped broken/deleted image: ${item.url} (Cloudinary sync delay)`);
       }
 
       const stepProgress = 30 + ((i + 1) / totalDocs) * 70;
@@ -187,11 +185,17 @@ export const verifyIdentity = async () => {
       faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
     ]);
 
-    const refImg = await faceapi.fetchImage(userData.photoURL);
+    // Get Reference Descriptor again for single verification
+    let refImg: HTMLImageElement;
+    try {
+      refImg = await loadCrossDomainImage(userData.photoURL);
+    } catch (e) {
+      refImg = await faceapi.fetchImage(userData.photoURL);
+    }
     const refDetection = await faceapi.detectSingleFace(refImg).withFaceLandmarks().withFaceDescriptor();
     
     if (!refDetection) {
-      return { success: false, error: "IDENT_INVALID" };
+      throw new Error("Could not extract biometric signature from profile photo.");
     }
 
     return { success: true };

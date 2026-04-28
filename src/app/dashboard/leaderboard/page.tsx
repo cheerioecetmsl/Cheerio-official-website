@@ -25,6 +25,12 @@ export default function LeaderboardPage() {
   const [myRank, setMyRank] = useState<number | null>(null);
   const [myData, setMyData] = useState<LeaderboardUser | null>(null);
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Get the logged-in user
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -104,7 +110,7 @@ export default function LeaderboardPage() {
     </div>
   );
 
-  if (loading) {
+  if (!mounted || loading) {
     return (
       <main className="min-h-screen py-24 px-8">
         <ReturnToDashboard />
@@ -207,7 +213,7 @@ export default function LeaderboardPage() {
               const isMe = user.id === currentUserId;
               return (
                 <div
-                  key={user.id}
+                  key={`rank-${user.id}-${rank}`}
                   className={`flex items-center gap-4 px-6 py-4 border-b border-brown-secondary/10 transition-colors ${
                     isMe
                       ? "bg-gold-primary/10 border-l-4 border-l-gold-primary"

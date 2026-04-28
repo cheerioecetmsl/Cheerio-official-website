@@ -4,14 +4,14 @@ import { auth } from "@/lib/firebase";
 import { 
   GoogleAuthProvider, 
   signInWithPopup, 
-  signInWithRedirect, 
-  getRedirectResult, 
+  signInWithCredential,
   signInWithEmailAndPassword 
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { onAuthStateChanged } from "firebase/auth";
+import GoogleAuthScript from "@/components/GoogleAuthScript";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -33,39 +33,52 @@ export default function AuthPage() {
     return () => unsubscribe();
   }, [router, isProcessing]);
 
-  // 2. Handle results from Redirect Sign-In
+  // 2. Google One Tap / Credential Manager Integration
   useEffect(() => {
-    const handleRedirect = async () => {
-      if (isCheckingRedirect.current) return;
-      isCheckingRedirect.current = true;
+    const initializeOneTap = () => {
+      if (typeof window === "undefined" || !(window as any).google) return;
 
-      try {
-        setIsProcessing(true);
-        console.log("Checking for redirect result...");
-        const result = await getRedirectResult(auth);
-        
-        if (result?.user) {
-          console.log("Redirect sign-in successful:", result.user.email);
-          router.push("/onboarding");
-        }
-      } catch (err: any) {
-        console.error("Redirect Auth Error:", err);
-        const message = err?.message || "";
-        
-        // Gracefully handle "missing initial state" which is common in PWAs
-        if (message.includes("missing initial state")) {
-          console.warn("Redirect state lost (missing initial state).");
-          // If we have a user from onAuthStateChanged, this error doesn't matter.
-          // If not, we just stay on the login page so they can try again.
-        } else {
-          setError(err instanceof Error ? err.message : "Sign-in via redirect failed.");
-        }
-      } finally {
-        setIsProcessing(false);
+      const client_id = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      if (!client_id) {
+        console.warn("Google Client ID missing. One Tap disabled.");
+        return;
       }
+
+      (window as any).google.accounts.id.initialize({
+        client_id: client_id,
+        callback: async (response: any) => {
+          try {
+            setIsProcessing(true);
+            const credential = GoogleAuthProvider.credential(response.credential);
+            await signInWithCredential(auth, credential);
+            router.push("/onboarding");
+          } catch (err: any) {
+            console.error("One Tap Login Error:", err);
+            setError(err.message || "Native sign-in failed.");
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        auto_select: false,
+        cancel_on_tap_outside: true,
+      });
+
+      (window as any).google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed()) {
+          console.warn("One Tap not displayed:", notification.getNotDisplayedReason());
+        }
+      });
     };
 
-    handleRedirect();
+    // Wait for GIS script to load
+    const checkGis = setInterval(() => {
+      if ((window as any).google?.accounts?.id) {
+        clearInterval(checkGis);
+        initializeOneTap();
+      }
+    }, 500);
+
+    return () => clearInterval(checkGis);
   }, [router]);
 
   const handleGoogleSignIn = async () => {
@@ -80,26 +93,20 @@ export default function AuthPage() {
         await signInWithPopup(auth, provider);
         router.push("/onboarding");
       } catch (popupError: any) {
-        console.warn("Popup sign-in failed or blocked:", popupError);
+        console.error("Popup sign-in error:", popupError);
         
-        // Only fallback to redirect if popup is blocked or explicitly unavailable
-        if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/cancelled-popup-request') {
-          console.log("Falling back to Redirect...");
-          await signInWithRedirect(auth, provider);
+        if (popupError.code === 'auth/popup-blocked') {
+          setError("The sign-in popup was blocked by your browser. Please enable popups or use the 'Continue with Google' button again.");
+        } else if (popupError.code === 'auth/cancelled-popup-request') {
+          // User closed the popup, no need to show error
         } else {
-          throw popupError;
+          setError(popupError.message || "An error occurred during Google Sign-In.");
         }
       }
     } catch (err: unknown) {
       console.error("Google Sign-In Error:", err);
-      const message = err instanceof Error ? err.message : "An unexpected error occurred";
-      
-      // Special handling for the "missing initial state" error if it somehow bubbles up
-      if (message.includes("missing initial state")) {
-        setError("Sign-in state was lost. Please try again. If you are using a private window or 'Add to Home Screen', try using the standard browser.");
-      } else {
-        setError(message);
-      }
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -115,7 +122,8 @@ export default function AuthPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-parchment">
+    <main className="min-h-screen flex items-center justify-center p-6 bg-parchment relative">
+      <GoogleAuthScript />
       <div className="glass-card p-8 md:p-12 rounded-3xl w-full max-w-md text-center border-gold/30">
         <h1 className="text-4xl font-bold mb-2 text-brown-primary serif">Welcome</h1>
         <p className="text-brown-secondary/60 mb-8 italic serif">Begin your Cheerio journey</p>

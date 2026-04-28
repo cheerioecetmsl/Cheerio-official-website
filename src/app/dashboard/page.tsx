@@ -18,6 +18,8 @@ import { PulseOverlay } from "@/components/PulseOverlay";
 import { Zap } from "lucide-react";
 import { LogoutModal } from "@/components/LogoutModal";
 import { archiveProfilePhoto } from "@/lib/image-archive";
+import { EngagementModal } from "@/components/EngagementModal";
+import { EngagementModule } from "@/types/engagement";
 
 interface UserArchiveData {
   name: string;
@@ -41,7 +43,14 @@ export default function DashboardPage() {
   const [showPulse, setShowPulse] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [userRank, setUserRank] = useState<number | null>(null);
+  const [activeModule, setActiveModule] = useState<EngagementModule | null>(null);
+  const [showEngagement, setShowEngagement] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const hasTriggeredRef = useRef({ tutorial: false, invite: false });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -107,10 +116,26 @@ export default function DashboardPage() {
       }
     });
 
+    // Listen for Active Engagement Modules
+    const engagementQuery = query(
+      collection(db, "engagement_modules"), 
+      where("status", "==", "active"),
+      limit(1)
+    );
+    const unsubscribeEngagement = onSnapshot(engagementQuery, (snap) => {
+      if (!snap.empty) {
+        const moduleData = { id: snap.docs[0].id, ...snap.docs[0].data() } as EngagementModule;
+        setActiveModule(moduleData);
+      } else {
+        setActiveModule(null);
+      }
+    });
+
     return () => {
       unsubscribeAuth();
       unsubscribeLeaderboard();
       unsubscribePulse();
+      unsubscribeEngagement();
     };
   }, [router]);
 
@@ -149,7 +174,7 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) return <div className="theme-cinematic min-h-screen flex items-center justify-center text-brown-primary serif text-2xl animate-pulse">Consulting the Ledger...</div>;
+  if (!mounted || loading) return <div className="theme-cinematic min-h-screen flex items-center justify-center text-brown-primary serif text-2xl animate-pulse">Consulting the Ledger...</div>;
 
   const isFaculty = userData?.category === "FACULTY";
 
@@ -180,6 +205,33 @@ export default function DashboardPage() {
           <p className="text-sm md:text-xl italic serif text-brown-secondary">
             {isFaculty ? "Your contribution to our legacy is immeasurable." : "Guys it's that time of the year."}
           </p>
+
+          {/* Engagement Button Section */}
+          {!isFaculty && (
+            <div className="pt-4 flex justify-center animate-in slide-in-from-bottom duration-1000">
+              {/* Special logic: Block LEGENDS from Polls */}
+              {activeModule?.type === 'poll' && userData?.category === 'LEGEND' ? (
+                <div className="flex items-center gap-3 px-8 py-3 rounded-full font-bold text-[10px] md:text-[12px] uppercase tracking-[0.2em] bg-zinc-200/10 text-zinc-400 border border-zinc-200/20 italic">
+                  Polls for Juniors Only
+                </div>
+              ) : (
+                <button 
+                  onClick={() => activeModule && setShowEngagement(true)}
+                  disabled={!activeModule}
+                  className={`flex items-center gap-3 px-8 py-3 rounded-full font-bold text-[10px] md:text-[12px] uppercase tracking-[0.2em] transition-all duration-500 border ${
+                    activeModule 
+                      ? "bg-gold-soft/20 text-brown-primary border-gold-soft/50 hover:bg-gold-soft/40 shadow-xl shadow-gold-soft/10 animate-pulse" 
+                      : "bg-zinc-200/10 text-zinc-400 border-zinc-200/20 cursor-not-allowed"
+                  }`}
+                >
+                  <div className={`w-2 h-2 rounded-full ${activeModule ? "bg-gold-primary animate-ping" : "bg-zinc-500"}`} />
+                  {activeModule 
+                    ? (activeModule.type === 'poll' ? "New Batch Poll" : activeModule.type === 'game' ? "Active Mini-Game" : "View Results") 
+                    : "No Active Events"}
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {!isFaculty && (
@@ -231,19 +283,33 @@ export default function DashboardPage() {
       {/* 3. Sequential Hype Board Section */}
       <section className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 space-y-12 md:space-y-16">
         <div className="w-full max-w-3xl" id="pulse-section">
-          <Link href="/dashboard/hype" className="block theme-card p-12 rounded-[3rem] relative group overflow-hidden border border-gold-soft/30 hover:border-gold-primary/50 transition-all duration-700">
+          <div 
+            onClick={() => router.push("/dashboard/hype")}
+            className="block theme-card p-12 rounded-[3rem] relative group cursor-pointer overflow-hidden border border-gold-soft/30 hover:border-gold-primary/50 transition-all duration-700"
+          >
             <div className="flex items-center gap-4 mb-8">
               <div className="p-3 bg-gold-soft/30 rounded-2xl text-brown-primary">
                 <TrendingUp size={24} />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-brown-primary">The Pulse</span>
-              <div className="ml-auto px-3 py-1 bg-gold-soft/20 rounded-full border border-gold-soft/40">
-                <span className="text-[8px] font-bold text-brown-primary uppercase animate-pulse">Live</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-brown-primary">Notification Bar</span>
+              <div className="ml-auto flex items-center gap-4">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push("/dashboard/history");
+                  }}
+                  className="px-4 py-1.5 bg-brown-primary/10 hover:bg-brown-primary/20 rounded-full border border-brown-primary/20 text-[8px] font-bold text-brown-primary uppercase tracking-widest transition-all"
+                >
+                  History
+                </button>
+                <div className="px-3 py-1 bg-gold-soft/20 rounded-full border border-gold-soft/40">
+                  <span className="text-[8px] font-bold text-brown-primary uppercase animate-pulse">Live</span>
+                </div>
               </div>
             </div>
             
             <div className="space-y-6">
-              <h2 className="text-4xl md:text-6xl font-bold serif text-brown-primary group-hover:translate-x-2 transition-transform duration-700">THE PULSE</h2>
+              <h2 className="text-4xl md:text-6xl font-bold serif text-brown-primary group-hover:translate-x-2 transition-transform duration-700 uppercase">Notifications</h2>
               <p className="text-brown-secondary italic serif text-xl">Real-time updates from the Architects.</p>
               
               <div className="pt-12 border-t border-brown-secondary/30 mt-12 space-y-12">
@@ -275,7 +341,7 @@ export default function DashboardPage() {
               <span className="text-[10px] font-bold uppercase tracking-widest">Archive Feed</span>
               <ArrowUpRight size={16} />
             </div>
-          </Link>
+          </div>
         </div>
       </section>
 
@@ -373,6 +439,11 @@ export default function DashboardPage() {
         onClose={() => setShowTutorial(false)}
         isFaculty={isFaculty}
         onComplete={handleTutorialComplete}
+      />
+      <EngagementModal 
+        isOpen={showEngagement}
+        onClose={() => setShowEngagement(false)}
+        module={activeModule}
       />
       <LogoutModal
         isOpen={showLogoutModal}
