@@ -109,6 +109,7 @@ export default function AddMemberPage() {
                       src={preview} 
                       alt="Preview" 
                       fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover" 
                     />
                   </div>
