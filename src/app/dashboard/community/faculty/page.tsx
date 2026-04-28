@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { X, GraduationCap, Quote, Sparkles, Loader2, BookOpen, Star } from "lucide-react";
+import { Pagination } from "@/components/Pagination";
 import { InstagramIcon, FacebookIcon, GithubIcon, LinkedinIcon } from "@/components/SocialIcons";
 import Image from "next/image";
 
@@ -19,12 +20,15 @@ interface Person {
   facebook?: string;
   github?: string;
   linkedin?: string;
+  createdAt?: string;
 }
 
 export default function FacultyPage() {
   const [members, setMembers] = useState<Person[]>([]);
   const [selectedMember, setSelectedMember] = useState<Person | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
     // Query both "people" collection and "users" collection
@@ -45,7 +49,8 @@ export default function FacultyPage() {
         instagram: doc.data().instagram,
         facebook: doc.data().facebook,
         github: doc.data().github,
-        linkedin: doc.data().linkedin
+        linkedin: doc.data().linkedin,
+        createdAt: doc.data().createdAt || ""
       })) as Person[];
       combineAndSet();
     });
@@ -61,7 +66,8 @@ export default function FacultyPage() {
         instagram: doc.data().instagram,
         facebook: doc.data().facebook,
         github: doc.data().github,
-        linkedin: doc.data().linkedin
+        linkedin: doc.data().linkedin,
+        createdAt: doc.data().createdAt || ""
       })) as Person[];
       combineAndSet();
     });
@@ -70,7 +76,15 @@ export default function FacultyPage() {
       const combined = [...peopleData, ...usersData];
       // Remove duplicates by ID if any
       const unique = combined.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
-      setMembers(unique);
+      
+      // Sort chronologically: First uploaded first shown
+      const sorted = unique.sort((a, b) => {
+        if (!a.createdAt) return 1;
+        if (!b.createdAt) return -1;
+        return a.createdAt.localeCompare(b.createdAt);
+      });
+
+      setMembers(sorted);
       setLoading(false);
     };
 
@@ -122,52 +136,66 @@ export default function FacultyPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
-            {members.map((member) => (
-              <div 
-                key={member.id}
-                onClick={() => setSelectedMember(member)}
-                className="group relative"
-              >
-                {/* Profile Card */}
-                <div className="relative aspect-square rounded-full overflow-hidden border-4 border-amber-500/10 transition-all duration-700 group-hover:scale-105 group-hover:shadow-[0_0_80px_rgba(245,158,11,0.15)] group-hover:border-amber-500/40 cursor-pointer bg-zinc-900">
-                  {member.imageURL ? (
-                    <Image 
-                      src={member.imageURL} 
-                      alt={member.name}
-                      fill
-                      className="object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-1000"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.id}`;
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-zinc-800 uppercase">
-                      {member.name.charAt(0)}
+            <div className="space-y-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
+              {members
+                .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+                .map((member) => (
+                <div 
+                  key={member.id}
+                  onClick={() => setSelectedMember(member)}
+                  className="group relative"
+                >
+                  {/* Profile Card */}
+                  <div className="relative aspect-square rounded-full overflow-hidden border-4 border-amber-500/10 transition-all duration-700 group-hover:scale-105 group-hover:shadow-[0_0_80px_rgba(245,158,11,0.15)] group-hover:border-amber-500/40 cursor-pointer bg-zinc-900">
+                    {member.imageURL ? (
+                      <Image 
+                        src={member.imageURL} 
+                        alt={member.name}
+                        fill
+                        className="object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-1000"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.id}`;
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-zinc-800 uppercase">
+                        {member.name.charAt(0)}
+                      </div>
+                    )}
+                    
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-parchment-base/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center p-8 text-center">
+                      <BookOpen size={32} className="text-gold-primary/40 mx-auto mb-4" />
+                      <p className="text-sm text-brown-primary italic serif mb-4 line-clamp-3">
+                        &quot;{member.description}&quot;
+                      </p>
+                      <Star size={16} className="text-amber-600 mx-auto" />
                     </div>
-                  )}
-                  
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-parchment-base/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center p-8 text-center">
-                    <BookOpen size={32} className="text-gold-primary/40 mx-auto mb-4" />
-                    <p className="text-sm text-brown-primary italic serif mb-4 line-clamp-3">
-                      &quot;{member.description}&quot;
-                    </p>
-                    <Star size={16} className="text-amber-600 mx-auto" />
                   </div>
-                </div>
 
-                {/* Bottom Label */}
-                <div className="mt-8 text-center space-y-2">
-                  <h3 className="text-2xl font-bold text-brown-primary serif tracking-tight">{member.name}</h3>
-                  <div className="flex items-center justify-center gap-2 text-brown-secondary/60 text-[10px] font-bold uppercase tracking-[0.2em]">
-                    <GraduationCap size={12} />
-                    {member.role}
+                  {/* Bottom Label */}
+                  <div className="mt-8 text-center space-y-2">
+                    <h3 className="text-2xl font-bold text-brown-primary serif tracking-tight">{member.name}</h3>
+                    <div className="flex items-center justify-center gap-2 text-brown-secondary/60 text-[10px] font-bold uppercase tracking-[0.2em]">
+                      <GraduationCap size={12} />
+                      {member.role}
+                    </div>
                   </div>
                 </div>
+              ))}
               </div>
-            ))}
+
+              {/* Pagination Controls */}
+              <Pagination 
+                currentPage={currentPage}
+                totalPages={Math.ceil(members.length / ITEMS_PER_PAGE)}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
             </div>
           </div>
         )}

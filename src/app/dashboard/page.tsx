@@ -285,50 +285,68 @@ export default function DashboardPage() {
         <div className="w-full max-w-3xl" id="pulse-section">
           <div 
             onClick={() => router.push("/dashboard/hype")}
-            className="block theme-card p-12 rounded-[3rem] relative group cursor-pointer overflow-hidden border border-gold-soft/30 hover:border-gold-primary/50 transition-all duration-700"
+            className="block theme-card p-5 md:p-12 rounded-[2rem] md:rounded-[3rem] relative group cursor-pointer overflow-hidden border border-gold-soft/30 hover:border-gold-primary/50 transition-all duration-700"
           >
-            <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 bg-gold-soft/30 rounded-2xl text-brown-primary">
-                <TrendingUp size={24} />
+            <div className="flex flex-wrap items-center gap-4 mb-8">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gold-soft/30 rounded-2xl text-brown-primary">
+                  <TrendingUp size={24} />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-brown-primary">Notification Bar</span>
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-brown-primary">Notification Bar</span>
-              <div className="ml-auto flex items-center gap-4">
+              <div className="ml-auto flex items-center gap-2 md:gap-4">
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
                     router.push("/dashboard/history");
                   }}
-                  className="px-4 py-1.5 bg-brown-primary/10 hover:bg-brown-primary/20 rounded-full border border-brown-primary/20 text-[8px] font-bold text-brown-primary uppercase tracking-widest transition-all"
+                  className="px-3 md:px-4 py-1.5 bg-brown-primary/10 hover:bg-brown-primary/20 rounded-full border border-brown-primary/20 text-[7px] md:text-[8px] font-bold text-brown-primary uppercase tracking-widest transition-all"
                 >
                   History
                 </button>
-                <div className="px-3 py-1 bg-gold-soft/20 rounded-full border border-gold-soft/40">
-                  <span className="text-[8px] font-bold text-brown-primary uppercase animate-pulse">Live</span>
+                <div className="px-2 md:px-3 py-1 bg-gold-soft/20 rounded-full border border-gold-soft/40 flex items-center gap-1">
+                  <span className="w-1 h-1 rounded-full bg-gold-primary animate-ping" />
+                  <span className="text-[7px] md:text-[8px] font-bold text-brown-primary uppercase">Live</span>
                 </div>
               </div>
             </div>
             
-            <div className="space-y-6">
-              <h2 className="text-4xl md:text-6xl font-bold serif text-brown-primary group-hover:translate-x-2 transition-transform duration-700 uppercase">Notifications</h2>
-              <p className="text-brown-secondary italic serif text-xl">Real-time updates from the Architects.</p>
+            <div className="space-y-4 md:space-y-6">
+              <h2 className="text-3xl md:text-6xl font-bold serif text-brown-primary group-hover:translate-x-2 transition-transform duration-700 uppercase break-words leading-tight">Notifications</h2>
+              <p className="text-brown-secondary italic serif text-base md:text-xl">Real-time updates from the Architects.</p>
               
               <div className="pt-12 border-t border-brown-secondary/30 mt-12 space-y-12">
                 {pulseItems.length > 0 ? (
                   pulseItems.map((item, i) => (
-                    <div key={item.id} className={`space-y-4 ${i !== 0 ? "opacity-50 hover:opacity-100 transition-opacity" : ""}`}>
+                    <div key={item.id} className={`space-y-6 ${i !== 0 ? "opacity-60 hover:opacity-100 transition-opacity" : ""}`}>
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-brown-primary uppercase tracking-[0.3em]">{item.tag}</span>
-                        <div className="flex items-center gap-3">
-                          {item.mediaGallery && item.mediaGallery.length > 0 && (
-                            <span className="flex items-center gap-1 text-[8px] font-bold text-brown-primary/70 uppercase tracking-widest">
-                              <Files size={10} /> {item.mediaGallery.length} Assets
-                            </span>
-                          )}
-                          <span className="text-[10px] text-brown-secondary font-bold uppercase">{item.date}</span>
+                        <span className="text-[10px] font-bold text-brown-primary bg-gold-soft/20 px-2 py-0.5 rounded uppercase tracking-[0.2em]">{item.tag}</span>
+                        <span className="text-[10px] text-brown-secondary font-bold uppercase tracking-wider">{item.date}</span>
+                      </div>
+                      
+                      <div className="flex flex-col md:flex-row gap-6">
+                        {item.mediaGallery && item.mediaGallery.length > 0 && (
+                          <div className="relative w-full md:w-48 aspect-video md:aspect-square rounded-2xl overflow-hidden flex-shrink-0 border border-gold-soft/20 shadow-lg">
+                            <Image 
+                              src={item.mediaGallery[0]} 
+                              alt={item.title}
+                              fill
+                              className="object-cover"
+                            />
+                            {item.mediaGallery.length > 1 && (
+                              <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/50 backdrop-blur-md rounded-lg text-[8px] font-bold text-white uppercase tracking-widest flex items-center gap-1">
+                                <Files size={10} /> +{item.mediaGallery.length - 1}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <div className="flex-grow min-w-0 space-y-3">
+                          <h3 className="text-xl md:text-3xl font-bold text-brown-primary serif leading-tight break-words">{item.title}</h3>
+                          <p className="text-brown-secondary italic text-sm md:text-lg leading-relaxed break-words whitespace-pre-wrap">
+                            &quot;{item.content}&quot;
+                          </p>
                         </div>
                       </div>
-                      <p className="text-2xl font-bold text-brown-primary serif line-clamp-1">{item.title}</p>
-                      <p className="text-brown-secondary italic text-lg line-clamp-2">&quot;{item.content}&quot;</p>
                     </div>
                   ))
                 ) : (

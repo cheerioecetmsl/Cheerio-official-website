@@ -173,7 +173,7 @@ export const Sidebar = () => {
                 <div key={item.name} id={item.id} className={`flex flex-col relative ${isExpanded ? "w-full" : "items-center"}`}>
                   <Link 
                     href={item.path}
-                    onClick={() => !item.subItems && setIsExpanded(false)}
+                    onClick={() => setIsExpanded(false)}
                     className={`flex items-center rounded-2xl transition-all duration-300 ${
                       isExpanded ? "w-full p-4 gap-6" : "w-12 h-12 justify-center"
                     }`}
@@ -291,7 +291,7 @@ export const Sidebar = () => {
 export const ReturnToDashboard = () => (
   <Link 
     href="/dashboard"
-    className="fixed top-19 left-8 md:top-8 md:left-28 z-40 flex items-center gap-2 text-brown-primary font-bold uppercase tracking-widest text-[10px] hover:-translate-x-2 transition-transform"
+    className="fixed top-20 left-8 md:top-8 md:left-28 z-40 flex items-center gap-2 text-brown-primary font-bold uppercase tracking-widest text-[10px] hover:-translate-x-2 transition-transform"
   >
     <ArrowLeft size={16} /> Back to Dashboard
   </Link>
