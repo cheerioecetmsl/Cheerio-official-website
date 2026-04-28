@@ -1,24 +1,106 @@
 "use client";
 
 import { auth } from "@/lib/firebase";
-import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signInWithRedirect, 
+  getRedirectResult, 
+  signInWithEmailAndPassword 
+} from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function AuthPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const isCheckingRedirect = useRef(false);
+
+  // 1. Monitor Auth State directly (Robust fallback for PWA redirect issues)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && !isProcessing) {
+        console.log("Auth state detected user:", user.email);
+        router.push("/onboarding");
+      }
+    });
+    return () => unsubscribe();
+  }, [router, isProcessing]);
+
+  // 2. Handle results from Redirect Sign-In
+  useEffect(() => {
+    const handleRedirect = async () => {
+      if (isCheckingRedirect.current) return;
+      isCheckingRedirect.current = true;
+
+      try {
+        setIsProcessing(true);
+        console.log("Checking for redirect result...");
+        const result = await getRedirectResult(auth);
+        
+        if (result?.user) {
+          console.log("Redirect sign-in successful:", result.user.email);
+          router.push("/onboarding");
+        }
+      } catch (err: any) {
+        console.error("Redirect Auth Error:", err);
+        const message = err?.message || "";
+        
+        // Gracefully handle "missing initial state" which is common in PWAs
+        if (message.includes("missing initial state")) {
+          console.warn("Redirect state lost (missing initial state).");
+          // If we have a user from onAuthStateChanged, this error doesn't matter.
+          // If not, we just stay on the login page so they can try again.
+        } else {
+          setError(err instanceof Error ? err.message : "Sign-in via redirect failed.");
+        }
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    handleRedirect();
+  }, [router]);
 
   const handleGoogleSignIn = async () => {
     try {
+      setIsProcessing(true);
+      setError("");
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      router.push("/onboarding");
+      provider.setCustomParameters({ prompt: "select_account" });
+      
+      console.log("Attempting Google Sign-In with Popup...");
+      try {
+        await signInWithPopup(auth, provider);
+        router.push("/onboarding");
+      } catch (popupError: any) {
+        console.warn("Popup sign-in failed or blocked:", popupError);
+        
+        // Only fallback to redirect if popup is blocked or explicitly unavailable
+        if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/cancelled-popup-request') {
+          console.log("Falling back to Redirect...");
+          await signInWithRedirect(auth, provider);
+        } else {
+          throw popupError;
+        }
+      }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      console.error("Google Sign-In Error:", err);
+      const message = err instanceof Error ? err.message : "An unexpected error occurred";
+      
+      // Special handling for the "missing initial state" error if it somehow bubbles up
+      if (message.includes("missing initial state")) {
+        setError("Sign-in state was lost. Please try again. If you are using a private window or 'Add to Home Screen', try using the standard browser.");
+      } else {
+        setError(message);
+      }
+      setIsProcessing(false);
     }
   };
 
@@ -42,16 +124,21 @@ export default function AuthPage() {
 
         <button 
           onClick={handleGoogleSignIn}
-          className="w-full mb-4 flex items-center justify-center gap-3 bg-white text-black border border-brown-primary/10 py-3 rounded-lg hover:bg-gray-50 transition-all font-medium"
+          disabled={isProcessing}
+          className="w-full mb-4 flex items-center justify-center gap-3 bg-white text-black border border-brown-primary/10 py-3 rounded-lg hover:bg-gray-50 transition-all font-medium disabled:opacity-50"
         >
-          <Image 
-            src="https://www.google.com/favicon.ico" 
-            alt="Google" 
-            width={20}
-            height={20}
-            className="w-5 h-5" 
-          />
-          Continue with Google
+          {isProcessing ? (
+            <div className="w-5 h-5 border-2 border-gold-primary border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Image 
+              src="https://www.google.com/favicon.ico" 
+              alt="Google" 
+              width={20}
+              height={20}
+              className="w-5 h-5" 
+            />
+          )}
+          {isProcessing ? "Authenticating..." : "Continue with Google"}
         </button>
 
         <div className="flex items-center gap-4 my-6">
