@@ -103,6 +103,7 @@ export default function OrganizersPage() {
                         src={member.imageURL} 
                         alt={member.name}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
@@ -148,7 +149,7 @@ export default function OrganizersPage() {
             onClick={() => setSelectedMember(null)}
           />
           
-          <div className="relative glass-card max-w-5xl w-full rounded-[2rem] md:rounded-[4rem] border-gold-primary/20 overflow-hidden animate-in zoom-in fade-in duration-700 flex flex-col md:flex-row h-full max-h-[90vh] md:h-auto md:max-h-[85vh] bg-card-tone">
+          <div className="relative glass-card max-w-5xl w-full rounded-[2rem] md:rounded-[4rem] border-gold-primary/20 overflow-hidden animate-in zoom-in fade-in duration-700 flex flex-col md:flex-row h-full max-h-[90vh] md:max-h-none md:h-[75vh] lg:h-[80vh] bg-card-tone">
             <button 
               onClick={() => setSelectedMember(null)}
               className="absolute top-4 right-4 md:top-8 md:right-8 p-3 md:p-4 bg-gold-primary text-black rounded-full z-10 hover:scale-110 transition-transform shadow-2xl"
@@ -156,12 +157,13 @@ export default function OrganizersPage() {
               <X size={20} className="md:w-6 md:h-6" />
             </button>
 
-            <div className="w-full md:w-2/5 h-[40%] md:h-auto relative bg-zinc-900 flex-shrink-0">
+            <div className="w-full md:w-2/5 h-[40%] md:h-full relative bg-zinc-900 flex-shrink-0">
               {selectedMember.imageURL ? (
                 <Image 
                   src={selectedMember.imageURL} 
                   alt={selectedMember.name}
                   fill
+                  sizes="(max-width: 768px) 100vw, 40vw"
                   className="object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -175,12 +177,12 @@ export default function OrganizersPage() {
               )}
             </div>
 
-            <div className="w-full md:w-3/5 p-8 md:p-20 flex-1 min-h-0 flex flex-col justify-start md:justify-center space-y-8 md:space-y-12 overflow-y-auto">
+            <div className="w-full md:w-3/5 p-8 md:p-12 lg:p-16 flex-1 min-h-0 flex flex-col justify-start md:justify-center space-y-6 md:space-y-8 lg:space-y-10 overflow-y-auto">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 text-gold-primary font-bold uppercase tracking-[0.4em] text-[10px]">
                   <Sparkles size={14} /> The Architect
                 </div>
-                <h2 className="text-4xl md:text-6xl font-bold text-brown-primary serif leading-tight break-words">
+                <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-brown-primary serif leading-tight break-words">
                   {selectedMember.name}
                 </h2>
                 <p className="text-gold-primary font-bold uppercase tracking-widest text-[10px] md:text-xs">{selectedMember.role}</p>

@@ -66,6 +66,7 @@ export default function LegacyPage() {
           <Image 
             src="/assets/department_hero_image.png" 
             fill 
+            sizes="(max-width: 768px) 100vw, 100vw"
             className="object-cover transition-transform duration-1000 group-hover:scale-105" 
             alt="Department History" 
             priority
@@ -237,6 +238,7 @@ export default function LegacyPage() {
                     <Image 
                       src={item.imageURL} 
                       fill 
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover transition-transform duration-1000 group-hover:scale-110" 
                       alt={item.title} 
                     />
@@ -303,6 +305,7 @@ export default function LegacyPage() {
                   <Image 
                     src={selectedItem.imageURL} 
                     fill 
+                    sizes="(max-width: 768px) 100vw, 100vw"
                     className="object-cover" 
                     alt={selectedItem.title} 
                   />
