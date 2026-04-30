@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
-import { X, Heart, Award, Quote, Sparkles, Loader2 } from "lucide-react";
+import { Award, Quote, Sparkles, Loader2 } from "lucide-react";
 import { Pagination } from "@/components/Pagination";
-import { InstagramIcon, FacebookIcon, GithubIcon, LinkedinIcon } from "@/components/SocialIcons";
 import Image from "next/image";
+import OrganizerProfileModal, {
+  type OrganizerData,
+} from "@/components/OrganizerProfileModal";
 
 interface Person {
   id: string;
@@ -21,6 +23,31 @@ interface Person {
   github?: string;
   linkedin?: string;
   createdAt?: string;
+  order?: number;
+}
+
+/** Map a Firestore Person into the separated OrganizerData shape */
+function toOrganizerData(member: Person): OrganizerData {
+  return {
+    image: {
+      src: member.imageURL || "",
+      alt: member.name,
+    },
+    details: {
+      name: member.name,
+      role: member.role,
+      quote: member.description,
+      bio: "",
+      social: {
+        instagram: member.instagram,
+        facebook: member.facebook,
+        linkedin: member.linkedin,
+        github: member.github,
+      },
+      status: "Distinguished Legend",
+      specialization: "Class of 2026",
+    },
+  };
 }
 
 export default function SeniorsPage() {
@@ -50,7 +77,8 @@ export default function SeniorsPage() {
         facebook: doc.data().facebook,
         github: doc.data().github,
         linkedin: doc.data().linkedin,
-        createdAt: doc.data().createdAt || ""
+        createdAt: doc.data().createdAt || "",
+        order: doc.data().order
       })) as Person[];
       combineAndSet();
     });
@@ -67,7 +95,8 @@ export default function SeniorsPage() {
         facebook: doc.data().facebook,
         github: doc.data().github,
         linkedin: doc.data().linkedin,
-        createdAt: doc.data().createdAt || ""
+        createdAt: doc.data().createdAt || "",
+        order: doc.data().order
       })) as Person[];
       combineAndSet();
     });
@@ -77,8 +106,11 @@ export default function SeniorsPage() {
       // Remove duplicates by ID if any
       const unique = combined.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
       
-      // Sort chronologically: First uploaded first shown
+      // Sort by custom order if set, otherwise fall back to createdAt
       const sorted = unique.sort((a, b) => {
+        const aOrder = a.order ?? Infinity;
+        const bOrder = b.order ?? Infinity;
+        if (aOrder !== Infinity || bOrder !== Infinity) return aOrder - bOrder;
         if (!a.createdAt) return 1;
         if (!b.createdAt) return -1;
         return a.createdAt.localeCompare(b.createdAt);
@@ -126,7 +158,6 @@ export default function SeniorsPage() {
               <Image 
                 src="/assets/legends_group.jpg" 
                 fill 
-                sizes="(max-width: 768px) 100vw, 100vw"
                 className="object-cover transition-transform duration-1000 group-hover:scale-105" 
                 alt="Legends Group" 
                 priority
@@ -138,6 +169,7 @@ export default function SeniorsPage() {
             </div>
 
             <div className="space-y-12">
+              {/* ---- Legend Card Grid (PRESERVED) ---- */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
               {members
                 .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
@@ -154,7 +186,6 @@ export default function SeniorsPage() {
                         src={member.imageURL} 
                         alt={member.name}
                         fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover grayscale-[50%] group-hover:grayscale-0 transition-all duration-700"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
@@ -204,100 +235,15 @@ export default function SeniorsPage() {
         )}
       </div>
 
-      {/* Senior Detail Modal */}
+      {/* ============================================ */}
+      {/* NEW Modal — OrganizerProfileModal component  */}
+      {/* ============================================ */}
       {selectedMember && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
-          <div 
-            className="absolute inset-0 bg-parchment-base/95 backdrop-blur-3xl"
-            onClick={() => setSelectedMember(null)}
-          />
-          
-          <div className="relative glass-card max-w-5xl w-full rounded-[2rem] md:rounded-[4rem] border-gold-primary/20 overflow-hidden animate-in zoom-in fade-in duration-700 flex flex-col md:flex-row h-full max-h-[90vh] md:max-h-none md:h-[75vh] lg:h-[80vh]">
-            <button 
-              onClick={() => setSelectedMember(null)}
-              className="absolute top-4 right-4 md:top-8 md:right-8 p-3 md:p-4 bg-gold-primary text-black rounded-full z-10 hover:scale-110 transition-transform shadow-2xl"
-            >
-              <X size={20} className="md:w-6 md:h-6" />
-            </button>
-
-            <div className="w-full md:w-2/5 h-[40%] md:h-full relative bg-zinc-900 flex-shrink-0">
-              {selectedMember.imageURL ? (
-                <Image 
-                  src={selectedMember.imageURL} 
-                  alt={selectedMember.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 40vw"
-                  className="object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedMember.id}`;
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-8xl font-bold text-zinc-800">
-                  {selectedMember.name.charAt(0)}
-                </div>
-              )}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-dark-bg/10 hidden md:block pointer-events-none" />
-            </div>
-
-            <div className="w-full md:w-3/5 p-8 md:p-12 lg:p-16 flex-1 min-h-0 flex flex-col justify-start md:justify-center space-y-6 md:space-y-8 lg:space-y-10 overflow-y-auto bg-card-tone">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 text-gold-primary font-bold uppercase tracking-[0.4em] text-[10px]">
-                  <Award size={14} /> Distinguished Legend
-                </div>
-                <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-brown-primary serif leading-tight break-words">
-                  {selectedMember.name}
-                </h2>
-                <p className="text-gold-primary font-bold uppercase tracking-widest text-[10px] md:text-xs">{selectedMember.role}</p>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-px flex-grow bg-gold-primary/10" />
-                  <Quote size={20} className="text-gold-primary/20 md:w-6 md:h-6" />
-                  <div className="h-px flex-grow bg-gold-primary/10" />
-                </div>
-                <p className="text-lg md:text-xl text-brown-secondary/80 italic serif leading-relaxed text-center">
-                  &quot;{selectedMember.description}&quot;
-                </p>
-                <div className="h-px w-full bg-gold-primary/10" />
-              </div>
-
-              <div className="pt-4 md:pt-8 flex flex-col items-center gap-6 pb-8 md:pb-0">
-                {/* Social Links */}
-                <div className="flex gap-6">
-                  {selectedMember.instagram && (
-                    <a href={selectedMember.instagram} target="_blank" rel="noopener noreferrer" className="p-3 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
-                      <InstagramIcon size={20} />
-                    </a>
-                  )}
-                  {selectedMember.facebook && (
-                    <a href={selectedMember.facebook} target="_blank" rel="noopener noreferrer" className="p-3 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
-                      <FacebookIcon size={20} />
-                    </a>
-                  )}
-                  {selectedMember.github && (
-                    <a href={selectedMember.github} target="_blank" rel="noopener noreferrer" className="p-3 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
-                      <GithubIcon size={20} />
-                    </a>
-                  )}
-                  {selectedMember.linkedin && (
-                    <a href={selectedMember.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 bg-gold-primary/5 text-gold-primary rounded-2xl hover:bg-gold-primary hover:text-black transition-all">
-                      <LinkedinIcon size={20} />
-                    </a>
-                  )}
-                </div>
-                
-                <div className="h-px w-24 bg-gold-primary/10" />
-                
-                <button className="flex items-center gap-3 px-8 py-4 bg-gold-primary/5 border border-gold-primary/10 text-gold-primary rounded-full hover:bg-gold-primary/10 transition-all font-bold uppercase tracking-widest text-[10px]">
-                  <Heart size={16} /> Legacy Approved
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <OrganizerProfileModal
+          organizer={toOrganizerData(selectedMember)}
+          onClose={() => setSelectedMember(null)}
+          actionLabel="Legacy Approved"
+        />
       )}
     </main>
   );

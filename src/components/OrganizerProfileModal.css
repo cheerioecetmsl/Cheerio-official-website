@@ -1,0 +1,419 @@
+/* ============================================ */
+/* OrganizerProfileModal — Responsive Modal CSS */
+/* ============================================ */
+
+/* Prevent background scrolling when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* ---- Overlay ---- */
+.opm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: opm-fade-in 180ms ease-out forwards;
+}
+
+/* ---- Modal Container ---- */
+.opm-container {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  max-width: 900px;
+  width: 92%;
+  max-height: 90vh;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--color-card-tone, #FFF3D6);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(212, 175, 55, 0.15);
+  animation: opm-scale-in 180ms ease-out forwards;
+}
+
+/* ---- Image Panel (Desktop) ---- */
+.opm-image-panel {
+  width: 40%;
+  min-height: 100%;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.opm-image-panel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.opm-image-panel .opm-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7rem;
+  font-weight: 700;
+  color: rgba(107, 68, 35, 0.15);
+  background: linear-gradient(135deg, var(--color-parchment-contrast, #EAD3A7), var(--color-card-tone, #FFF3D6));
+}
+
+/* Cinematic gradient on image */
+.opm-image-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, transparent 60%, rgba(255, 243, 214, 0.25));
+  pointer-events: none;
+}
+
+/* ---- Text Panel (Desktop) ---- */
+.opm-text-panel {
+  width: 60%;
+  overflow-y: auto;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Custom scrollbar for text panel */
+.opm-text-panel::-webkit-scrollbar {
+  width: 5px;
+}
+.opm-text-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.opm-text-panel::-webkit-scrollbar-thumb {
+  background: var(--color-gold-primary, #D4AF37);
+  border-radius: 10px;
+}
+.opm-text-panel {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gold-primary, #D4AF37) transparent;
+}
+
+/* ---- Typography ---- */
+.opm-name {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-brown-primary, #6B4423);
+  font-family: var(--font-serif, "EB Garamond", serif);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.opm-role {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--color-gold-primary, #D4AF37);
+  margin: 0;
+}
+
+.opm-quote {
+  font-size: 18px;
+  font-style: italic;
+  color: var(--color-brown-secondary, #8B5E3C);
+  font-family: var(--font-serif, "EB Garamond", serif);
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  padding: 16px 0;
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  margin: 0;
+}
+
+.opm-bio {
+  font-size: 15px;
+  color: var(--color-theme-text-secondary, #4A3426);
+  line-height: 1.7;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  margin: 0;
+}
+
+.opm-metadata {
+  font-size: 13px;
+  color: var(--color-brown-secondary, #8B5E3C);
+}
+
+/* ---- Social Icon Row ---- */
+.opm-social-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.opm-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--color-gold-primary, #D4AF37);
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.opm-social-link:hover {
+  background: var(--color-gold-primary, #D4AF37);
+  color: #1a0e07;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+}
+
+/* ---- Status Chips ---- */
+.opm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.opm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--color-brown-primary, #6B4423);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+/* ---- Action Button ---- */
+.opm-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  color: var(--color-gold-primary, #D4AF37);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  cursor: default;
+  transition: all 0.25s ease;
+  align-self: flex-start;
+}
+
+.opm-action-btn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+/* ---- Close Button ---- */
+.opm-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 110;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-gold-primary, #D4AF37);
+  color: #1a0e07;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.opm-close:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(212, 175, 55, 0.45);
+}
+
+/* ---- Divider ---- */
+.opm-divider {
+  width: 48px;
+  height: 1px;
+  background: rgba(212, 175, 55, 0.2);
+  margin: 4px 0;
+}
+
+/* ============================================ */
+/* ---- Desktop Animation ----                  */
+/* ============================================ */
+@keyframes opm-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes opm-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ============================================ */
+/* ---- MOBILE RESPONSIVE (WhatsApp Style) ---- */
+/* ============================================ */
+@media (max-width: 768px) {
+  .opm-container {
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    animation: opm-slide-up 280ms ease-out forwards;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Mobile: Image becomes banner */
+  .opm-image-panel {
+    width: 100%;
+    height: 180px;
+    min-height: 180px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .opm-image-panel::after {
+    background: linear-gradient(to bottom, transparent 30%, rgba(255, 243, 214, 0.5));
+  }
+
+  .opm-image-panel img {
+    filter: blur(8px);
+    transform: scale(1.1); /* prevent blur edges from showing */
+  }
+
+  /* Mobile: Text panel stacks below */
+  .opm-text-panel {
+    width: 100%;
+    overflow-y: visible;
+    padding: 24px 20px 40px;
+    /* On mobile, the entire container scrolls, not just this panel */
+  }
+
+  /* ---- WhatsApp-style Avatar Overlay ---- */
+  .opm-avatar-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-top: -130px;
+    margin-bottom: 8px;
+    z-index: 5;
+  }
+
+  .opm-avatar-circle {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid var(--color-card-tone, #FFF3D6);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  .opm-avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+
+  /* Mobile close button */
+  .opm-close {
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Center text on mobile */
+  .opm-text-panel {
+    align-items: center;
+    text-align: center;
+  }
+
+  .opm-name {
+    font-size: 26px;
+    text-align: center;
+  }
+
+  .opm-role {
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .opm-quote {
+    font-size: 16px;
+    text-align: center;
+  }
+
+  .opm-bio {
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .opm-social-row {
+    justify-content: center;
+  }
+
+  .opm-chips {
+    justify-content: center;
+  }
+
+  .opm-action-btn {
+    align-self: center;
+  }
+
+  .opm-divider {
+    margin: 4px auto;
+  }
+}
+
+/* Mobile slide-up animation */
+@keyframes opm-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Desktop: hide avatar overlay (it's only for mobile WhatsApp style) */
+@media (min-width: 769px) {
+  .opm-avatar-overlay {
+    display: none;
+  }
+}

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, getDocs, orderBy } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
-import { School, History, Sparkles, BookOpen, Quote, X, Maximize2, Target, Compass, CheckCircle } from "lucide-react";
+import { School, History, Sparkles, BookOpen, Quote, X, Maximize2, GraduationCap, Target, Eye, Cpu, Award } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -16,6 +16,18 @@ interface LegacyItem {
   imageURL: string;
   createdAt: any;
 }
+
+/* Reusable section fade-in wrapper */
+const SectionReveal = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-60px" }}
+    transition={{ duration: 0.7, delay, ease: "easeOut" }}
+  >
+    {children}
+  </motion.div>
+);
 
 export default function LegacyPage() {
   const [items, setItems] = useState<LegacyItem[]>([]);
@@ -66,7 +78,6 @@ export default function LegacyPage() {
           <Image 
             src="/assets/department_hero_image.png" 
             fill 
-            sizes="(max-width: 768px) 100vw, 100vw"
             className="object-cover transition-transform duration-1000 group-hover:scale-105" 
             alt="Department History" 
             priority
@@ -77,136 +88,178 @@ export default function LegacyPage() {
           </div>
         </div>
 
-        {/* Institution and Department Description Sections */}
-        <div className="space-y-12 md:space-y-16">
-          {/* About College */}
-          <div className="theme-card p-8 md:p-12 rounded-[2.5rem] border border-gold-soft/20 shadow-xl space-y-10 bg-card-tone relative overflow-hidden group">
-            {/* Decorative background element */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gold-primary/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:bg-gold-primary/10 transition-colors duration-700" />
-            
-            <div className="relative z-10 flex items-center gap-4 border-b border-gold-soft/20 pb-6">
-              <div className="p-3 bg-gold-soft/10 rounded-2xl border border-gold-soft/20 text-brown-primary shadow-inner">
-                <School size={32} />
+        {/* ═══════════════════════════════════════════════════════════════
+            ABOUT THE INSTITUTE — Techno Main Salt Lake
+        ═══════════════════════════════════════════════════════════════ */}
+        <SectionReveal>
+          <div className="theme-card rounded-[2.5rem] overflow-hidden border border-gold-soft/20 shadow-xl">
+            {/* Section Header */}
+            <div className="px-8 md:px-14 pt-10 md:pt-14 pb-6 md:pb-8 border-b border-gold-soft/10">
+              <div className="flex items-center gap-3 md:gap-4 mb-4">
+                <div className="p-3 bg-gold-primary/10 rounded-2xl border border-gold-soft/20">
+                  <School size={24} className="text-brown-primary" />
+                </div>
+                <div>
+                  <p className="text-[8px] md:text-[10px] font-bold text-gold-primary uppercase tracking-[0.4em]">The Institution</p>
+                  <h3 className="text-2xl md:text-4xl font-bold text-brown-primary serif leading-tight">Techno Main Salt Lake</h3>
+                </div>
               </div>
-              <h3 className="text-3xl md:text-5xl font-bold text-brown-primary serif">Techno Main Salt Lake</h3>
+              <p className="text-brown-secondary/50 text-xs md:text-sm font-medium tracking-wider uppercase">Est. 2001 &nbsp;·&nbsp; Kolkata, City of Joy</p>
             </div>
-            
-            <div className="relative z-10 space-y-8">
-              <div className="text-lg md:text-xl text-brown-primary/90 serif leading-relaxed md:leading-loose text-justify">
-                <p className="first-letter:text-6xl first-letter:font-bold first-letter:text-gold-primary first-letter:mr-2 first-letter:float-left first-letter:leading-none">
-                  <span className="font-bold text-brown-primary">Ever since its inception</span>, Techno Main Salt Lake has earned its rightful place in the field of academics. Established in the year <span className="text-gold-primary font-bold">2001</span>, this nationally acclaimed institute has set itself apart from other educational organizations by virtue of its visionary objectives and novel endeavors. 
-                </p>
-                <p className="mt-6">
-                  Situated in the heart of the city of joy, <span className="font-bold text-brown-primary">Techno Main Salt Lake</span> has grown in leaps and bounds over the glorious past <span className="text-gold-primary font-bold">25 years</span> with its growing emphasis on research infrastructure, hands-on-training opportunities and holistic skill development in aspirants. This institute encourages its students to thrive in an academic albeit wholesome ambience that paves the way for skilled human resources in the future. Faculty development programs, soft skill development initiatives coupled with a multitude of seminars and workshops constitute the highlights of the academic initiatives undertaken here.
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                <div className="bg-gradient-to-br from-parchment-base/80 to-transparent p-8 rounded-[2rem] border border-gold-soft/20 shadow-inner group/vision hover:border-gold-primary/40 transition-colors">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Compass size={24} className="text-gold-primary group-hover/vision:animate-spin-slow" />
-                    <h4 className="text-xl font-bold text-brown-primary uppercase tracking-[0.2em]">Institute Vision</h4>
+
+            {/* Body */}
+            <div className="px-8 md:px-14 py-8 md:py-12">
+              <p className="text-brown-primary/90 text-base md:text-lg leading-[1.9] serif">
+                Ever since its inception, <span className="font-semibold text-brown-primary">Techno Main Salt Lake</span> has earned its rightful place in the field of academics. Established in the year 2001, this nationally acclaimed institute has set itself apart from other educational organizations by virtue of its visionary objectives and novel endeavors. Situated in the heart of the City of Joy, the institute has grown in leaps and bounds over a glorious <span className="font-semibold text-brown-primary">25-year journey</span>, with its growing emphasis on research infrastructure, hands-on training opportunities, and holistic skill development in aspirants.
+              </p>
+              <p className="text-brown-primary/90 text-base md:text-lg leading-[1.9] serif mt-6">
+                Techno Main Salt Lake encourages its students to thrive in an academic yet wholesome ambience that paves the way for skilled human resources of the future. Faculty development programs, soft-skill development initiatives, coupled with a multitude of seminars and workshops, constitute the highlights of the academic initiatives undertaken by this institution.
+              </p>
+            </div>
+          </div>
+        </SectionReveal>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            INSTITUTE VISION & MISSION
+        ═══════════════════════════════════════════════════════════════ */}
+        <SectionReveal delay={0.1}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
+            {/* Vision Card */}
+            <div className="theme-card rounded-[2.5rem] p-8 md:p-12 border border-gold-soft/20 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gold-primary/5 rounded-full blur-[80px] pointer-events-none" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-gold-primary/10 rounded-2xl border border-gold-soft/20">
+                    <Eye size={22} className="text-brown-primary" />
                   </div>
-                  <p className="italic text-brown-secondary serif leading-relaxed">
-                    &quot;Emerge as a Centre of excellence for engineering and management studies encouraging research and building leaders contributing towards individual and social empowerment.&quot;
+                  <h4 className="text-xl md:text-2xl font-bold text-brown-primary serif">Institute Vision</h4>
+                </div>
+                <div className="border-l-4 border-gold-primary/30 pl-5 md:pl-6">
+                  <p className="text-brown-primary/85 text-base md:text-lg leading-[1.85] serif italic">
+                    Emerge as a Centre of Excellence for engineering and management studies — encouraging research and building leaders contributing towards individual and social empowerment.
                   </p>
                 </div>
+              </div>
+            </div>
 
-                <div className="bg-gradient-to-br from-parchment-base/80 to-transparent p-8 rounded-[2rem] border border-gold-soft/20 shadow-inner group/mission hover:border-gold-primary/40 transition-colors">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Target size={24} className="text-gold-primary group-hover/mission:scale-110 transition-transform" />
-                    <h4 className="text-xl font-bold text-brown-primary uppercase tracking-[0.2em]">Institute Mission</h4>
+            {/* Mission Card */}
+            <div className="theme-card rounded-[2.5rem] p-8 md:p-12 border border-gold-soft/20 shadow-xl relative overflow-hidden">
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-gold-primary/5 rounded-full blur-[80px] pointer-events-none" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-gold-primary/10 rounded-2xl border border-gold-soft/20">
+                    <Target size={22} className="text-brown-primary" />
                   </div>
-                  <ul className="space-y-4 text-brown-secondary serif leading-relaxed">
-                    <li className="flex items-start gap-3">
-                      <CheckCircle size={18} className="text-gold-primary/60 mt-1 shrink-0" />
-                      <span>Identify individual potential, capabilities and skills to achieve confidence and competence.</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle size={18} className="text-gold-primary/60 mt-1 shrink-0" />
-                      <span>Practice innovative and modern methods of pedagogy encouraging holistic education and research.</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle size={18} className="text-gold-primary/60 mt-1 shrink-0" />
-                      <span>Enhance employability skills through collaborative ventures with the industry.</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle size={18} className="text-gold-primary/60 mt-1 shrink-0" />
-                      <span>Build leaders and entrepreneurs with integrity and ethics fostering growth and sustainability.</span>
-                    </li>
-                  </ul>
+                  <h4 className="text-xl md:text-2xl font-bold text-brown-primary serif">Institute Mission</h4>
                 </div>
+                <ul className="space-y-4">
+                  {[
+                    "To identify individual potential, capabilities and skills to achieve confidence and competence.",
+                    "To practice innovative and modern methods of pedagogy encouraging holistic education and research.",
+                    "To enhance employability skills through collaborative ventures with the industry.",
+                    "To build leaders and entrepreneurs with integrity and ethics fostering growth and sustainability."
+                  ].map((m, i) => (
+                    <li key={i} className="flex gap-3 items-start">
+                      <span className="flex-shrink-0 mt-1.5 w-6 h-6 rounded-full bg-gold-primary/10 border border-gold-soft/20 flex items-center justify-center text-[10px] font-bold text-brown-primary">{i + 1}</span>
+                      <p className="text-brown-primary/85 text-sm md:text-base leading-[1.8] serif">{m}</p>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>
+        </SectionReveal>
 
-          {/* About Department */}
-          <div className="theme-card p-8 md:p-12 rounded-[2.5rem] border border-gold-soft/20 shadow-xl space-y-10 bg-card-tone relative overflow-hidden group">
-            {/* Decorative background element */}
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-gold-primary/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 group-hover:bg-gold-primary/10 transition-colors duration-700" />
-            
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-4 border-b border-gold-soft/20 pb-6">
-              <div className="p-3 bg-gold-soft/10 rounded-2xl border border-gold-soft/20 text-brown-primary w-fit shadow-inner">
-                <BookOpen size={32} />
+        {/* ═══════════════════════════════════════════════════════════════
+            ABOUT THE DEPARTMENT — Electronics & Communication Engineering
+        ═══════════════════════════════════════════════════════════════ */}
+        <SectionReveal delay={0.05}>
+          <div className="theme-card rounded-[2.5rem] overflow-hidden border border-gold-soft/20 shadow-xl">
+            {/* Section Header */}
+            <div className="px-8 md:px-14 pt-10 md:pt-14 pb-6 md:pb-8 border-b border-gold-soft/10">
+              <div className="flex items-center gap-3 md:gap-4 mb-4">
+                <div className="p-3 bg-gold-primary/10 rounded-2xl border border-gold-soft/20">
+                  <Cpu size={24} className="text-brown-primary" />
+                </div>
+                <div>
+                  <p className="text-[8px] md:text-[10px] font-bold text-gold-primary uppercase tracking-[0.4em]">The Department</p>
+                  <h3 className="text-2xl md:text-4xl font-bold text-brown-primary serif leading-tight">Electronics &amp; Communication Engineering</h3>
+                </div>
               </div>
-              <h3 className="text-3xl md:text-5xl font-bold text-brown-primary serif leading-tight">Electronics & Communication Engineering</h3>
+              <div className="flex flex-wrap gap-3 mt-4">
+                {["AICTE Approved", "NBA Accredited", "MAKAUT Affiliated"].map(tag => (
+                  <span key={tag} className="px-4 py-1.5 rounded-full bg-gold-primary/8 border border-gold-soft/20 text-[9px] md:text-[10px] font-bold text-brown-primary uppercase tracking-[0.2em]">
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
-            
-            <div className="relative z-10 space-y-8">
-              <div className="text-lg md:text-xl text-brown-primary/90 serif leading-relaxed md:leading-loose text-justify">
-                <p className="first-letter:text-6xl first-letter:font-bold first-letter:text-gold-primary first-letter:mr-2 first-letter:float-left first-letter:leading-none">
-                  <span className="font-bold text-brown-primary">The department</span> of Electronics and Communication Engineering is approved by the <span className="font-bold text-brown-primary">AICTE</span>, accredited by <span className="font-bold text-brown-primary">NBA</span>, and is affiliated to <span className="font-bold text-brown-primary">MAKAUT</span>. Established in 2001, offering a B.Tech. course to 60 students initially and gradually increasing the intake to 120 students by 2007-2008. The department proudly introduced an M.Tech program in VLSI and Microelectronics in 2006-2007.
-                </p>
-                <div className="my-8 py-8 px-8 md:px-10 border-l-4 border-gold-primary bg-gradient-to-r from-gold-soft/10 to-transparent rounded-r-3xl">
-                  <Quote className="text-gold-primary/40 mb-4" size={32} />
-                  <p className="italic text-brown-primary font-medium text-xl md:text-2xl leading-relaxed">
-                    &quot;The department provides an intellectually stimulating environment that encourages innovative thinking, creative problem-solving, and enthusiastic learning. With a dedicated faculty network, well-equipped labs, and skill-based programs, students are prepared for industry demands.&quot;
+
+            {/* Body */}
+            <div className="px-8 md:px-14 py-8 md:py-12 space-y-6">
+              <p className="text-brown-primary/90 text-base md:text-lg leading-[1.9] serif">
+                The Department of Electronics and Communication Engineering at Techno Main Salt Lake was established in <span className="font-semibold text-brown-primary">2001</span>, offering a B.Tech. course to 60 students initially and gradually increasing the intake to <span className="font-semibold text-brown-primary">120 students</span> by 2007-08. An M.Tech program in VLSI and Microelectronics was introduced in 2006-07, further expanding the department&apos;s academic portfolio.
+              </p>
+              <p className="text-brown-primary/90 text-base md:text-lg leading-[1.9] serif">
+                The department provides an intellectually stimulating environment that encourages innovative thinking, creative problem-solving, and enthusiastic learning. With a dedicated faculty network, well-equipped laboratories, and skill-based programs — including workshops and seminars — students are prepared to meet the ever-evolving demands of the industry. While teaching remains a priority, research and consultancy also receive considerable attention, nurtured under professional student chapters such as <span className="font-semibold text-brown-primary">IET, IETE</span>, and several others that extend their memberships to students.
+              </p>
+              <p className="text-brown-primary/90 text-base md:text-lg leading-[1.9] serif">
+                The department fosters a student-friendly atmosphere, promoting collaboration and maintaining a professional culture. Through projects, seminars, guest lectures, meetings, and festivals, they aim for efficient and proficient results — enabling students to compete on the global stage. Continuous improvement in academic standards equips students with the skills required for successful careers across diverse fields.
+              </p>
+            </div>
+          </div>
+        </SectionReveal>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            DEPARTMENT VISION & MISSION
+        ═══════════════════════════════════════════════════════════════ */}
+        <SectionReveal delay={0.1}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
+            {/* Department Vision Card */}
+            <div className="theme-card rounded-[2.5rem] p-8 md:p-12 border border-gold-soft/20 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-48 h-48 bg-gold-primary/5 rounded-full blur-[80px] pointer-events-none" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-gold-primary/10 rounded-2xl border border-gold-soft/20">
+                    <Eye size={22} className="text-brown-primary" />
+                  </div>
+                  <h4 className="text-xl md:text-2xl font-bold text-brown-primary serif">Departmental Vision</h4>
+                </div>
+                <div className="border-l-4 border-gold-primary/30 pl-5 md:pl-6">
+                  <p className="text-brown-primary/85 text-base md:text-lg leading-[1.85] serif italic">
+                    To be recognized as a Centre of Excellence in Electronics and Communication Engineering education, higher studies, and research — as per the needs of industry — deeply inculcating professional ethics and duly nurturing all-round personality development.
                   </p>
                 </div>
-                <p className="mt-6">
-                  While teaching is a priority, research and consultancy also receive attention here, under different professional student chapters like <span className="font-bold text-gold-primary">IET</span> and <span className="font-bold text-gold-primary">IETE</span> offering their memberships to the students. The department fosters a student-friendly atmosphere, promoting collaboration and maintaining a professional culture. Through projects, seminars, lectures, meetings, and festivals, they aim for efficient and proficient results, enabling students to compete globally.
-                </p>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                <div className="bg-gradient-to-br from-parchment-base/80 to-transparent p-8 rounded-[2rem] border border-gold-soft/20 shadow-inner group/vision hover:border-gold-primary/40 transition-colors h-full">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Compass size={24} className="text-gold-primary group-hover/vision:animate-spin-slow" />
-                    <h4 className="text-xl font-bold text-brown-primary uppercase tracking-[0.2em]">Departmental Vision</h4>
+            {/* Department Mission Card */}
+            <div className="theme-card rounded-[2.5rem] p-8 md:p-12 border border-gold-soft/20 shadow-xl relative overflow-hidden">
+              <div className="absolute bottom-0 right-0 w-48 h-48 bg-gold-primary/5 rounded-full blur-[80px] pointer-events-none" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-gold-primary/10 rounded-2xl border border-gold-soft/20">
+                    <Target size={22} className="text-brown-primary" />
                   </div>
-                  <p className="italic text-brown-secondary serif leading-relaxed">
-                    &quot;To be recognized as a Centre of excellence in Electronics and Communication Engineering education, higher studies and research as per the needs of industry, deeply inculcating professional ethics and duly nurturing all-round personality development.&quot;
-                  </p>
+                  <h4 className="text-xl md:text-2xl font-bold text-brown-primary serif">Departmental Mission</h4>
                 </div>
-
-                <div className="bg-gradient-to-br from-parchment-base/80 to-transparent p-8 rounded-[2rem] border border-gold-soft/20 shadow-inner group/mission hover:border-gold-primary/40 transition-colors h-full">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Target size={24} className="text-gold-primary group-hover/mission:scale-110 transition-transform" />
-                    <h4 className="text-xl font-bold text-brown-primary uppercase tracking-[0.2em]">Departmental Mission</h4>
-                  </div>
-                  <ul className="space-y-4 text-brown-secondary serif leading-relaxed">
-                    <li className="flex items-start gap-3">
-                      <div className="mt-1 flex items-center justify-center bg-gold-soft/20 text-gold-primary font-bold text-xs rounded-full w-7 h-7 shrink-0 shadow-sm border border-gold-soft/30">M1</div>
-                      <span>Offer state-of-art infrastructure for teaching, learning, research activities and innovative hands-on engineering projects.</span>
+                <ul className="space-y-4">
+                  {[
+                    "To offer state-of-the-art infrastructure for teaching, learning, research activities, and innovative hands-on engineering projects.",
+                    "To deliver curricula meeting ever-changing industry requirements and keeping pace with present trends in higher studies and research, through student-centric learning methodologies.",
+                    "To promote all-round personality development of students through interaction with alumni and experts from academia and industry.",
+                    "To motivate and upgrade faculty members for departmental success, growth, and quality enhancement."
+                  ].map((m, i) => (
+                    <li key={i} className="flex gap-3 items-start">
+                      <span className="flex-shrink-0 mt-1.5 w-6 h-6 rounded-full bg-gold-primary/10 border border-gold-soft/20 flex items-center justify-center text-[9px] font-bold text-brown-primary">M{i + 1}</span>
+                      <p className="text-brown-primary/85 text-sm md:text-base leading-[1.8] serif">{m}</p>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <div className="mt-1 flex items-center justify-center bg-gold-soft/20 text-gold-primary font-bold text-xs rounded-full w-7 h-7 shrink-0 shadow-sm border border-gold-soft/30">M2</div>
-                      <span>Deliver curricula to meet ever changing industry requirements and cope up with present trends in higher studies and research.</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="mt-1 flex items-center justify-center bg-gold-soft/20 text-gold-primary font-bold text-xs rounded-full w-7 h-7 shrink-0 shadow-sm border border-gold-soft/30">M3</div>
-                      <span>Promote all-round personality development of students through interaction with alumni and industry experts.</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="mt-1 flex items-center justify-center bg-gold-soft/20 text-gold-primary font-bold text-xs rounded-full w-7 h-7 shrink-0 shadow-sm border border-gold-soft/30">M4</div>
-                      <span>Motivate and upgrade faculty members for departmental success, growth and quality enhancement.</span>
-                    </li>
-                  </ul>
-                </div>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>
-        </div>
+        </SectionReveal>
 
         {/* Dynamic Achievements Grid */}
         <div className="space-y-16">
@@ -238,7 +291,6 @@ export default function LegacyPage() {
                     <Image 
                       src={item.imageURL} 
                       fill 
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover transition-transform duration-1000 group-hover:scale-110" 
                       alt={item.title} 
                     />
@@ -305,7 +357,6 @@ export default function LegacyPage() {
                   <Image 
                     src={selectedItem.imageURL} 
                     fill 
-                    sizes="(max-width: 768px) 100vw, 100vw"
                     className="object-cover" 
                     alt={selectedItem.title} 
                   />
