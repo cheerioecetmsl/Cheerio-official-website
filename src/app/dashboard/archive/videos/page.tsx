@@ -5,7 +5,7 @@ import { Video, Play, Download, Filter, UploadCloud, Film, X, Maximize2, Chevron
 import Link from "next/link";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pagination } from "@/components/Pagination";
@@ -30,22 +30,24 @@ export default function VideoArchive() {
   const itemsPerPage = 30;
 
   useEffect(() => {
-    const q = query(
-      collection(db, "archives"), 
-      where("type", "==", "video"),
-      orderBy("createdAt", "desc")
-    );
+    const fetchVideos = async () => {
+      try {
+        const q = query(
+          collection(db, "archives"), 
+          where("type", "==", "video"),
+          orderBy("createdAt", "desc")
+        );
+        const snapshot = await getDocs(q);
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ArchiveVideo));
+        setVideos(docs);
+      } catch (err) {
+        console.error("Firestore Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ArchiveVideo));
-      setVideos(docs);
-      setLoading(false);
-    }, (err) => {
-      console.error("Firestore Error:", err);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    fetchVideos();
   }, []);
 
   // Pagination Logic

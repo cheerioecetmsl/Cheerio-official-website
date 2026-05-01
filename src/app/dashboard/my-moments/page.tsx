@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { auth, db } from "@/lib/firebase";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { Download, Sparkles, Image as ImageIcon, Archive, Share2, CheckCircle, Loader2, Zap } from "lucide-react";
@@ -31,17 +31,21 @@ export default function MyMoments() {
   const itemsPerPage = 30;
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const memoriesRef = collection(db, "users", user.uid, "found_memories");
-        const q = query(memoriesRef, orderBy("detectedAt", "desc"));
-        
-        const unsubMemories = onSnapshot(q, (snap) => {
+        try {
+          const memoriesRef = collection(db, "users", user.uid, "found_memories");
+          const q = query(memoriesRef, orderBy("detectedAt", "desc"));
+          
+          const snap = await getDocs(q);
           setMemories(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as FoundMemory)));
+        } catch (err) {
+          console.error("Firestore Error:", err);
+        } finally {
           setLoading(false);
-        });
-
-        return () => unsubMemories();
+        }
+      } else {
+        setLoading(false);
       }
     });
     return () => unsubscribe();

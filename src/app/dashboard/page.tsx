@@ -9,7 +9,7 @@ import { Countdown } from "@/components/Countdown";
 import { HypeBoard, UserStats } from "@/components/DashboardModules";
 import { Trophy, TrendingUp, ChevronDown, ArrowUpRight, Files } from "lucide-react";
 import Link from "next/link";
-import { collection, query, orderBy, limit, onSnapshot, where } from "firebase/firestore";
+import { collection, query, orderBy, limit, where, getDocs } from "firebase/firestore";
 import { TutorialOverlay } from "@/components/TutorialOverlay";
 import Image from "next/image";
 import { HypeUpdate } from "@/components/DashboardModules";
@@ -94,48 +94,52 @@ export default function DashboardPage() {
       }
     });
 
-    // Real-time Leaderboard Query (Simplified to avoid index requirement)
-    const q = query(
-      collection(db, "users"), 
-      orderBy("xp", "desc"), 
-      limit(20)
-    );
-    const unsubscribeLeaderboard = onSnapshot(q, (snapshot) => {
+    // One-time Leaderboard Fetch
+    const fetchLeaderboard = async () => {
+      const q = query(
+        collection(db, "users"), 
+        orderBy("xp", "desc"), 
+        limit(20)
+      );
+      const snapshot = await getDocs(q);
       const users = snapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() } as any))
         .filter(u => u.category === "STUDENT" || u.category === "LEGEND")
         .slice(0, 3);
       setLeaderboard(users);
-    });
+    };
 
-    // Listen to the Pulse (Hype Board) - Last 3 items
-    const pulseQuery = query(collection(db, "hype_board"), orderBy("createdAt", "desc"), limit(3));
-    const unsubscribePulse = onSnapshot(pulseQuery, (snap) => {
+    // One-time Pulse Fetch
+    const fetchPulse = async () => {
+      const pulseQuery = query(collection(db, "hype_board"), orderBy("createdAt", "desc"), limit(3));
+      const snap = await getDocs(pulseQuery);
       if (!snap.empty) {
         setPulseItems(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)));
       }
-    });
+    };
 
-    // Listen for Active Engagement Modules
-    const engagementQuery = query(
-      collection(db, "engagement_modules"), 
-      where("status", "==", "active"),
-      limit(1)
-    );
-    const unsubscribeEngagement = onSnapshot(engagementQuery, (snap) => {
+    // One-time Engagement Module Fetch
+    const fetchEngagement = async () => {
+      const engagementQuery = query(
+        collection(db, "engagement_modules"), 
+        where("status", "==", "active"),
+        limit(1)
+      );
+      const snap = await getDocs(engagementQuery);
       if (!snap.empty) {
         const moduleData = { id: snap.docs[0].id, ...snap.docs[0].data() } as EngagementModule;
         setActiveModule(moduleData);
       } else {
         setActiveModule(null);
       }
-    });
+    };
+
+    fetchLeaderboard();
+    fetchPulse();
+    fetchEngagement();
 
     return () => {
       unsubscribeAuth();
-      unsubscribeLeaderboard();
-      unsubscribePulse();
-      unsubscribeEngagement();
     };
   }, [router]);
 
@@ -143,12 +147,12 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!userData || typeof userData.xp !== 'number') return;
 
-    const rankQuery = query(collection(db, "users"), where("xp", ">", userData.xp));
-    const unsubscribeRank = onSnapshot(rankQuery, (snap) => {
+    const fetchRank = async () => {
+      const rankQuery = query(collection(db, "users"), where("xp", ">", userData.xp));
+      const snap = await getDocs(rankQuery);
       setUserRank(snap.size + 1);
-    });
-
-    return () => unsubscribeRank();
+    };
+    fetchRank();
   }, [userData?.xp]);
 
   const handleTutorialComplete = async () => {

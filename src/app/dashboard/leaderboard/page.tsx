@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Trophy, Medal, Star, Loader2, Crown, User } from "lucide-react";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { db, auth } from "@/lib/firebase";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import Image from "next/image";
 import { formatXP, calculateLevel } from "@/lib/xp";
@@ -42,26 +42,31 @@ export default function LeaderboardPage() {
 
   // Fetch all users ordered by XP
   useEffect(() => {
-    const q = query(
-      collection(db, "users"),
-      orderBy("xp", "desc")
-    );
+    const fetchUsers = async () => {
+      try {
+        const q = query(
+          collection(db, "users"),
+          orderBy("xp", "desc")
+        );
+        const snapshot = await getDocs(q);
+        const list: LeaderboardUser[] = snapshot.docs.map((doc, index) => ({
+          id: doc.id,
+          name: doc.data().name || doc.data().displayName || "Anonymous",
+          xp: doc.data().xp || 0,
+          level: calculateLevel(doc.data().xp || 0).level,
+          count: doc.data().contributions || doc.data().count || 0,
+          photoURL: doc.data().photoURL || doc.data().imageURL,
+          email: doc.data().email,
+        }));
+        setUsers(list);
+      } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const unsub = onSnapshot(q, (snapshot) => {
-      const list: LeaderboardUser[] = snapshot.docs.map((doc, index) => ({
-        id: doc.id,
-        name: doc.data().name || doc.data().displayName || "Anonymous",
-        xp: doc.data().xp || 0,
-        level: calculateLevel(doc.data().xp || 0).level,
-        count: doc.data().contributions || doc.data().count || 0,
-        photoURL: doc.data().photoURL || doc.data().imageURL,
-        email: doc.data().email,
-      }));
-      setUsers(list);
-      setLoading(false);
-    });
-
-    return () => unsub();
+    fetchUsers();
   }, []);
 
   // Calculate own rank whenever users or currentUserId changes

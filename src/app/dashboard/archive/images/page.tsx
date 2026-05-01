@@ -6,7 +6,7 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,22 +30,24 @@ export default function ImageArchive() {
   const itemsPerPage = 30;
 
   useEffect(() => {
-    const q = query(
-      collection(db, "archives"), 
-      where("type", "==", "image"),
-      orderBy("createdAt", "desc")
-    );
+    const fetchPhotos = async () => {
+      try {
+        const q = query(
+          collection(db, "archives"), 
+          where("type", "==", "image"),
+          orderBy("createdAt", "desc")
+        );
+        const snapshot = await getDocs(q);
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ArchivePhoto));
+        setPhotos(docs);
+      } catch (err) {
+        console.error("Firestore Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ArchivePhoto));
-      setPhotos(docs);
-      setLoading(false);
-    }, (err) => {
-      console.error("Firestore Error:", err);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    fetchPhotos();
   }, []);
 
   // Pagination Logic

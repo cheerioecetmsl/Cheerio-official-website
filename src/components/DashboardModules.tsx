@@ -3,7 +3,7 @@
 import { TrendingUp, Award, Zap } from "lucide-react";
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
 export interface HypeUpdate {
   id: string;
@@ -20,15 +20,20 @@ export const HypeBoard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Real-time Hype Query
-    const q = query(collection(db, "hype"), orderBy("createdAt", "desc"), limit(5));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HypeUpdate));
-      setUpdates(docs);
-      setLoading(false);
-    });
+    const fetchHype = async () => {
+      try {
+        const q = query(collection(db, "hype"), orderBy("createdAt", "desc"), limit(5));
+        const snapshot = await getDocs(q);
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HypeUpdate));
+        setUpdates(docs);
+      } catch (error) {
+        console.error("Error fetching hype:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => unsubscribe();
+    fetchHype();
   }, []);
 
   return (

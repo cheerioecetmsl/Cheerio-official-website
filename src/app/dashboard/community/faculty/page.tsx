@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { GraduationCap, BookOpen, Star, Loader2 } from "lucide-react";
 import { Pagination } from "@/components/Pagination";
@@ -58,72 +58,67 @@ export default function FacultyPage() {
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
-    // Query both "people" collection and "users" collection
-    const qPeople = query(collection(db, "people"), where("category", "==", "FACULTY"));
-    const qUsers = query(collection(db, "users"), where("category", "==", "FACULTY"), where("status", "==", "approved"));
+    const fetchData = async () => {
+      try {
+        const qPeople = query(collection(db, "people"), where("category", "==", "FACULTY"));
+        const qUsers = query(collection(db, "users"), where("category", "==", "FACULTY"), where("status", "==", "approved"));
 
-    let peopleData: Person[] = [];
-    let usersData: Person[] = [];
+        const [snapPeople, snapUsers] = await Promise.all([
+          getDocs(qPeople),
+          getDocs(qUsers)
+        ]);
 
-    const unsubscribePeople = onSnapshot(qPeople, (snapshot) => {
-      peopleData = snapshot.docs.map(doc => ({ 
-        id: doc.id, 
-        name: doc.data().name,
-        role: doc.data().role,
-        description: doc.data().description || doc.data().narrative,
-        imageURL: doc.data().imageURL || doc.data().photoURL,
-        category: doc.data().category,
-        instagram: doc.data().instagram,
-        facebook: doc.data().facebook,
-        github: doc.data().github,
-        linkedin: doc.data().linkedin,
-        createdAt: doc.data().createdAt || "",
-        order: doc.data().order
-      })) as Person[];
-      combineAndSet();
-    });
+        const peopleData = snapPeople.docs.map(doc => ({ 
+          id: doc.id, 
+          name: doc.data().name,
+          role: doc.data().role,
+          description: doc.data().description || doc.data().narrative,
+          imageURL: doc.data().imageURL || doc.data().photoURL,
+          category: doc.data().category,
+          instagram: doc.data().instagram,
+          facebook: doc.data().facebook,
+          github: doc.data().github,
+          linkedin: doc.data().linkedin,
+          createdAt: doc.data().createdAt || "",
+          order: doc.data().order
+        })) as Person[];
 
-    const unsubscribeUsers = onSnapshot(qUsers, (snapshot) => {
-      usersData = snapshot.docs.map(doc => ({ 
-        id: doc.id, 
-        name: doc.data().name,
-        role: doc.data().role || "Esteemed Faculty",
-        description: doc.data().narrative || doc.data().description,
-        imageURL: doc.data().photoURL || doc.data().imageURL,
-        category: doc.data().category,
-        instagram: doc.data().instagram,
-        facebook: doc.data().facebook,
-        github: doc.data().github,
-        linkedin: doc.data().linkedin,
-        createdAt: doc.data().createdAt || "",
-        order: doc.data().order
-      })) as Person[];
-      combineAndSet();
-    });
+        const usersData = snapUsers.docs.map(doc => ({ 
+          id: doc.id, 
+          name: doc.data().name,
+          role: doc.data().role || "Esteemed Faculty",
+          description: doc.data().narrative || doc.data().description,
+          imageURL: doc.data().photoURL || doc.data().imageURL,
+          category: doc.data().category,
+          instagram: doc.data().instagram,
+          facebook: doc.data().facebook,
+          github: doc.data().github,
+          linkedin: doc.data().linkedin,
+          createdAt: doc.data().createdAt || "",
+          order: doc.data().order
+        })) as Person[];
 
-    const combineAndSet = () => {
-      const combined = [...peopleData, ...usersData];
-      // Remove duplicates by ID if any
-      const unique = combined.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
-      
-      // Sort by custom order if set, otherwise fall back to createdAt
-      const sorted = unique.sort((a, b) => {
-        const aOrder = a.order ?? Infinity;
-        const bOrder = b.order ?? Infinity;
-        if (aOrder !== Infinity || bOrder !== Infinity) return aOrder - bOrder;
-        if (!a.createdAt) return 1;
-        if (!b.createdAt) return -1;
-        return a.createdAt.localeCompare(b.createdAt);
-      });
+        const combined = [...peopleData, ...usersData];
+        const unique = combined.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+        
+        const sorted = unique.sort((a, b) => {
+          const aOrder = a.order ?? Infinity;
+          const bOrder = b.order ?? Infinity;
+          if (aOrder !== Infinity || bOrder !== Infinity) return aOrder - bOrder;
+          if (!a.createdAt) return 1;
+          if (!b.createdAt) return -1;
+          return a.createdAt.localeCompare(b.createdAt);
+        });
 
-      setMembers(sorted);
-      setLoading(false);
+        setMembers(sorted);
+      } catch (error) {
+        console.error("Error fetching faculty:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    return () => {
-      unsubscribePeople();
-      unsubscribeUsers();
-    };
+    fetchData();
   }, []);
 
   return (

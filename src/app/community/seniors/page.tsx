@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { DirectoryHeader, ProfileCard, ArchiveProfile } from "@/components/CommunityModules";
 
 export default function SeniorsPage() {
@@ -10,18 +10,19 @@ export default function SeniorsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(
-      collection(db, "users"), 
-      where("category", "==", "LEGEND"),
-      where("status", "==", "approved")
-    );
+    const fetchSeniors = async () => {
+      const q = query(
+        collection(db, "users"), 
+        where("category", "==", "LEGEND"),
+        where("status", "==", "approved")
+      );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const snapshot = await getDocs(q);
       setSeniors(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ArchiveProfile)));
       setLoading(false);
-    });
+    };
 
-    return () => unsubscribe();
+    fetchSeniors();
   }, []);
 
   return (

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Pagination } from "@/components/Pagination";
@@ -58,37 +58,44 @@ export default function OrganizersPage() {
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
-    const q = query(collection(db, "people"), where("category", "==", "COUNCIL"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ 
-        id: doc.id, 
-        name: doc.data().name,
-        role: doc.data().role,
-        description: doc.data().description || doc.data().narrative || "",
-        imageURL: doc.data().imageURL || doc.data().photoURL || "",
-        category: doc.data().category,
-        instagram: doc.data().instagram,
-        facebook: doc.data().facebook,
-        github: doc.data().github,
-        linkedin: doc.data().linkedin,
-        createdAt: doc.data().createdAt || "",
-        order: doc.data().order
-      })) as Person[];
-      
-      // Sort by custom order if set, otherwise fall back to createdAt
-      const sortedData = data.sort((a, b) => {
-        const aOrder = a.order ?? Infinity;
-        const bOrder = b.order ?? Infinity;
-        if (aOrder !== Infinity || bOrder !== Infinity) return aOrder - bOrder;
-        if (!a.createdAt) return 1;
-        if (!b.createdAt) return -1;
-        return a.createdAt.localeCompare(b.createdAt);
-      });
+    const fetchOrganizers = async () => {
+      try {
+        const q = query(collection(db, "people"), where("category", "==", "COUNCIL"));
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({ 
+          id: doc.id, 
+          name: doc.data().name,
+          role: doc.data().role,
+          description: doc.data().description || doc.data().narrative || "",
+          imageURL: doc.data().imageURL || doc.data().photoURL || "",
+          category: doc.data().category,
+          instagram: doc.data().instagram,
+          facebook: doc.data().facebook,
+          github: doc.data().github,
+          linkedin: doc.data().linkedin,
+          createdAt: doc.data().createdAt || "",
+          order: doc.data().order
+        })) as Person[];
+        
+        // Sort by custom order if set, otherwise fall back to createdAt
+        const sortedData = data.sort((a, b) => {
+          const aOrder = a.order ?? Infinity;
+          const bOrder = b.order ?? Infinity;
+          if (aOrder !== Infinity || bOrder !== Infinity) return aOrder - bOrder;
+          if (!a.createdAt) return 1;
+          if (!b.createdAt) return -1;
+          return a.createdAt.localeCompare(b.createdAt);
+        });
 
-      setMembers(sortedData);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+        setMembers(sortedData);
+      } catch (error) {
+        console.error("Error fetching organizers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrganizers();
   }, []);
 
   return (

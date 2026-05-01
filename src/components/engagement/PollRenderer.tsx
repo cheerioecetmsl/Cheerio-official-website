@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db, auth } from "@/lib/firebase";
-import { doc, updateDoc, arrayUnion, onSnapshot, increment } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, getDoc, increment } from "firebase/firestore";
 import { CheckCircle2 } from "lucide-react";
 
 interface PollRendererProps {
@@ -20,16 +20,18 @@ export function PollRenderer({ module }: PollRendererProps) {
       setVoted(true);
     }
 
-    // Live listener for votes
-    const unsub = onSnapshot(doc(db, "engagement_modules", module.id), (doc) => {
-      const data = doc.data();
+    // One-time fetch for latest votes
+    const fetchVotes = async () => {
+      const docRef = doc(db, "engagement_modules", module.id);
+      const docSnap = await getDoc(docRef);
+      const data = docSnap.data();
       if (data?.config?.votes) {
         setVotes(data.config.votes);
         setTotalVotes(Object.values(data.config.votes as Record<string, number>).reduce((a, b) => a + b, 0));
       }
-    });
+    };
 
-    return () => unsub();
+    fetchVotes();
   }, [module.id, module.config.voters]);
 
   const handleVote = async (option: string) => {

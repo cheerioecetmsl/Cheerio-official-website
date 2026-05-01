@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db, auth } from "@/lib/firebase";
-import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, query, orderBy, getDocs, serverTimestamp } from "firebase/firestore";
 import { MessageSquare, Send, Heart, Sparkles, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -28,11 +28,12 @@ export default function AnonymousWallPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const q = query(collection(db, "anonymous_messages"), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(q, (snap) => {
+    const fetchMessages = async () => {
+      const q = query(collection(db, "anonymous_messages"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
       setMessages(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Message)));
-    });
-    return () => unsub();
+    };
+    fetchMessages();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
