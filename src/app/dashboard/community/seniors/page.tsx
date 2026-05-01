@@ -156,7 +156,7 @@ export default function SeniorsPage() {
             {/* Hero Group Photo */}
             <div className="relative aspect-[16/9] w-full rounded-[3rem] overflow-hidden border border-gold/20 shadow-2xl group">
               <Image 
-                src="/assets/legends_group.jpg" 
+                src="/assets/seniorscollage.png" 
                 fill 
                 className="object-cover transition-transform duration-1000 group-hover:scale-105" 
                 alt="Legends Group" 
