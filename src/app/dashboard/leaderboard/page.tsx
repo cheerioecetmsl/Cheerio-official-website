@@ -7,6 +7,7 @@ import { db, auth } from "@/lib/firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import Image from "next/image";
+import { formatXP, calculateLevel } from "@/lib/xp";
 
 interface LeaderboardUser {
   id: string;
@@ -51,7 +52,7 @@ export default function LeaderboardPage() {
         id: doc.id,
         name: doc.data().name || doc.data().displayName || "Anonymous",
         xp: doc.data().xp || 0,
-        level: doc.data().level || 1,
+        level: calculateLevel(doc.data().xp || 0).level,
         count: doc.data().contributions || doc.data().count || 0,
         photoURL: doc.data().photoURL || doc.data().imageURL,
         email: doc.data().email,
@@ -156,7 +157,7 @@ export default function LeaderboardPage() {
               <p className="text-[10px] font-bold text-brown-secondary uppercase tracking-widest text-center line-clamp-1">{top3[1].name}</p>
               <div className="h-28 w-full bg-gold-soft/10 rounded-t-2xl flex flex-col items-center justify-center border-t-2 border-brown-primary/10">
                 <Medal size={20} className="text-slate-300 mb-1" />
-                <span className="text-xs font-bold text-brown-secondary">{top3[1].xp} XP</span>
+                <span className="text-xs font-bold text-brown-secondary">{formatXP(top3[1].xp)} XP</span>
                 <span className="text-[9px] text-brown-secondary/30 font-bold uppercase">2nd</span>
               </div>
             </div>
@@ -180,7 +181,7 @@ export default function LeaderboardPage() {
               <p className="text-[10px] font-bold text-brown-primary uppercase tracking-widest text-center line-clamp-1">{top3[0].name}</p>
               <div className="h-44 w-full bg-gold-soft/30 rounded-t-3xl flex flex-col items-center justify-center border-t-4 border-gold-primary">
                 <Trophy size={32} className="text-brown-primary mb-2" />
-                <span className="text-sm font-bold text-brown-primary">{top3[0].xp} XP</span>
+                <span className="text-sm font-bold text-brown-primary">{formatXP(top3[0].xp)} XP</span>
                 <span className="text-[9px] text-brown-secondary/40 font-bold uppercase">1st</span>
               </div>
             </div>
@@ -191,7 +192,7 @@ export default function LeaderboardPage() {
               <p className="text-[10px] font-bold text-brown-secondary uppercase tracking-widest text-center line-clamp-1">{top3[2].name}</p>
               <div className="h-20 w-full bg-gold-soft/10 rounded-t-2xl flex flex-col items-center justify-center border-t-2 border-amber-600/30">
                 <Medal size={20} className="text-amber-600 mb-1" />
-                <span className="text-xs font-bold text-brown-secondary">{top3[2].xp} XP</span>
+                <span className="text-xs font-bold text-brown-secondary">{formatXP(top3[2].xp)} XP</span>
                 <span className="text-[9px] text-brown-secondary/30 font-bold uppercase">3rd</span>
               </div>
             </div>
@@ -271,7 +272,7 @@ export default function LeaderboardPage() {
                     <div className={`text-base font-bold tabular-nums serif ${
                       rank <= 3 ? "text-gold-primary" : isMe ? "text-gold-primary" : "text-brown-primary"
                     }`}>
-                      {user.xp.toLocaleString()}
+                      {formatXP(user.xp)}
                     </div>
                     <div className="text-[9px] font-bold text-brown-secondary/30 uppercase tracking-widest">XP</div>
                   </div>
@@ -343,7 +344,7 @@ export default function LeaderboardPage() {
                 {/* XP */}
                 <div className="text-right shrink-0">
                   <div className="text-base font-bold tabular-nums serif text-gold-primary">
-                    {myData.xp.toLocaleString()}
+                    {formatXP(myData.xp)}
                   </div>
                   <div className="text-[9px] font-bold text-brown-secondary/30 uppercase tracking-widest">XP</div>
                 </div>

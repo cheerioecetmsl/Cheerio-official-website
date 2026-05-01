@@ -78,10 +78,10 @@ export const HypeBoard = () => {
   );
 };
 
+import { calculateLevel, formatXP } from "@/lib/xp";
+
 export const UserStats = ({ xp = 0, name = "Archivist" }) => {
-  const level = Math.floor(xp / 100) + 1;
-  const nextLevelXP = level * 100;
-  const progress = (xp / nextLevelXP) * 100;
+  const { level, nextLevelXP, progress } = calculateLevel(xp);
 
   return (
     <div className="theme-card p-6 md:p-8">
@@ -99,7 +99,7 @@ export const UserStats = ({ xp = 0, name = "Archivist" }) => {
         <div>
           <div className="flex justify-between items-end mb-2">
             <span className="text-[10px] font-bold uppercase tracking-widest text-brown-secondary">Legacy Progress</span>
-            <span className="text-xs font-bold text-brown-primary tabular-nums">{xp} / {nextLevelXP} XP</span>
+            <span className="text-xs font-bold text-brown-primary tabular-nums">{formatXP(xp)} / {formatXP(nextLevelXP)} XP</span>
           </div>
           <div className="h-2 w-full bg-card-tone rounded-full overflow-hidden">
             <div 

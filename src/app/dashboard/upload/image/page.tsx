@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { auth, db } from "@/lib/firebase";
-import { doc, updateDoc, increment, collection, addDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, increment, collection, addDoc } from "firebase/firestore";
 import {
   Image as ImageIcon, Upload, CheckCircle, X, Loader2,
   Camera, SwitchCamera, AlertCircle
@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { ReturnToDashboard } from "@/components/Sidebar";
+import imageCompression from 'browser-image-compression';
 
 export default function ImageUpload() {
   const [files, setFiles] = useState<File[]>([]);
@@ -22,9 +23,38 @@ export default function ImageUpload() {
   const [cameraFacing, setCameraFacing] = useState<"user" | "environment">("environment");
   const [cameraError, setCameraError] = useState<string | null>(null);
 
+  const [strikes, setStrikes] = useState<number>(0);
+  const [strikeWarningDismissed, setStrikeWarningDismissed] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(true);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async (uid: string) => {
+      try {
+        const docRef = doc(db, "users", uid);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+          setStrikes(snap.data().strikes || 0);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user strikes", err);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        fetchUser(user.uid);
+      } else {
+        setLoadingUser(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   // ── File helpers ─────────────────────────────────────────
   const addFiles = (newFiles: File[]) => {
@@ -115,8 +145,24 @@ export default function ImageUpload() {
     setUploadedCount(0);
     try {
       await Promise.all(files.map(async file => {
+        let fileToUpload = file;
+        
+        // Compress image if > 3MB
+        if (file.size > 3 * 1024 * 1024) {
+          try {
+            const options = {
+              maxSizeMB: 3,
+              maxWidthOrHeight: 1920,
+              useWebWorker: true
+            };
+            fileToUpload = await imageCompression(file, options);
+          } catch (error) {
+            console.error("Error compressing image:", error);
+          }
+        }
+
         const form = new FormData();
-        form.append("file", file);
+        form.append("file", fileToUpload);
         form.append("upload_preset", "Cheerio-2026");
         form.append("folder", "Cheerio/Archives/Images");
         const res = await fetch(
@@ -146,9 +192,54 @@ export default function ImageUpload() {
   };
 
   // ── Render ───────────────────────────────────────────────
+  if (loadingUser) {
+    return (
+      <main className="min-h-screen py-24 px-6 flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-gold-primary" />
+      </main>
+    );
+  }
+
+  const isBanned = strikes >= 3;
+  const showStrikeWarning = (strikes === 1 || strikes === 2) && !strikeWarningDismissed;
+
   return (
-    <main className="min-h-screen py-24 px-6 flex items-center justify-center">
-      <div className="max-w-3xl w-full">
+    <main className="min-h-screen py-24 px-6 flex items-center justify-center relative">
+      {isBanned && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm px-6">
+          <div className="bg-red-950/90 border border-red-500/50 p-8 rounded-3xl max-w-md text-center space-y-4 shadow-2xl animate-in zoom-in duration-300">
+            <AlertCircle size={48} className="mx-auto text-red-500 mb-2" />
+            <h2 className="text-2xl font-bold text-red-50 serif">Uploads Disabled</h2>
+            <p className="text-red-200/80 text-sm leading-relaxed">
+              Due to three strikes, you are not able to continue uploading images.
+            </p>
+            <div className="pt-4">
+              <Link href="/dashboard" className="inline-block w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors">
+                Return to Dashboard
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showStrikeWarning && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm px-6">
+          <div className="bg-orange-950/90 border border-orange-500/50 p-8 rounded-3xl max-w-md text-center space-y-4 shadow-2xl animate-in zoom-in duration-300">
+            <AlertCircle size={48} className="mx-auto text-orange-500 mb-2" />
+            <h2 className="text-2xl font-bold text-orange-50 serif">Moderator Warning</h2>
+            <p className="text-orange-200/80 text-sm leading-relaxed">
+              You have been given strikes by moderators. Please do not engage in such content any more.
+            </p>
+            <div className="pt-4">
+              <button onClick={() => setStrikeWarningDismissed(true)} className="inline-block w-full py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors">
+                I Understand
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className={`max-w-3xl w-full ${isBanned ? 'opacity-50 pointer-events-none' : ''}`}>
         <ReturnToDashboard />
 
         {/* Live camera modal */}

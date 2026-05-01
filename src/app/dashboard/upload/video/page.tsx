@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { auth, db } from "@/lib/firebase";
-import { doc, updateDoc, increment, collection, addDoc } from "firebase/firestore";
+import { doc, updateDoc, increment, collection, addDoc, getDoc } from "firebase/firestore";
 import {
   Video as VideoIcon, Upload, CheckCircle, X, Loader2,
   Camera, SwitchCamera, Square, AlertCircle
@@ -23,6 +23,38 @@ export default function VideoUpload() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
 
+  const [strikes, setStrikes] = useState<number | null>(null);
+  const [strikeWarningDismissed, setStrikeWarningDismissed] = useState(false);
+  const [banned, setBanned] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch strikes on mount
+  useEffect(() => {
+    const checkStrikes = () => {
+      const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+              const userStrikes = userDoc.data()?.strikes || 0;
+              setStrikes(userStrikes);
+              if (userStrikes >= 3) {
+                setBanned(true);
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching user strikes:", error);
+          }
+        }
+        setLoading(false);
+      });
+      return unsubscribe;
+    };
+
+    const unsub = checkStrikes();
+    return () => unsub();
+  }, []);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -30,14 +62,41 @@ export default function VideoUpload() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── File helpers ─────────────────────────────────────────
-  const addFiles = (newFiles: File[]) => {
+  const getVideoDuration = (file: File): Promise<number> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        resolve(video.duration);
+      };
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
+  const addFiles = async (newFiles: File[]) => {
     // Accept any video/* type; also accept .webm .mp4 etc by extension as fallback
     const vids = newFiles.filter(f =>
       f.type.startsWith("video/") || /\.(mp4|mov|webm|mkv|avi|m4v|3gp|ogv)$/i.test(f.name)
     );
     if (!vids.length) return;
-    setFiles(p => [...p, ...vids]);
-    setPreviews(p => [...p, ...vids.map(f => URL.createObjectURL(f))]);
+    
+    for (const file of vids) {
+      if (file.size > 100 * 1024 * 1024) {
+        alert(`File ${file.name} is larger than 100MB and cannot be uploaded.`);
+        continue;
+      }
+
+      // Check duration
+      const duration = await getVideoDuration(file);
+      if (duration > 600) {
+        alert(`File ${file.name} is longer than 10 minutes and cannot be uploaded. Please cut it into pieces.`);
+        continue;
+      }
+
+      setFiles(p => [...p, file]);
+      setPreviews(p => [...p, URL.createObjectURL(file)]);
+    }
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -220,8 +279,58 @@ export default function VideoUpload() {
   };
 
   // ── Render ───────────────────────────────────────────────
+  if (loading) {
+    return (
+      <main className="min-h-screen py-24 px-6 flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-gold-primary" />
+      </main>
+    );
+  }
+
+  const showStrikeWarning = strikes !== null && (strikes === 1 || strikes === 2) && !strikeWarningDismissed;
+
   return (
     <main className="min-h-screen py-24 px-6 flex items-center justify-center">
+      {/* Full Screen Banned Overlay */}
+      {banned && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-in fade-in duration-500">
+          <div className="max-w-md w-full mx-4 p-8 rounded-3xl bg-red-950/20 border-2 border-red-900/50 text-center space-y-6">
+            <div className="w-20 h-20 mx-auto rounded-full bg-red-900/30 flex items-center justify-center">
+              <AlertCircle size={40} className="text-red-500" />
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-3xl font-bold text-red-500 serif tracking-wide">Uploads Disabled</h2>
+              <p className="text-red-400/80 text-sm leading-relaxed">
+                Your account has accumulated 3 or more strikes due to community guidelines violations. 
+                Media upload privileges have been permanently revoked.
+              </p>
+            </div>
+            <div className="pt-4 flex justify-center">
+              <Link href="/dashboard" className="px-8 py-3 rounded-xl bg-red-900/40 text-red-400 font-bold tracking-widest uppercase text-xs hover:bg-red-900/60 transition-all border border-red-500/20">
+                Return to Dashboard
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showStrikeWarning && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm px-6">
+          <div className="bg-orange-950/90 border border-orange-500/50 p-8 rounded-3xl max-w-md text-center space-y-4 shadow-2xl animate-in zoom-in duration-300">
+            <AlertCircle size={48} className="mx-auto text-orange-500 mb-2" />
+            <h2 className="text-2xl font-bold text-orange-50 serif">Moderator Warning</h2>
+            <p className="text-orange-200/80 text-sm leading-relaxed">
+              You have been given strikes by moderators. Please do not engage in such content any more.
+            </p>
+            <div className="pt-4">
+              <button onClick={() => setStrikeWarningDismissed(true)} className="inline-block w-full py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors">
+                I Understand
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-3xl w-full">
         <ReturnToDashboard />
 
