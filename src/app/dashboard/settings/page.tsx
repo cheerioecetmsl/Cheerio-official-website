@@ -21,6 +21,8 @@ export default function SettingsPage() {
     section: "",
     photoURL: "",
     category: "STUDENT",
+    narrative: "",
+    role: "",
   });
 
   useEffect(() => {
@@ -37,6 +39,8 @@ export default function SettingsPage() {
             section: data.section || "A",
             photoURL: data.photoURL || u.photoURL || "",
             category: data.category || "STUDENT",
+            narrative: data.narrative || "",
+            role: data.role || "",
           });
         }
         setLoading(false);
@@ -83,7 +87,9 @@ export default function SettingsPage() {
         name: formData.name,
         year: formData.year,
         section: formData.section,
-        photoURL: archivedPhotoURL
+        photoURL: archivedPhotoURL,
+        narrative: formData.narrative,
+        role: formData.role
       });
 
       // 2. Update Auth Profile
@@ -238,6 +244,37 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Extended Profile Information */}
+              <div className="space-y-8">
+                {/* Role / Fun Fact */}
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold text-brown-primary uppercase tracking-widest flex items-center gap-2">
+                    <Star size={12} /> Write something fun about yourself
+                  </label>
+                  <input 
+                    type="text"
+                    className="w-full theme-cinematic-input border-b border-gold-soft/40 p-4 rounded-none text-lg serif text-brown-primary"
+                    placeholder="e.g. Code by day, gamer by night"
+                    value={formData.role}
+                    onChange={e => setFormData({...formData, role: e.target.value})}
+                  />
+                </div>
+
+                {/* About Brief / Narrative */}
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold text-brown-primary uppercase tracking-widest flex items-center gap-2">
+                    <Star size={12} /> About Brief
+                  </label>
+                  <textarea 
+                    rows={3}
+                    className="w-full theme-cinematic-input border border-gold-soft/40 p-4 rounded-xl text-lg serif text-brown-primary"
+                    placeholder="A brief legacy note for the archives..."
+                    value={formData.narrative}
+                    onChange={e => setFormData({...formData, narrative: e.target.value})}
+                  />
+                </div>
               </div>
 
               {/* Action Button */}

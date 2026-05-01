@@ -295,21 +295,21 @@ export default function OnboardingPage() {
                 <div
                   className="rounded-2xl px-4 py-4 text-left w-full max-w-xs space-y-3"
                   style={{
-                    background: 'rgba(239,68,68,0.07)',
-                    border: '1.5px solid rgba(239,68,68,0.45)',
+                    background: 'rgba(245,158,11,0.07)',
+                    border: '1.5px solid rgba(245,158,11,0.45)',
                   }}
                 >
                   {/* Header */}
                   <div className="flex items-center gap-2">
-                    <AlertTriangle size={14} className="text-red-500 flex-shrink-0" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-red-500">
-                      No human face detected
+                    <AlertTriangle size={14} className="text-amber-500 flex-shrink-0" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-amber-500">
+                      Close-up Recommended
                     </span>
                   </div>
 
                   {/* Message */}
                   <p className="text-xs leading-relaxed" style={{ color: 'var(--color-brown-primary)' }}>
-                    We couldn&apos;t find a face in this photo. Would you like to add your own face now, or keep this and change it later?
+                    Your photo is not a close-up shot of your face. Do you like to give a close-up shot of your face?
                   </p>
 
                   {/* Actions */}
@@ -317,16 +317,17 @@ export default function OnboardingPage() {
                     {/* Keep it for now — muted */}
                     <button
                       type="button"
-                      className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all hover:border-red-400 hover:text-red-500"
-                      style={{ borderColor: 'rgba(239,68,68,0.3)', color: 'var(--color-brown-secondary)' }}
+                      onClick={() => setFaceStatus('idle')}
+                      className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all hover:border-amber-400 hover:text-amber-500"
+                      style={{ borderColor: 'rgba(245,158,11,0.3)', color: 'var(--color-brown-secondary)' }}
                     >
                       Keep &amp; change later
                     </button>
-                    {/* Put my face now — red CTA */}
+                    {/* Put my face now — yellow CTA */}
                     <label
                       htmlFor="photo-upload-input"
                       className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer text-black transition-all hover:brightness-110 active:scale-95"
-                      style={{ background: '#EF4444' }}
+                      style={{ background: '#F59E0B' }}
                     >
                       <RefreshCw size={11} /> Put my face now
                     </label>
@@ -443,11 +444,11 @@ export default function OnboardingPage() {
                   {formData.year === "4th Year" && (
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-brown-primary flex items-center gap-2">
-                        <BookOpen size={14} /> Role / Designation
+                        <BookOpen size={14} /> Write something fun about yourself
                       </label>
                       <input 
                         type="text"
-                        placeholder="e.g. Lead Sculptor / Batch Rep"
+                        placeholder="e.g. Code by day, gamer by night"
                         value={formData.role}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                         className="w-full theme-cinematic-input p-4 rounded-xl text-sm font-bold uppercase tracking-widest"

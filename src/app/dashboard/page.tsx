@@ -104,7 +104,7 @@ export default function DashboardPage() {
       const users = snapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() } as any))
         .filter(u => u.category === "STUDENT" || u.category === "LEGEND")
-        .slice(0, 10);
+        .slice(0, 3);
       setLeaderboard(users);
     });
 
@@ -141,7 +141,7 @@ export default function DashboardPage() {
 
   // Separate effect for rank calculation to avoid auth race conditions
   useEffect(() => {
-    if (!userData?.xp) return;
+    if (!userData || typeof userData.xp !== 'number') return;
 
     const rankQuery = query(collection(db, "users"), where("xp", ">", userData.xp));
     const unsubscribeRank = onSnapshot(rankQuery, (snap) => {
@@ -404,8 +404,8 @@ export default function DashboardPage() {
                   </div>
                 ))}
 
-                {/* Show Current User if not in Top 10 */}
-                {userRank && userRank > 10 && (
+                {/* Show Current User if not in Top 3 */}
+                {userRank && userRank > 3 && (
                   <>
                     <div className="p-4 text-center text-brown-primary/50 italic serif border-b border-brown-secondary/20">... descending into the archives ...</div>
                     <div className="flex items-center gap-4 md:gap-8 p-4 md:p-8 bg-gold-soft/20 border-l-4 border-l-gold-primary">
