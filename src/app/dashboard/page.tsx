@@ -20,6 +20,7 @@ import { LogoutModal } from "@/components/LogoutModal";
 import { archiveProfilePhoto } from "@/lib/image-archive";
 import { EngagementModal } from "@/components/EngagementModal";
 import { EngagementModule } from "@/types/engagement";
+import { NotificationModal } from "@/components/NotificationModal";
 
 interface UserArchiveData {
   name: string;
@@ -45,6 +46,8 @@ export default function DashboardPage() {
   const [userRank, setUserRank] = useState<number | null>(null);
   const [activeModule, setActiveModule] = useState<EngagementModule | null>(null);
   const [showEngagement, setShowEngagement] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [latestNotification, setLatestNotification] = useState<HypeUpdate | null>(null);
   const [mounted, setMounted] = useState(false);
   const hasTriggeredRef = useRef({ tutorial: false, invite: false });
 
@@ -114,7 +117,12 @@ export default function DashboardPage() {
       const pulseQuery = query(collection(db, "hype_board"), orderBy("createdAt", "desc"), limit(3));
       const snap = await getDocs(pulseQuery);
       if (!snap.empty) {
-        setPulseItems(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)));
+        const updates = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+        setPulseItems(updates);
+        
+        // Trigger Popup logic for the very latest one
+        const latest = updates[0];
+        setLatestNotification(latest);
       }
     };
 
@@ -142,6 +150,52 @@ export default function DashboardPage() {
       unsubscribeAuth();
     };
   }, [router]);
+
+  // Handle Popup Logic once both user data and latest notification are available
+  useEffect(() => {
+    if (!userData || !latestNotification || loading) return;
+
+    const checkPopup = async () => {
+      const lastSeenId = userData.lastSeenNotificationId;
+      const userCreatedAt = userData.createdAt ? new Date(userData.createdAt).getTime() : 0;
+      
+      // Convert latestNotification.createdAt to timestamp
+      let notificationCreatedAt = 0;
+      if (latestNotification.createdAt?.toDate) {
+        notificationCreatedAt = latestNotification.createdAt.toDate().getTime();
+      } else if (typeof latestNotification.createdAt === 'string') {
+        notificationCreatedAt = new Date(latestNotification.createdAt).getTime();
+      } else if (typeof latestNotification.createdAt === 'number') {
+        notificationCreatedAt = latestNotification.createdAt;
+      }
+
+      // Logic: 
+      // 1. Not seen this one yet
+      // 2. User joined BEFORE this notification was created (Existing users only)
+      // 3. No other critical overlays are open (Tutorial, Invitation)
+      const hasNotSeen = lastSeenId !== latestNotification.id;
+      const isExistingUser = userCreatedAt < notificationCreatedAt;
+      const noOtherOverlays = !showTutorial && !showSeniorInvite;
+
+      if (hasNotSeen && isExistingUser && noOtherOverlays) {
+        // Delay slightly for better UX (let initial animations finish)
+        setTimeout(() => {
+          setShowNotificationModal(true);
+        }, 1500);
+      }
+    };
+
+    checkPopup();
+  }, [userData, latestNotification, loading, showTutorial, showSeniorInvite]);
+
+  const handleNotificationClose = async () => {
+    setShowNotificationModal(false);
+    if (auth.currentUser && latestNotification) {
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        lastSeenNotificationId: latestNotification.id
+      });
+    }
+  };
 
   // Separate effect for rank calculation to avoid auth race conditions
   useEffect(() => {
@@ -470,6 +524,11 @@ export default function DashboardPage() {
       <LogoutModal
         isOpen={showLogoutModal}
         onCancel={() => setShowLogoutModal(false)}
+      />
+      <NotificationModal
+        isOpen={showNotificationModal}
+        onClose={handleNotificationClose}
+        notification={latestNotification}
       />
     </main>
   );
