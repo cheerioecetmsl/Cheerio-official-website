@@ -1,3 +1,5 @@
+"use client";
+
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -11,16 +13,21 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Initialize Firebase only on the client
+let app;
+let auth: any;
+let db: any;
 
-// Set persistence explicitly to LOCAL
 if (typeof window !== "undefined") {
+  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+
+  // Set persistence explicitly to LOCAL
   setPersistence(auth, browserLocalPersistence).catch((err) => {
     console.error("Auth Persistence Error:", err);
   });
 }
 
 export { auth, db };
+

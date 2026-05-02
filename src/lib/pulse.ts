@@ -1,3 +1,5 @@
+"use client";
+
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc, collection, getDocs, setDoc, query, where, limit, orderBy } from "firebase/firestore";
 import * as faceapi from "face-api.js";
