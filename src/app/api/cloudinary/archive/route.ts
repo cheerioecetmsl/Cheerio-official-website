@@ -1,21 +1,43 @@
 export const runtime = 'edge';
 
 import { NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
-
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 export async function GET() {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    console.error('Missing Cloudinary configuration');
+    return NextResponse.json({ success: false, error: 'Cloudinary configuration missing' }, { status: 500 });
+  }
+
   try {
-    const { resources } = await cloudinary.search
-      .expression('folder:Cheerio/Archives/Images AND resource_type:image')
-      .sort_by('created_at', 'desc')
-      .max_results(500)
-      .execute();
+    const auth = btoa(`${apiKey}:${apiSecret}`);
+    
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/resources/search`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          expression: 'folder:Cheerio/Archives/Images AND resource_type:image',
+          sort_by: [{ created_at: 'desc' }],
+          max_results: 500,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || 'Cloudinary API returned an error');
+    }
+
+    const result = await response.json();
+    const resources = result.resources || [];
 
     const urls = resources.map((r: any) => ({
       url: r.secure_url,
