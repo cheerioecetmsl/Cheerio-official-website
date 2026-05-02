@@ -6,7 +6,11 @@ import { doc, getDoc } from "firebase/firestore";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image"; // Stabilizes Next.js 16 module evaluation on Cloudflare
 import { User as FirebaseUser } from "firebase/auth";
+
+// @ts-ignore - Explicitly keep next/image in the bundle
+const _unused = Image;
 
 export const Navbar = () => {
   const router = useRouter();
@@ -88,7 +92,7 @@ export const Navbar = () => {
       }`}
       style={!isHome ? { backgroundColor: 'var(--color-brown-primary)', borderBottom: '1px solid var(--color-gold-soft)' } : {}}
     >
-      <Link href="/" className="flex items-center gap-4 group">
+      <Link href="/" prefetch={false} className="flex items-center gap-4 group">
         {/* Navbar Logo Landing Zone */}
         {isHome ? (
           <div className="w-10 md:w-16 h-8 md:h-12 flex-shrink-0" /> // Reserved space for gliding logo
@@ -115,6 +119,7 @@ export const Navbar = () => {
           user ? (
             <Link 
               href="/dashboard"
+              prefetch={false}
               className={isHome ? "gold-button px-6 py-2 rounded-full text-[10px] md:text-sm font-bold uppercase tracking-wider" : "theme-cinematic-btn-primary px-6 py-2 rounded-full text-[10px] md:text-sm font-bold uppercase tracking-wider"}
             >
               Dashboard

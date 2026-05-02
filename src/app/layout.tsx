@@ -3,7 +3,6 @@ import { Inter, EB_Garamond, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import PWARegistration from "@/components/PWARegistration";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -56,7 +55,20 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${ebGaramond.variable} ${shareTechMono.variable} antialiased film-grain min-h-screen bg-dark-bg text-dark-text`}>
-        <PWARegistration />
+        {/* Service Worker Cleanup: Ensures stale Cloudflare caches are cleared for all users */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                  for (let registration of registrations) {
+                    registration.unregister();
+                  }
+                });
+              }
+            `,
+          }}
+        />
         <Navbar />
         {children}
         <Footer />

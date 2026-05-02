@@ -24,6 +24,7 @@ const IMG_HEIGHT = 100;
 
 function FlipCard({
     src,
+    baseId,
     index,
     total,
     phase,
