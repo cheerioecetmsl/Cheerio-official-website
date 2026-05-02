@@ -142,7 +142,7 @@ export default function OnboardingPage() {
     if (!file) return;
     setLoading(true);
     try {
-      const { baseId } = await uploadProcessedImage(file, "Avatars");
+      const { baseId } = await uploadProcessedImage(file, "Cheerio/Archives/Images");
       const url = getDownloadUrl(baseId, "gallery");
       setFormData(prev => ({ ...prev, photoURL: url, photoBaseId: baseId }));
       setGmailPhotoURL(''); // now a custom upload

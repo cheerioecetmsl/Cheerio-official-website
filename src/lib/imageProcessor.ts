@@ -13,10 +13,7 @@ export interface ImageVariant {
 }
 
 export const IMAGE_VARIANTS: Record<string, { width: number; height: number; quality: number }> = {
-  avatar: { width: 300, height: 300, quality: 0.8 },      // 1:1 for profile pics
-  card: { width: 400, height: 500, quality: 0.8 },        // 4:5 for archive face cards
   gallery: { width: 1200, height: 1500, quality: 0.85 },  // 4:5 for high-res viewing
-  preview: { width: 100, height: 125, quality: 0.6 },     // 4:5 for thumbnails
 };
 
 /**
@@ -99,33 +96,23 @@ export async function processImage(
 }
 
 /**
- * Generates all 8 variants for a single input file.
+ * Generates only the required WebP variant for display.
  * Returns a map of variant names to Blobs.
  */
 export async function generateAllVariants(file: File | Blob): Promise<Map<string, Blob>> {
   const variants = new Map<string, Blob>();
   
-  for (const [name, config] of Object.entries(IMAGE_VARIANTS)) {
-    // Generate WebP for display
-    const webpBlob = await processImage(
-      file, 
-      config.width, 
-      config.height, 
-      "image/webp", 
-      config.quality
-    );
-    variants.set(`${name}_webp`, webpBlob);
-
-    // Generate JPEG for download
-    const jpegBlob = await processImage(
-      file, 
-      config.width, 
-      config.height, 
-      "image/jpeg", 
-      config.quality
-    );
-    variants.set(`${name}_jpeg`, jpegBlob);
-  }
+  const config = IMAGE_VARIANTS.gallery;
+  
+  // Generate WebP for display
+  const webpBlob = await processImage(
+    file, 
+    config.width, 
+    config.height, 
+    "image/webp", 
+    config.quality
+  );
+  variants.set("gallery_webp", webpBlob);
 
   return variants;
 }

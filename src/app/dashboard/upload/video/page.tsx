@@ -247,16 +247,41 @@ export default function VideoUpload() {
     if (!files.length || !auth.currentUser) return;
     setUploading(true);
     setUploadedCount(0);
+    
+    const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dyvobdjp5";
+    if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) {
+      console.warn("[VideoUpload] NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME is missing. Using fallback:", CLOUD_NAME);
+    }
+
     try {
       await Promise.all(files.map(async file => {
         const form = new FormData();
         form.append("file", file);
         form.append("upload_preset", "Cheerio-2026");
         form.append("folder", "Cheerio/Archives/Videos");
+        
+        console.log(`[VideoUpload] Uploading ${file.name}...`, { 
+          cloudName: CLOUD_NAME, 
+          preset: "Cheerio-2026",
+          folder: "Cheerio/Archives/Videos"
+        });
+
         const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/video/upload`,
+          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`,
           { method: "POST", body: form }
         );
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          console.error("[VideoUpload] Cloudinary Upload Failed:", {
+            status: res.status,
+            statusText: res.statusText,
+            error: errorData.error?.message || "Unknown error",
+            fullError: errorData
+          });
+          throw new Error(`Upload failed: ${errorData.error?.message || res.statusText}`);
+        }
+
         const json = await res.json();
         await addDoc(collection(db, "archives"), {
           url: json.secure_url, type: "video",

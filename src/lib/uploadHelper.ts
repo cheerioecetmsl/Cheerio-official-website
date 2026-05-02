@@ -15,24 +15,60 @@ export interface UploadResult {
  */
 export async function uploadProcessedImage(
   file: File | Blob,
-  subfolder: string = "General",
+  subfolder: string = "Images",
   onProgress?: (progress: number) => void
 ): Promise<UploadResult> {
+  const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dyvobdjp5";
+  const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-2026";
+  const API_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+
+  if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) {
+    console.warn("[UploadHelper] NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME is missing. Using fallback:", CLOUD_NAME);
+  }
+
   const baseId = `img_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   const variants = await generateAllVariants(file);
   const totalVariants = variants.size;
   let completed = 0;
   let lastVersion = 0;
 
-  // We upload them sequentially to avoid overloading the browser/network
+  // Use the folder structure from the user's screenshot: Cheerio/Archives/Images
+  // If subfolder already contains the full path, use it as is; otherwise prepend the archive path.
+  const folderPath = subfolder.startsWith("Cheerio/") 
+    ? subfolder 
+    : `Cheerio/Archives/${subfolder}`;
+
+  console.log(`[UploadHelper] Initializing Upload for ${baseId} to ${folderPath} using preset ${UPLOAD_PRESET}`);
+
+  // 1. Upload the Original File
+  const originalFormData = new FormData();
+  originalFormData.append("file", file);
+  originalFormData.append("upload_preset", UPLOAD_PRESET);
+  originalFormData.append("public_id", `${baseId}_original`);
+  originalFormData.append("folder", folderPath);
+
+  console.log(`[UploadHelper] Uploading original file...`);
+  const originalResponse = await fetch(API_URL, {
+    method: "POST",
+    body: originalFormData,
+  });
+
+  if (!originalResponse.ok) {
+    const error = await originalResponse.json().catch(() => ({}));
+    throw new Error(`Failed to upload original file: ${error.error?.message || originalResponse.statusText}`);
+  }
+
+  // 2. Upload the Processed WebP Variant(s) (now only one)
   for (const [name, blob] of variants.entries()) {
     const formData = new FormData();
-    formData.append("file", blob);
+    formData.append("file", blob, `${baseId}_${name}.webp`);
     formData.append("upload_preset", UPLOAD_PRESET);
     
-    // public_id convention: Cheerio/Static/{subfolder}/{baseId}_{variantName}
+    // public_id convention: {baseId}_{variantName}
     formData.append("public_id", `${baseId}_${name}`);
-    formData.append("folder", `Cheerio/Static/${subfolder}`);
+    formData.append("folder", folderPath);
+
+    console.log(`[UploadHelper] Uploading display variant ${name}...`);
 
     const response = await fetch(API_URL, {
       method: "POST",
@@ -40,9 +76,9 @@ export async function uploadProcessedImage(
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      console.error(`Cloudinary Upload Error for ${name}:`, error);
-      throw new Error(`Failed to upload variant ${name}: ${error.message || response.statusText}`);
+      const error = await response.json().catch(() => ({}));
+      console.error(`[UploadHelper] Cloudinary Upload Error (${name}):`, error);
+      throw new Error(`Failed to upload variant ${name}: ${error.error?.message || response.statusText}`);
     }
 
     const result = await response.json();
@@ -54,6 +90,7 @@ export async function uploadProcessedImage(
     }
   }
 
+  console.log(`[UploadHelper] Batch Upload Complete for ${baseId}`);
   return { baseId, version: lastVersion };
 }
 

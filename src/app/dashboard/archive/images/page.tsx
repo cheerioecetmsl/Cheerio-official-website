@@ -126,7 +126,7 @@ export default function ImageArchive() {
         
         // Use high-res gallery JPG if baseId exists, otherwise fallback to url
         const downloadUrl = photo.baseId 
-          ? getDownloadUrl(photo.baseId, "gallery", "jpg")
+          ? getDownloadUrl(photo.baseId, "gallery")
           : photo.url;
           
         const response = await fetch(downloadUrl);

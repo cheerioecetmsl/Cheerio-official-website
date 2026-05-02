@@ -25,7 +25,7 @@ export async function archiveProfilePhoto(photoURL: string): Promise<ArchiveResu
     const blob = await response.blob();
 
     // 2. Process and Upload all variants to Cloudinary
-    const { baseId } = await uploadProcessedImage(blob, "Avatars");
+    const { baseId } = await uploadProcessedImage(blob, "Cheerio/Archives/Images");
     const url = getDownloadUrl(baseId, "gallery");
     
     console.log("[archiveProfilePhoto] Successfully archived to Cloudinary with variants:", baseId);

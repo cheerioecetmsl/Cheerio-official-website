@@ -10,9 +10,14 @@ export type ImageVariantName = "avatar" | "card" | "gallery" | "preview";
  * Note: These URLs do not contain any transformation parameters (w_, h_, etc.)
  * as the resizing was done client-side before upload.
  */
-export function getVariantUrl(baseId: string, variant: ImageVariantName, format: "webp" | "jpeg" = "webp") {
-  // Use the naming convention: Cheerio/Static/{baseId}_{variant}_{format}.{format}
-  return `${BASE_URL}/Cheerio/Static/${baseId}_${variant}_${format}.${format}`;
+export function getVariantUrl(baseId: string, variant: ImageVariantName, format: "webp" | "jpeg" = "webp", folder: string = "Cheerio/Archives/Images") {
+  // New simplified logic:
+  // - All webp (display) requests use the 'gallery_webp' variant.
+  // - All jpeg (download) requests use the 'original' file.
+  if (format === "webp") {
+    return `${BASE_URL}/${folder}/${baseId}_gallery_webp.webp`;
+  }
+  return `${BASE_URL}/${folder}/${baseId}_original.jpg`;
 }
 
 interface CheerioImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -20,6 +25,7 @@ interface CheerioImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackUrl?: string; // Original URL for backward compatibility
   variant?: ImageVariantName;
   priority?: boolean;
+  folder?: string;
 }
 
 /**
@@ -46,6 +52,7 @@ export const CheerioImage: React.FC<CheerioImageProps> = ({
   fallbackUrl, 
   src, // Support standard src prop
   variant = "gallery", 
+  folder = "Cheerio/Archives/Images",
   alt = "Memory",
   className = "",
   priority,
@@ -84,8 +91,8 @@ export const CheerioImage: React.FC<CheerioImageProps> = ({
     return null;
   }
 
-  const webpUrl = getVariantUrl(baseId, variant, "webp");
-  const jpegUrl = getVariantUrl(baseId, variant, "jpeg");
+  const webpUrl = getVariantUrl(baseId, variant, "webp", folder);
+  const jpegUrl = getVariantUrl(baseId, variant, "jpeg", folder);
 
   return (
     <picture className={className}>
@@ -110,6 +117,6 @@ export const CheerioImage: React.FC<CheerioImageProps> = ({
 /**
  * Returns the download URL (JPG) for a specific variant.
  */
-export function getDownloadUrl(baseId: string, variant: ImageVariantName = "gallery") {
-  return getVariantUrl(baseId, variant, "jpeg");
+export function getDownloadUrl(baseId: string, variant: ImageVariantName = "gallery", folder: string = "Cheerio/Archives/Images") {
+  return getVariantUrl(baseId, variant, "jpeg", folder);
 }

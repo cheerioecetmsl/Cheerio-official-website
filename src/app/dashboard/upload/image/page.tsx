@@ -147,7 +147,7 @@ export default function ImageUpload() {
     try {
       for (const file of files) {
         // Use our new multi-variant processor instead of manual compression/fetch
-        const { baseId } = await uploadProcessedImage(file, "Gallery");
+        const { baseId } = await uploadProcessedImage(file, "Cheerio/Archives/Images");
         
         // Store both the baseId (for CheerioImage) and a fallbackUrl (for legacy support)
         const fallbackUrl = getDownloadUrl(baseId, "gallery");

@@ -60,7 +60,7 @@ export default function SettingsPage() {
 
     setSaving(true);
     try {
-      const { baseId } = await uploadProcessedImage(file, "Avatars");
+      const { baseId } = await uploadProcessedImage(file, "Cheerio/Archives/Images");
       const url = getDownloadUrl(baseId, "gallery");
       setFormData(prev => ({ ...prev, photoURL: url, photoBaseId: baseId }));
     } catch (err) {

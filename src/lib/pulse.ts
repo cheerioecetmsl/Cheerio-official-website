@@ -4,7 +4,7 @@ import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc, collection, getDocs, setDoc, query, where, limit, orderBy } from "firebase/firestore";
 import * as faceapi from "face-api.js";
 import { getRawCloudinaryUrl } from "@/lib/cloudinary";
-import { getProxiedUrl } from "@/lib/imageVariants";
+import { getProxiedUrl, getVariantUrl } from "@/lib/imageVariants";
 
 const MODEL_URL = "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/";
 
@@ -125,7 +125,7 @@ export const runPulseScan = async (
         let img: HTMLImageElement;
         // Optimization: Use the 'preview' variant if baseId exists for faster detection
         const scanUrl = item.baseId 
-          ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/Cheerio/Static/${item.baseId.split('/').pop()}_preview_webp`
+          ? getVariantUrl(item.baseId, "preview", "webp", "Cheerio/Archives/Images")
           : getRawCloudinaryUrl(item.url);
 
         try {
