@@ -23,32 +23,66 @@ interface CheerioImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 }
 
 /**
+ * Helper to wrap external URLs (specifically Google photos) in a proxy to avoid CORS issues.
+ */
+export const getProxiedUrl = (url: string) => {
+  if (!url) return "";
+  if (url.startsWith("/") || url.startsWith("blob:") || url.startsWith("data:")) return url;
+  
+  // Only proxy Google photos which are known to have CORS issues with canvas
+  if (url.includes("googleusercontent.com") || url.includes("lh3.googleusercontent.com")) {
+    return `/api/img-proxy?url=${encodeURIComponent(url)}`;
+  }
+  
+  return url;
+};
+
+/**
  * A specialized Image component that serves WebP by default with a JPEG fallback.
  * Uses the <picture> element to avoid any server-side transformation.
  */
 export const CheerioImage: React.FC<CheerioImageProps> = ({ 
   baseId, 
   fallbackUrl, 
+  src, // Support standard src prop
   variant = "gallery", 
   alt = "Memory",
   className = "",
   priority,
   ...props 
 }) => {
-  // Backward compatibility: If no baseId is provided, use the fallbackUrl (old system)
-  if (!baseId && fallbackUrl) {
+  // Use src if provided, otherwise fallbackUrl
+  const effectiveUrl = getProxiedUrl(src || fallbackUrl || "");
+
+  // Backward compatibility: If no baseId is provided, use the effectiveUrl (old system)
+  if (!baseId && effectiveUrl) {
     return (
       <img 
-        src={fallbackUrl} 
+        src={effectiveUrl} 
         alt={alt} 
         className={className} 
-        loading={props.priority ? "eager" : "lazy"}
+        loading={priority ? "eager" : "lazy"}
+        crossOrigin="anonymous"
         {...props} 
       />
     );
   }
 
-  if (!baseId) return null;
+  if (!baseId) {
+    if (effectiveUrl) {
+      return (
+        <img 
+          src={effectiveUrl} 
+          alt={alt} 
+          className={className} 
+          loading={priority ? "eager" : "lazy"}
+          crossOrigin="anonymous"
+          {...props} 
+        />
+      );
+    }
+    return null;
+  }
 
   const webpUrl = getVariantUrl(baseId, variant, "webp");
   const jpegUrl = getVariantUrl(baseId, variant, "jpeg");
@@ -60,8 +94,14 @@ export const CheerioImage: React.FC<CheerioImageProps> = ({
         src={jpegUrl} 
         alt={alt} 
         className={className}
-        loading={props.priority ? "eager" : "lazy"}
+        loading={priority ? "eager" : "lazy"}
+        crossOrigin="anonymous"
         {...props} 
+        onError={(e) => {
+          if (effectiveUrl && e.currentTarget.src !== effectiveUrl) {
+            e.currentTarget.src = effectiveUrl;
+          }
+        }}
       />
     </picture>
   );

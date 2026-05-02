@@ -222,14 +222,10 @@ export default function IntroAnimation() {
                         }}
                         className="flex flex-col items-center transition-all duration-300"
                     >
-                        <Image 
+                        <img 
                             src="/assets/cheerio logo.png" 
                             alt="Cheerio Logo" 
-                        width={350}
-                        height={350}
-                        priority
-                        style={{ width: "auto", height: "auto" }}
-                        className="w-[150px] md:w-[350px] h-auto opacity-90"
+                            className="w-[150px] md:w-[350px] h-auto opacity-90"
                         />
                         <motion.p 
                             style={{ opacity: supportTextOpacity }}
@@ -248,14 +244,10 @@ export default function IntroAnimation() {
                     }}
                     className="absolute z-10 flex flex-col items-center justify-center pointer-events-none"
                 >
-                    <Image 
+                    <img 
                         src="/assets/cheerio writing 1.png" 
                         alt="Cheerio Writing" 
-                        width={1000}
-                        height={300}
-                        style={{ width: "auto", height: "auto" }}
                         className="w-[300px] md:w-[1000px] h-auto opacity-100"
-                        priority
                     />
                 </motion.div>
 

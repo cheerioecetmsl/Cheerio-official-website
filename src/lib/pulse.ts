@@ -4,6 +4,7 @@ import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc, collection, getDocs, setDoc, query, where, limit, orderBy } from "firebase/firestore";
 import * as faceapi from "face-api.js";
 import { getRawCloudinaryUrl } from "@/lib/cloudinary";
+import { getProxiedUrl } from "@/lib/imageVariants";
 
 const MODEL_URL = "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/";
 
@@ -23,11 +24,12 @@ export interface PulseProgress {
 }
 
 const loadCrossDomainImage = (url: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
+  const proxiedUrl = getProxiedUrl(url);
   const img = new Image();
   img.crossOrigin = "anonymous";
   img.onload = () => resolve(img);
-  img.onerror = (e) => reject(new Error(`Failed to load image: ${url}`));
-  img.src = url;
+  img.onerror = (e) => reject(new Error(`Failed to load image: ${proxiedUrl}`));
+  img.src = proxiedUrl;
 });
 
 export const runPulseScan = async (
