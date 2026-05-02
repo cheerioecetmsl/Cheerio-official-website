@@ -116,7 +116,7 @@ export const runPulseScan = async (
 
     for (let i = 0; i < totalDocs; i++) {
       const item = validDocs[i];
-      const optimizedUrl = item.url.replace('/upload/', '/upload/w_800,c_limit,q_auto,f_auto/');
+      const optimizedUrl = item.url;
       
       try {
         let img: HTMLImageElement;
