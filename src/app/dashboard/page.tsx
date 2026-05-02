@@ -11,7 +11,6 @@ import { Trophy, TrendingUp, ChevronDown, ArrowUpRight, Files } from "lucide-rea
 import Link from "next/link";
 import { collection, query, orderBy, limit, where, getDocs } from "firebase/firestore";
 import { TutorialOverlay } from "@/components/TutorialOverlay";
-import { TutorialOverlay } from "@/components/TutorialOverlay";
 import { HypeUpdate } from "@/components/DashboardModules";
 import { SeniorInvitation } from "@/components/SeniorInvitation";
 import { PulseOverlay } from "@/components/PulseOverlay";
