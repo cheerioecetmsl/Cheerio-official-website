@@ -1,6 +1,9 @@
 name = "cheerio-2026"
+account_id = "e6c679b3664c0198534207d0d05648ff"
+pages_build_output_dir = ".vercel/output/static"
 compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]
+
 
 [vars]
 # You can define non-secret environment variables here
