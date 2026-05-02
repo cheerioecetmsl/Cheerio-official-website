@@ -7,10 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "pages:build": "opennext build"
+    "pages:build": "opennextjs-cloudflare build"
   },
   "dependencies": {
-    "@opennextjs/cloudflare": "^1.19.5",
     "browser-image-compression": "^2.0.2",
     "canvas-confetti": "^1.9.4",
     "cloudinary": "^2.10.0",
@@ -27,6 +26,7 @@
     "react-dom": "^19.2.5"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.19.5",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",
