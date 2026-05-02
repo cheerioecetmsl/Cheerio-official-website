@@ -6,7 +6,6 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Pagination } from "@/components/Pagination";
-import Image from "next/image";
 import OrganizerProfileModal, {
   type OrganizerData,
 } from "@/components/OrganizerProfileModal";
@@ -137,11 +136,10 @@ export default function OrganizersPage() {
                 >
                   <div className="aspect-[4/5] rounded-[2rem] overflow-hidden relative shadow-2xl bg-zinc-900">
                     {member.imageURL ? (
-                      <Image 
+                      <img 
                         src={member.imageURL} 
                         alt={member.name}
-                        fill
-                        className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.id}`;

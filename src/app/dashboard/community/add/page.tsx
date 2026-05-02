@@ -6,7 +6,9 @@ import { collection, addDoc } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { UploadCloud, Check, AlertCircle, Sparkles, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { uploadProcessedImage } from "@/lib/uploadHelper";
+import { getDownloadUrl } from "@/lib/imageVariants";
+// Removed next/image for static asset delivery
 
 export default function AddMemberPage() {
   const [loading, setLoading] = useState(false);
@@ -44,26 +46,16 @@ export default function AddMemberPage() {
     setError("");
 
     try {
-      // 1. Upload to Cloudinary with dynamic folder routing
-      const data = new FormData();
-      data.append("file", file);
-      data.append("upload_preset", "Cheerio-2026");
-      // Route to hierarchical community subfolders
-      const folderName = formData.role.charAt(0).toUpperCase() + formData.role.slice(1) + "s";
-      data.append("folder", `Cheerio/Community/${folderName}`);
-
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, {
-        method: "POST",
-        body: data,
-      });
-
-      const resData = await res.json();
-      if (!res.ok) throw new Error("Upload failed");
+      // 1. Upload to Cloudinary using our static variant processor
+      // We route to 'Community' subfolder
+      const { baseId } = await uploadProcessedImage(file, "Community");
+      const photoUrl = getDownloadUrl(baseId, "gallery");
 
       // 2. Save metadata to Firestore
       await addDoc(collection(db, "community"), {
         ...formData,
-        photoUrl: resData.secure_url,
+        baseId,
+        photoUrl,
         createdAt: new Date().toISOString()
       });
 
@@ -105,11 +97,10 @@ export default function AddMemberPage() {
               <div className="relative group aspect-[4/5] rounded-[3rem] overflow-hidden border-2 border-dashed border-gold-soft/20 hover:border-gold-primary transition-all duration-500 bg-gold-soft/5 flex flex-col items-center justify-center cursor-pointer overflow-hidden">
                 {preview ? (
                   <div className="relative w-full h-full">
-                    <Image 
+                    <img 
                       src={preview} 
                       alt="Preview" 
-                      fill
-                      className="object-cover" 
+                      className="w-full h-full object-cover" 
                     />
                   </div>
                 ) : (

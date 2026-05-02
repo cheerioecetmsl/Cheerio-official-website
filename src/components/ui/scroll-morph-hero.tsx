@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, useTransform, useSpring, useScroll } from "framer-motion";
-import Image from "next/image";
+import { CheerioImage } from "@/lib/imageVariants";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -11,6 +11,7 @@ export type AnimationPhase = "scatter" | "line" | "circle" | "bottom-strip";
 
 interface FlipCardProps {
     src: string;
+    baseId?: string;
     index: number;
     total: number;
     phase: AnimationPhase;
@@ -62,16 +63,12 @@ function FlipCard({
                     className="absolute inset-0 h-full w-full overflow-hidden rounded-lg shadow-lg bg-white border border-gold/10"
                     style={{ backfaceVisibility: "hidden" }}
                 >
-                    <Image
+                    <CheerioImage
                         src={src || "/gallery/pic-1.jpeg"}
+                        baseId={baseId}
+                        variant="preview"
                         alt={`hero-${index}`}
-                        fill
-                        sizes="70px"
-                        className="object-cover md:grayscale brightness-90 group-hover:grayscale-0 transition-all duration-500"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = `/gallery/pic-${(index % 12) + 1}.jpeg`;
-                        }}
+                        className="w-full h-full object-cover md:grayscale brightness-90 group-hover:grayscale-0 transition-all duration-500"
                     />
                     <div className="absolute inset-0 bg-ink/10 transition-colors group-hover:bg-transparent" />
                 </div>
@@ -115,7 +112,9 @@ const DEFAULT_IMAGES = Array.from({ length: TOTAL_IMAGES }, (_, i) => `/gallery/
 const lerp = (start: number, end: number, t: number) => start * (1 - t) + end * t;
 
 export default function IntroAnimation() {
-    const [images, setImages] = useState<string[]>(DEFAULT_IMAGES);
+    const [images, setImages] = useState<{url: string; baseId?: string}[]>(
+        DEFAULT_IMAGES.map(url => ({ url }))
+    );
     const [introPhase, setIntroPhase] = useState<AnimationPhase>("scatter");
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
     const containerRef = useRef<HTMLDivElement>(null);
@@ -126,11 +125,17 @@ export default function IntroAnimation() {
                 const docRef = doc(db, "hero_images", "featured");
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    const fetchedUrls = docSnap.data().urls || [];
-                    const mergedImages = [...DEFAULT_IMAGES];
+                    const data = docSnap.data();
+                    const fetchedUrls = data.urls || [];
+                    const fetchedBaseIds = data.baseIds || [];
+                    
+                    const mergedImages = DEFAULT_IMAGES.map(url => ({ url }));
                     fetchedUrls.forEach((url: string, i: number) => {
                         if (url && i < TOTAL_IMAGES) {
-                            mergedImages[i] = url;
+                            mergedImages[i] = { 
+                                url, 
+                                baseId: fetchedBaseIds[i] 
+                            };
                         }
                     });
                     setImages(mergedImages);
@@ -269,7 +274,7 @@ export default function IntroAnimation() {
 
                 {/* Main 3D Container */}
                 <div className="relative flex items-center justify-center w-full h-full">
-                    {images.map((src, i) => {
+                    {images.map((imgData, i) => {
                         let target = { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1 };
 
                         if (introPhase === "scatter") {
@@ -326,7 +331,8 @@ export default function IntroAnimation() {
                         return (
                             <FlipCard
                                 key={i}
-                                src={src}
+                                src={imgData.url}
+                                baseId={imgData.baseId}
                                 index={i}
                                 total={TOTAL_IMAGES}
                                 phase={introPhase}

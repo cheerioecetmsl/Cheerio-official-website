@@ -1,12 +1,13 @@
 "use client";
 
 import { Search, Filter, Mail, Camera } from "lucide-react";
-import Image from "next/image";
+import { CheerioImage } from "@/lib/imageVariants";
 
 export interface ArchiveProfile {
   id: string;
   name: string;
   photoURL: string;
+  photoBaseId?: string;
   role?: string;
   year: string;
   section?: string;
@@ -17,7 +18,13 @@ export const ProfileCard = ({ profile }: { profile: ArchiveProfile }) => (
   <div className="glass-card p-6 rounded-3xl border-gold/10 hover:border-gold/30 transition-all group">
     <div className="relative w-24 h-24 mx-auto mb-6">
       <div className="relative w-full h-full rounded-full border-2 border-gold/20 overflow-hidden group-hover:border-gold transition-colors">
-        <Image src={profile.photoURL} alt={profile.name} fill sizes="96px" className="object-cover" />
+        <CheerioImage 
+          baseId={profile.photoBaseId} 
+          fallbackUrl={profile.photoURL} 
+          alt={profile.name} 
+          variant="avatar"
+          className="w-full h-full object-cover" 
+        />
       </div>
       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gold-soft/30 text-brown-primary text-[8px] font-bold px-2 py-1 rounded-full uppercase tracking-widest whitespace-nowrap border border-gold-soft/20 backdrop-blur-sm">
         {profile.role || profile.year}

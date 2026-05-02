@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Sparkles, X, Award, Quote, CheckCircle } from "lucide-react";
-import Image from "next/image";
 
 export const SeniorInvitation = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const [mounted, setMounted] = useState(false);
@@ -34,11 +33,10 @@ export const SeniorInvitation = ({ isOpen, onClose }: { isOpen: boolean, onClose
 
         {/* Left: Cinematic Visual */}
         <div className="w-full md:w-1/2 h-64 md:h-auto relative bg-card-tone group flex-shrink-0">
-          <Image 
+          <img 
             src="/assets/senior_invite_hero.jpg" 
             alt="The Invitation" 
-            fill 
-            className="object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000"
+            className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-parchment-base via-parchment-base/40 to-transparent" />
           

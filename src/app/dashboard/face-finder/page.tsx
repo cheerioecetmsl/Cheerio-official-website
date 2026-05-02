@@ -7,7 +7,7 @@ import { doc, getDoc, collection, getDocs, query, where } from "firebase/firesto
 import { onAuthStateChanged } from "firebase/auth";
 import { Search, Sparkles, Scan, CheckCircle, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { runPulseScan, PulseProgress } from "@/lib/pulse";
-import Image from "next/image";
+// Removed next/image for static asset delivery
 import { IdentityGate } from "@/components/IdentityGate";
 
 interface UserArchiveData {
@@ -116,10 +116,9 @@ export default function FaceFinder() {
               <div className={`w-48 h-48 rounded-full border-4 transition-all duration-700 ${
                 scanning ? "border-gold animate-pulse scale-110" : "border-gold/20"
               } overflow-hidden shadow-2xl bg-gold/5`}>
-                <Image 
+                <img 
                   src={userData?.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=placeholder"} 
-                  fill
-                  className="object-cover" 
+                  className="w-full h-full object-cover" 
                   alt="Reference" 
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -176,10 +175,9 @@ export default function FaceFinder() {
                   <div className="grid grid-cols-2 gap-6">
                     {results.map((url, i) => (
                       <div key={i} className="group relative aspect-square rounded-3xl overflow-hidden border-2 border-gold-soft/20 shadow-2xl">
-                        <Image 
+                        <img 
                           src={url} 
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-1000" 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
                           alt="Found" 
                         />
                         <div className="absolute inset-0 bg-gold-soft/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

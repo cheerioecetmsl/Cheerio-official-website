@@ -41,6 +41,7 @@ export async function GET() {
 
     const urls = resources.map((r: any) => ({
       url: r.secure_url,
+      baseId: r.public_id,
       type: r.resource_type,
       createdAt: r.created_at,
     }));

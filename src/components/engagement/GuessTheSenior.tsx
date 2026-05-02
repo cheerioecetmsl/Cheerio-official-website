@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { db, auth } from "@/lib/firebase";
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
 import { CheckCircle2, XCircle, ArrowRight, Zap } from "lucide-react";
+
+import { CheerioImage } from "@/lib/imageVariants";
 
 interface GuessTheSeniorProps {
   module: any;
@@ -75,10 +76,11 @@ export function GuessTheSenior({ module, onComplete }: GuessTheSeniorProps) {
       </div>
 
       <div className="relative aspect-square w-full max-w-[280px] mx-auto rounded-[2rem] overflow-hidden border-2 border-gold-soft/30 shadow-2xl">
-        <Image 
-          src={currentSenior.photoURL}
-          fill
-          className={`object-cover transition-all duration-1000 ${isCorrect === null ? "blur-xl grayscale" : "blur-0 grayscale-0"}`}
+        <CheerioImage 
+          baseId={currentSenior.photoBaseId}
+          fallbackUrl={currentSenior.photoURL}
+          variant="card"
+          className={`w-full h-full object-cover transition-all duration-1000 ${isCorrect === null ? "blur-xl grayscale" : "blur-0 grayscale-0"}`}
           alt="Mystery Senior"
         />
         {isCorrect !== null && (

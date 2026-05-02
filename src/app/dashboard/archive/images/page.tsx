@@ -8,13 +8,16 @@ import { ReturnToDashboard } from "@/components/Sidebar";
 import { db } from "@/lib/firebase";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import Link from "next/link";
-import Image from "next/image";
+// Removed next/image for static asset delivery
 import { motion, AnimatePresence } from "framer-motion";
 import { Pagination } from "@/components/Pagination";
+import { getRawCloudinaryUrl } from "@/lib/cloudinary";
+import { CheerioImage, getDownloadUrl } from "@/lib/imageVariants";
 
 interface ArchivePhoto {
   id: string;
   url: string;
+  baseId?: string;
   event?: string;
   createdAt?: string | number | Date;
   uploadedBy?: string;
@@ -120,7 +123,13 @@ export default function ImageArchive() {
       for (let i = 0; i < selected.length; i++) {
         const photo = photos.find(p => p.id === selected[i]);
         if (!photo) continue;
-        const response = await fetch(photo.url);
+        
+        // Use high-res gallery JPG if baseId exists, otherwise fallback to url
+        const downloadUrl = photo.baseId 
+          ? getDownloadUrl(photo.baseId, "gallery", "jpg")
+          : photo.url;
+          
+        const response = await fetch(downloadUrl);
         const blob = await response.blob();
         const filename = `${photo.event || 'memory'}-${photo.id}.jpg`;
         folder?.file(filename, blob);
@@ -187,11 +196,11 @@ export default function ImageArchive() {
                     onClick={() => setViewIndex(actualIndex)}
                     className="relative aspect-[4/5] rounded-3xl overflow-hidden cursor-pointer group border border-gold/10 hover:border-gold/40 transition-all bg-card-tone"
                   >
-                    <Image 
-                      src={photo.url} 
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                      className={`object-cover transition-transform duration-700 ${
+                    <CheerioImage 
+                      baseId={photo.baseId}
+                      fallbackUrl={photo.url}
+                      variant="card"
+                      className={`w-full h-full object-cover transition-transform duration-700 ${
                         selected.includes(photo.id) ? "scale-95" : "group-hover:scale-110"
                       }`}
                       alt={photo.event || "Memory"}
@@ -286,7 +295,7 @@ export default function ImageArchive() {
                   </div>
                   <div className="flex items-center gap-2">
                     <a 
-                      href={currentPhoto.url} 
+                      href={getRawCloudinaryUrl(currentPhoto.url)} 
                       download
                       className="p-2 text-brown-secondary/60 hover:text-brown-primary transition-colors"
                     >
@@ -335,13 +344,12 @@ export default function ImageArchive() {
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     className="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing"
                   >
-                    <Image 
-                      src={currentPhoto.url}
-                      fill
-                      className="object-contain pointer-events-none"
+                    <CheerioImage 
+                      baseId={currentPhoto.baseId}
+                      fallbackUrl={currentPhoto.url}
+                      variant="preview"
+                      className="w-full h-full object-contain pointer-events-none"
                       alt={currentPhoto.event || "Large View"}
-                      priority
-                      quality={100}
                     />
                   </motion.div>
                 </AnimatePresence>

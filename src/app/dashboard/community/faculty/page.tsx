@@ -6,7 +6,6 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { GraduationCap, BookOpen, Star, Loader2 } from "lucide-react";
 import { Pagination } from "@/components/Pagination";
-import Image from "next/image";
 import OrganizerProfileModal, {
   type OrganizerData,
 } from "@/components/OrganizerProfileModal";
@@ -150,12 +149,10 @@ export default function FacultyPage() {
           <div className="space-y-16">
             {/* Hero Group Photo */}
             <div className="relative aspect-[16/9] w-full rounded-[3rem] overflow-hidden border border-amber-500/20 shadow-2xl group">
-              <Image 
+              <img 
                 src="/assets/faculty_group.jpg" 
-                fill 
-                className="object-cover transition-transform duration-1000 group-hover:scale-105" 
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
                 alt="Faculty Group" 
-                priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-parchment-base/80 via-transparent to-transparent flex flex-col justify-end p-12">
                 <p className="text-amber-500 font-bold uppercase tracking-[0.3em] text-xs">The Mentors</p>
@@ -177,11 +174,10 @@ export default function FacultyPage() {
                   {/* Profile Card */}
                   <div className="relative aspect-square rounded-full overflow-hidden border-4 border-amber-500/10 transition-all duration-700 group-hover:scale-105 group-hover:shadow-[0_0_80px_rgba(245,158,11,0.15)] group-hover:border-amber-500/40 cursor-pointer bg-zinc-900">
                     {member.imageURL ? (
-                      <Image 
+                      <img 
                         src={member.imageURL} 
                         alt={member.name}
-                        fill
-                        className="object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-1000"
+                        className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-1000"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.id}`;

@@ -11,7 +11,7 @@ import { Trophy, TrendingUp, ChevronDown, ArrowUpRight, Files } from "lucide-rea
 import Link from "next/link";
 import { collection, query, orderBy, limit, where, getDocs } from "firebase/firestore";
 import { TutorialOverlay } from "@/components/TutorialOverlay";
-import Image from "next/image";
+import { TutorialOverlay } from "@/components/TutorialOverlay";
 import { HypeUpdate } from "@/components/DashboardModules";
 import { SeniorInvitation } from "@/components/SeniorInvitation";
 import { PulseOverlay } from "@/components/PulseOverlay";
@@ -21,6 +21,7 @@ import { archiveProfilePhoto } from "@/lib/image-archive";
 import { EngagementModal } from "@/components/EngagementModal";
 import { EngagementModule } from "@/types/engagement";
 import { NotificationModal } from "@/components/NotificationModal";
+import { CheerioImage } from "@/lib/imageVariants";
 
 interface UserArchiveData {
   name: string;
@@ -80,10 +81,10 @@ export default function DashboardPage() {
           // Auto-migrate Google photos to Cloudinary if detected
           if (data.photoURL && data.photoURL.includes('googleusercontent.com')) {
             console.log("[Migration] Google photo detected, archiving to Cloudinary...");
-            archiveProfilePhoto(data.photoURL).then(async (archivedURL) => {
-              if (archivedURL !== data.photoURL) {
-                await updateDoc(docRef, { photoURL: archivedURL });
-                setUserData((prev: any) => ({ ...prev, photoURL: archivedURL }));
+            archiveProfilePhoto(data.photoURL).then(async ({ url, baseId }) => {
+              if (url !== data.photoURL) {
+                await updateDoc(docRef, { photoURL: url, photoBaseId: baseId });
+                setUserData((prev: any) => ({ ...prev, photoURL: url, photoBaseId: baseId }));
               }
             });
           }
@@ -385,11 +386,10 @@ export default function DashboardPage() {
                       <div className="flex flex-col md:flex-row gap-6">
                         {item.mediaGallery && item.mediaGallery.length > 0 && (
                           <div className="relative w-full md:w-48 aspect-video md:aspect-square rounded-2xl overflow-hidden flex-shrink-0 border border-gold-soft/20 shadow-lg">
-                            <Image 
+                            <img 
                               src={item.mediaGallery[0]} 
                               alt={item.title}
-                              fill
-                              className="object-cover"
+                              className="w-full h-full object-cover"
                             />
                             {item.mediaGallery.length > 1 && (
                               <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/50 backdrop-blur-md rounded-lg text-[8px] font-bold text-white uppercase tracking-widest flex items-center gap-1">
@@ -439,12 +439,11 @@ export default function DashboardPage() {
                   <div key={user.id} className={`flex items-center gap-4 md:gap-8 p-4 md:p-8 border-b border-brown-secondary/20 last:border-none hover:bg-gold-soft/10 transition-all ${user.id === auth.currentUser?.uid ? "bg-gold-soft/20 border-l-4 border-l-gold-primary" : ""}`}>
                     <div className="text-2xl md:text-3xl font-bold serif text-brown-primary/60 w-8 md:w-12 text-center">#{i + 1}</div>
                     <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-gold-soft/50 shadow-xl flex-shrink-0 bg-gold-soft/20">
-                      <Image 
-                        src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} 
-                        fill
-                        sizes="64px"
-                        className="object-cover" 
-                        alt={user.name} 
+                      <CheerioImage 
+                        baseId={user.photoBaseId}
+                        fallbackUrl={user.photoURL}
+                        variant="avatar"
+                        className="w-full h-full object-cover" 
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
@@ -469,11 +468,9 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-4 md:gap-8 p-4 md:p-8 bg-gold-soft/20 border-l-4 border-l-gold-primary">
                       <div className="text-2xl md:text-3xl font-bold serif text-brown-primary w-8 md:w-12 text-center">#{userRank}</div>
                       <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-gold-primary shadow-xl flex-shrink-0">
-                        <Image 
+                        <img 
                           src={userData.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${auth.currentUser?.uid}`} 
-                          fill
-                          sizes="64px"
-                          className="object-cover" 
+                          className="w-full h-full object-cover" 
                           alt="You" 
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;

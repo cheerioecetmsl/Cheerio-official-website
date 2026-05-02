@@ -6,7 +6,6 @@ import { doc, getDoc } from "firebase/firestore";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { User as FirebaseUser } from "firebase/auth";
 
 export const Navbar = () => {
@@ -94,16 +93,12 @@ export const Navbar = () => {
         {isHome ? (
           <div className="w-10 md:w-16 h-8 md:h-12 flex-shrink-0" /> // Reserved space for gliding logo
         ) : (
-          <Image 
+          <img 
             src="/assets/cheerio logo.png" 
             alt="Cheerio Logo" 
-            width={48}
-            height={48}
             className="h-8 md:h-12 w-auto object-contain"
             style={{ 
               filter: 'sepia(1) hue-rotate(330deg) saturate(2)',
-              width: "auto",
-              height: "auto"
             }} 
           />
         )}

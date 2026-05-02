@@ -1,12 +1,15 @@
-/**
- * Utility to archive Google profile photos to Cloudinary.
- * This prevents 429 rate-limiting issues from Google User Content.
- */
+import { uploadProcessedImage } from "./uploadHelper";
+import { getDownloadUrl } from "./imageVariants";
 
-export async function archiveProfilePhoto(photoURL: string): Promise<string> {
+export interface ArchiveResult {
+  url: string;
+  baseId?: string;
+}
+
+export async function archiveProfilePhoto(photoURL: string): Promise<ArchiveResult> {
   // Only process Google profile photos
   if (!photoURL || !photoURL.includes('googleusercontent.com')) {
-    return photoURL;
+    return { url: photoURL };
   }
 
   try {
@@ -21,29 +24,15 @@ export async function archiveProfilePhoto(photoURL: string): Promise<string> {
 
     const blob = await response.blob();
 
-    // 2. Upload to Cloudinary
-    const formData = new FormData();
-    formData.append('file', blob);
-    formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'Cheerio-2026');
-    formData.append('folder', 'Cheerio/Profiles/Archived');
-
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const cloudinaryRes = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      { method: 'POST', body: formData }
-    );
-
-    if (!cloudinaryRes.ok) {
-      console.warn("[archiveProfilePhoto] Cloudinary upload failed, falling back to original URL");
-      return photoURL;
-    }
-
-    const resData = await cloudinaryRes.json();
-    console.log("[archiveProfilePhoto] Successfully archived to Cloudinary:", resData.secure_url);
-    return resData.secure_url;
+    // 2. Process and Upload all variants to Cloudinary
+    const { baseId } = await uploadProcessedImage(blob, "Avatars");
+    const url = getDownloadUrl(baseId, "gallery");
+    
+    console.log("[archiveProfilePhoto] Successfully archived to Cloudinary with variants:", baseId);
+    return { url, baseId };
 
   } catch (err) {
     console.error("[archiveProfilePhoto] Error during archiving:", err);
-    return photoURL;
+    return { url: photoURL };
   }
 }

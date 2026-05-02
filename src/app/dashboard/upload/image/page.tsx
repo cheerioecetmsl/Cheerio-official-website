@@ -8,7 +8,7 @@ import {
   Camera, SwitchCamera, AlertCircle
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+// Removed next/image for static asset delivery
 import { ReturnToDashboard } from "@/components/Sidebar";
 import imageCompression from 'browser-image-compression';
 
@@ -144,40 +144,25 @@ export default function ImageUpload() {
     setUploading(true);
     setUploadedCount(0);
     try {
-      await Promise.all(files.map(async file => {
-        let fileToUpload = file;
+      for (const file of files) {
+        // Use our new multi-variant processor instead of manual compression/fetch
+        const { baseId } = await uploadProcessedImage(file, "Gallery");
         
-        // Compress image if > 3MB
-        if (file.size > 3 * 1024 * 1024) {
-          try {
-            const options = {
-              maxSizeMB: 3,
-              maxWidthOrHeight: 1920,
-              useWebWorker: true
-            };
-            fileToUpload = await imageCompression(file, options);
-          } catch (error) {
-            console.error("Error compressing image:", error);
-          }
-        }
-
-        const form = new FormData();
-        form.append("file", fileToUpload);
-        form.append("upload_preset", "Cheerio-2026");
-        form.append("folder", "Cheerio/Archives/Images");
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-          { method: "POST", body: form }
-        );
-        const json = await res.json();
+        // Store both the baseId (for CheerioImage) and a fallbackUrl (for legacy support)
+        const fallbackUrl = getDownloadUrl(baseId, "gallery");
+        
         await addDoc(collection(db, "archives"), {
-          url: json.secure_url, type: "image",
+          baseId,
+          url: fallbackUrl,
+          type: "image",
           userId: auth.currentUser!.uid,
           userName: auth.currentUser!.displayName,
-          createdAt: new Date().toISOString(), tag: "General",
+          createdAt: new Date().toISOString(),
+          tag: "General",
         });
+        
         setUploadedCount(p => p + 1);
-      }));
+      }
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
         xp: increment(10 * files.length),
         photoCount: increment(files.length),
@@ -343,7 +328,7 @@ export default function ImageUpload() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {previews.map((src, idx) => (
                     <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gold-soft/20 bg-card-tone group">
-                      <Image src={src} fill className="object-cover" alt={`Preview ${idx}`} />
+                      <img src={src} className="w-full h-full object-cover" alt={`Preview ${idx}`} />
                       <button
                         onClick={() => removeFile(idx)}
                         className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full shadow-lg z-20 transition-all hover:bg-red-700 sm:opacity-0 sm:group-hover:opacity-100 opacity-100"

@@ -6,7 +6,7 @@ import { ReturnToDashboard } from "@/components/Sidebar";
 import { db, auth } from "@/lib/firebase";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import Image from "next/image";
+import { CheerioImage } from "@/lib/imageVariants";
 import { formatXP, calculateLevel } from "@/lib/xp";
 
 interface LeaderboardUser {
@@ -16,6 +16,7 @@ interface LeaderboardUser {
   level: number;
   count: number;
   photoURL?: string;
+  photoBaseId?: string;
   email?: string;
 }
 
@@ -56,6 +57,7 @@ export default function LeaderboardPage() {
           level: calculateLevel(doc.data().xp || 0).level,
           count: doc.data().contributions || doc.data().count || 0,
           photoURL: doc.data().photoURL || doc.data().imageURL,
+          photoBaseId: doc.data().photoBaseId,
           email: doc.data().email,
         }));
         setUsers(list);
@@ -98,15 +100,13 @@ export default function LeaderboardPage() {
       className="relative rounded-full overflow-hidden bg-gold-soft/20 flex items-center justify-center shrink-0"
       style={{ width: size, height: size }}
     >
-      {user.photoURL ? (
-        <Image
-          src={user.photoURL}
+      {user.photoURL || user.photoBaseId ? (
+        <CheerioImage
+          src={user.photoURL || ""}
+          baseId={user.photoBaseId}
+          variant="avatar"
           alt={user.name}
-          fill
-          className="object-cover"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`;
-          }}
+          className="w-full h-full object-cover"
         />
       ) : (
         <span className="font-bold text-brown-primary uppercase" style={{ fontSize: size / 2.5 }}>
@@ -174,8 +174,14 @@ export default function LeaderboardPage() {
                   <Crown size={20} className="text-yellow-400 fill-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]" />
                 </div>
                 <div className="relative w-20 h-20 rounded-full border-4 border-gold-primary overflow-hidden shadow-[0_0_30px_rgba(212,175,55,0.4)]">
-                  {top3[0]?.photoURL ? (
-                    <Image src={top3[0].photoURL} alt={top3[0].name} fill className="object-cover" />
+                  {top3[0]?.photoURL || top3[0]?.photoBaseId ? (
+                    <CheerioImage 
+                      src={top3[0].photoURL || ""} 
+                      baseId={top3[0].photoBaseId}
+                      variant="avatar"
+                      alt={top3[0].name} 
+                      className="w-full h-full object-cover" 
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-brown-primary uppercase bg-gold-soft/20">
                       {top3[0].name.charAt(0)}
@@ -238,15 +244,13 @@ export default function LeaderboardPage() {
                     rank === 3 ? "border-amber-600" :
                     isMe ? "border-gold-primary/60" : "border-brown-secondary/10"
                   }`}>
-                    {user.photoURL ? (
-                      <Image
-                        src={user.photoURL}
+                    {user.photoURL || user.photoBaseId ? (
+                      <CheerioImage
+                        src={user.photoURL || ""}
+                        baseId={user.photoBaseId}
+                        variant="avatar"
                         alt={user.name}
-                        fill
-                        className="object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`;
-                        }}
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <span className="text-base font-bold text-brown-primary uppercase">
@@ -314,15 +318,13 @@ export default function LeaderboardPage() {
 
                 {/* Avatar */}
                 <div className="relative shrink-0 rounded-full overflow-hidden bg-gold-soft/20 flex items-center justify-center w-11 h-11 border border-gold-primary/60">
-                  {myData.photoURL ? (
-                    <Image
-                      src={myData.photoURL}
+                  {myData.photoURL || myData.photoBaseId ? (
+                    <CheerioImage
+                      src={myData.photoURL || ""}
+                      baseId={myData.photoBaseId}
+                      variant="avatar"
                       alt={myData.name}
-                      fill
-                      className="object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/initials/svg?seed=${myData.name}`;
-                      }}
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     <span className="text-base font-bold text-brown-primary uppercase">

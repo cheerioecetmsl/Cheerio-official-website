@@ -6,9 +6,12 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged, updateProfile } from "firebase/auth";
 import { Camera, Save, User, Mail, GraduationCap, School, CheckCircle, Loader2, Star } from "lucide-react";
 import { ReturnToDashboard } from "@/components/Sidebar";
-import Image from "next/image";
+// Removed next/image for static asset delivery
 import { User as FirebaseUser } from "firebase/auth";
 import { archiveProfilePhoto } from "@/lib/image-archive";
+import { getRawCloudinaryUrl } from "@/lib/cloudinary";
+import { uploadProcessedImage } from "@/lib/uploadHelper";
+import { CheerioImage, getDownloadUrl } from "@/lib/imageVariants";
 
 export default function SettingsPage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -20,6 +23,7 @@ export default function SettingsPage() {
     year: "",
     section: "",
     photoURL: "",
+    photoBaseId: "",
     category: "STUDENT",
     narrative: "",
     role: "",
@@ -38,6 +42,7 @@ export default function SettingsPage() {
             year: data.year || "1st Year",
             section: data.section || "A",
             photoURL: data.photoURL || u.photoURL || "",
+            photoBaseId: data.photoBaseId || "",
             category: data.category || "STUDENT",
             narrative: data.narrative || "",
             role: data.role || "",
@@ -55,17 +60,9 @@ export default function SettingsPage() {
 
     setSaving(true);
     try {
-      const data = new FormData();
-      data.append("file", file);
-      data.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-2026");
-      data.append("folder", "Cheerio/Profiles");
-      
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: "POST", body: data }
-      );
-      const resData = await res.json();
-      setFormData(prev => ({ ...prev, photoURL: resData.secure_url }));
+      const { baseId } = await uploadProcessedImage(file, "Avatars");
+      const url = getDownloadUrl(baseId, "gallery");
+      setFormData(prev => ({ ...prev, photoURL: url, photoBaseId: baseId }));
     } catch (err) {
       console.error(err);
       alert("Photo upload failed");
@@ -80,7 +77,8 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       // Archive Google photo to Cloudinary if necessary
-      const archivedPhotoURL = await archiveProfilePhoto(formData.photoURL);
+      const { url: archivedPhotoURL, baseId: archivedBaseId } = await archiveProfilePhoto(formData.photoURL);
+      const finalBaseId = archivedBaseId || formData.photoBaseId;
 
       // 1. Update Firestore
       await updateDoc(doc(db, "users", user.uid), {
@@ -88,6 +86,7 @@ export default function SettingsPage() {
         year: formData.year,
         section: formData.section,
         photoURL: archivedPhotoURL,
+        photoBaseId: finalBaseId,
         narrative: formData.narrative,
         role: formData.role
       });
@@ -136,13 +135,14 @@ export default function SettingsPage() {
               <div className="flex flex-col items-center gap-6">
                 <div className="relative group">
                   <div className="w-40 h-40 rounded-full border-4 border-gold-soft/40 overflow-hidden bg-card-tone flex items-center justify-center group-hover:border-gold-primary transition-all duration-500 shadow-2xl">
-                    {formData.photoURL ? (
+                    {formData.photoURL || formData.photoBaseId ? (
                       <div className="relative w-full h-full">
-                        <Image 
-                          src={formData.photoURL} 
+                        <CheerioImage 
+                          baseId={formData.photoBaseId}
+                          fallbackUrl={formData.photoURL}
+                          variant="avatar"
                           alt="Profile" 
-                          fill
-                          className="object-cover" 
+                          className="w-full h-full object-cover" 
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.uid || 'placeholder'}`;

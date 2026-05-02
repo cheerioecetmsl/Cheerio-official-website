@@ -8,16 +8,19 @@ import { ReturnToDashboard } from "@/components/Sidebar";
 import { Download, Sparkles, Image as ImageIcon, Archive, Share2, CheckCircle, Loader2, Zap } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import Image from "next/image";
+// Removed next/image for static asset delivery
 import { PulseOverlay } from "@/components/PulseOverlay";
 import { runPulseScan } from "@/lib/pulse";
 import { IdentityGate } from "@/components/IdentityGate";
 
 import { Pagination } from "@/components/Pagination";
+import { getRawCloudinaryUrl } from "@/lib/cloudinary";
+import { CheerioImage } from "@/lib/imageVariants";
 
 interface FoundMemory {
   id: string;
   url: string;
+  baseId?: string;
   detectedAt: string;
   metadata?: Record<string, unknown>;
 }
@@ -173,10 +176,11 @@ export default function MyMoments() {
                     className="group relative aspect-[4/5] rounded-[2rem] overflow-hidden border border-gold-soft/40 shadow-2xl bg-card-tone animate-in fade-in slide-in-from-bottom-4 duration-700"
                     style={{ animationDelay: `${i * 100}ms` }}
                   >
-                    <Image 
-                      src={m.url} 
-                      fill
-                      className="object-cover transition-transform duration-1000 group-hover:scale-110" 
+                    <CheerioImage 
+                      src={m.url}
+                      baseId={m.baseId}
+                      variant="card"
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
                       alt="Moment" 
                     />
                     

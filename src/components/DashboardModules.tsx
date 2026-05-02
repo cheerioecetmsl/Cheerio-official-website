@@ -12,6 +12,7 @@ export interface HypeUpdate {
   tag?: string;
   createdAt?: any;
   mediaGallery?: string[];
+  mediaBaseIds?: string[];
   date?: string;
 }
 

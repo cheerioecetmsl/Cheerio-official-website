@@ -2,8 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Bell, Zap, Image as ImageIcon, Calendar, ArrowRight } from "lucide-react";
-import Image from "next/image";
 import { HypeUpdate } from "./DashboardModules";
+import { CheerioImage } from "@/lib/imageVariants";
 
 interface NotificationModalProps {
   isOpen: boolean;
@@ -49,11 +49,12 @@ export const NotificationModal = ({ isOpen, onClose, notification }: Notificatio
               {/* Media Section (if available) */}
               {notification.mediaGallery && notification.mediaGallery.length > 0 && (
                 <div className="relative w-full md:w-5/12 aspect-square md:aspect-auto h-56 md:h-[500px] overflow-hidden bg-parchment-contrast/50">
-                  <Image
-                    src={notification.mediaGallery[0]}
+                  <CheerioImage
+                    baseId={notification.mediaBaseIds?.[0]}
+                    fallbackUrl={notification.mediaGallery?.[0]}
                     alt={notification.title}
-                    fill
-                    className="object-cover"
+                    variant="preview"
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                 </div>

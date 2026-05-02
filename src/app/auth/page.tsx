@@ -9,7 +9,7 @@ import {
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+// Removed next/image for static asset delivery
 import { onAuthStateChanged } from "firebase/auth";
 import GoogleAuthScript from "@/components/GoogleAuthScript";
 
@@ -138,11 +138,9 @@ export default function AuthPage() {
           {isProcessing ? (
             <div className="w-5 h-5 border-2 border-gold-primary border-t-transparent rounded-full animate-spin" />
           ) : (
-            <Image 
+            <img 
               src="https://www.google.com/favicon.ico" 
               alt="Google" 
-              width={20}
-              height={20}
               className="w-5 h-5" 
             />
           )}

@@ -8,15 +8,18 @@ import { useRouter } from "next/navigation";
 import { Camera, ChevronRight, Check, GraduationCap, Star, User, BookOpen, Hash, FileText, RefreshCw, ArrowRight, Loader2, CheckCircle2, AlertTriangle, X, Compass } from "lucide-react";
 import confetti from "canvas-confetti";
 import { User as FirebaseUser } from "firebase/auth";
-import Image from "next/image";
+// Removed next/image for static asset delivery
 import { motion, AnimatePresence } from "framer-motion";
 import { archiveProfilePhoto } from "@/lib/image-archive";
+import { uploadProcessedImage } from "@/lib/uploadHelper";
+import { CheerioImage, getDownloadUrl } from "@/lib/imageVariants";
 
 interface OnboardingFormData {
   name: string;
   year: string;
   section: string;
   photoURL: string;
+  photoBaseId: string;
   role: string;
   narrative: string;
   univRollNo: string;
@@ -39,6 +42,7 @@ export default function OnboardingPage() {
     year: "1st Year",
     section: "A",
     photoURL: "",
+    photoBaseId: "",
     role: "",
     narrative: "",
     univRollNo: "",
@@ -138,19 +142,11 @@ export default function OnboardingPage() {
     if (!file) return;
     setLoading(true);
     try {
-      const data = new FormData();
-      data.append('file', file);
-      data.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '');
-      data.append('folder', 'Cheerio/Profiles');
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: 'POST', body: data }
-      );
-      const resData = await res.json();
-      const uploadedURL = resData.secure_url;
-      setFormData(prev => ({ ...prev, photoURL: uploadedURL }));
+      const { baseId } = await uploadProcessedImage(file, "Avatars");
+      const url = getDownloadUrl(baseId, "gallery");
+      setFormData(prev => ({ ...prev, photoURL: url, photoBaseId: baseId }));
       setGmailPhotoURL(''); // now a custom upload
-      runFaceDetection(uploadedURL);
+      runFaceDetection(url);
     } catch (err) {
       console.error(err);
       alert('Photo upload failed');
@@ -170,13 +166,15 @@ export default function OnboardingPage() {
       const isPending = formData.year === "4th Year" || formData.year === "Faculty";
       
       // Archive Google photo to Cloudinary if necessary
-      const archivedPhotoURL = await archiveProfilePhoto(formData.photoURL);
+      const { url: archivedPhotoURL, baseId: archivedBaseId } = await archiveProfilePhoto(formData.photoURL);
+      const finalBaseId = archivedBaseId || formData.photoBaseId;
       
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
         ...formData,
         photoURL: archivedPhotoURL, // Use archived URL
+        photoBaseId: finalBaseId,
         xp: 0,
         photoCount: 0,
         createdAt: new Date().toISOString(),
@@ -222,9 +220,14 @@ export default function OnboardingPage() {
                     background: 'var(--color-card-tone)',
                   }}
                 >
-                  {formData.photoURL ? (
+                  {formData.photoURL || formData.photoBaseId ? (
                     <div className="relative w-full h-full">
-                      <Image src={formData.photoURL} alt="Profile" fill sizes="160px" className="object-cover" />
+                      <CheerioImage 
+                        baseId={formData.photoBaseId} 
+                        fallbackUrl={formData.photoURL} 
+                        variant="avatar"
+                        className="w-full h-full object-cover" 
+                      />
                     </div>
                   ) : (
                     <Camera size={40} className="text-gold-soft" />

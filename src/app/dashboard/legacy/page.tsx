@@ -5,7 +5,6 @@ import { db } from "@/lib/firebase";
 import { collection, query, getDocs, orderBy } from "firebase/firestore";
 import { ReturnToDashboard } from "@/components/Sidebar";
 import { School, History, Sparkles, BookOpen, Quote, X, Maximize2, GraduationCap, Target, Eye, Cpu, Award } from "lucide-react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface LegacyItem {
@@ -75,12 +74,10 @@ export default function LegacyPage() {
 
         {/* Feature Image - PRESERVED AS REQUESTED WITH MOBILE OPTIMIZATION */}
         <div className="relative aspect-[16/10] md:aspect-[21/9] rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-gold/20 shadow-2xl group mx-4 md:mx-0">
-          <Image 
+          <img 
             src="/assets/department_hero_image.png" 
-            fill 
-            className="object-cover transition-transform duration-1000 group-hover:scale-105" 
+            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
             alt="Department History" 
-            priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-parchment-base/90 via-parchment-base/10 to-transparent flex flex-col justify-end p-6 md:p-12">
             <p className="text-brown-primary font-bold uppercase tracking-[0.3em] text-[8px] md:text-xs">Foundation Archive</p>
@@ -288,10 +285,9 @@ export default function LegacyPage() {
                   className="theme-card p-6 rounded-[2.5rem] group cursor-pointer hover:border-gold-primary transition-all duration-500 shadow-xl hover:shadow-2xl flex flex-col"
                 >
                   <div className="relative aspect-video rounded-[1.8rem] overflow-hidden border border-gold-soft/10 mb-6 bg-card-tone">
-                    <Image 
+                    <img 
                       src={item.imageURL} 
-                      fill 
-                      className="object-cover transition-transform duration-1000 group-hover:scale-110" 
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
                       alt={item.title} 
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-500" />
@@ -354,10 +350,9 @@ export default function LegacyPage() {
 
               <div className="flex-1 overflow-y-auto">
                 <div className="relative aspect-video md:aspect-[21/9] w-full border-b border-gold-soft/20">
-                  <Image 
+                  <img 
                     src={selectedItem.imageURL} 
-                    fill 
-                    className="object-cover" 
+                    className="w-full h-full object-cover" 
                     alt={selectedItem.title} 
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-card-tone via-transparent to-transparent" />

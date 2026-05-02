@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
+import { CheerioImage } from "@/lib/imageVariants";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { Zap } from "lucide-react";
@@ -14,6 +14,7 @@ interface MemoryMatchProps {
 interface Card {
   id: string;
   img: string;
+  baseId?: string;
   name: string;
   flipped: boolean;
   matched: boolean;
@@ -39,7 +40,10 @@ export function MemoryMatch({ module, onComplete }: MemoryMatchProps) {
       } else {
         const q = query(collection(db, "users"), where("category", "==", "LEGEND"), where("photoURL", "!=", ""));
         const snap = await getDocs(q);
-        seniors = snap.docs.map(doc => ({ id: doc.id, name: doc.data().name, img: doc.data().photoURL })).slice(0, 6);
+        seniors = snap.docs.map(doc => {
+          const d = doc.data();
+          return { id: doc.id, name: d.name, img: d.photoURL, baseId: d.photoBaseId };
+        }).slice(0, 6);
       }
       
       const cardPairs = [...seniors, ...seniors].map((s, index) => ({
@@ -131,7 +135,7 @@ export function MemoryMatch({ module, onComplete }: MemoryMatchProps) {
             </div>
             {/* Back */}
             <div className="absolute inset-0 bg-white border-2 border-gold-primary rounded-xl overflow-hidden rotate-y-180 backface-hidden shadow-lg">
-              <Image src={card.img} fill className="object-cover" alt="Card" />
+              <CheerioImage baseId={card.baseId} fallbackUrl={card.img} fill className="object-cover" alt="Card" variant="card" />
             </div>
           </div>
         ))}
