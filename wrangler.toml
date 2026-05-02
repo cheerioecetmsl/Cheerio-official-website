@@ -1,0 +1,10 @@
+name = "cheerio-2026"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# You can define non-secret environment variables here
+# Secret variables should be set in the Cloudflare Pages dashboard
+
+[site]
+bucket = ".next"
