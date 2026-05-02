@@ -6,5 +6,4 @@ compatibility_flags = ["nodejs_compat"]
 # You can define non-secret environment variables here
 # Secret variables should be set in the Cloudflare Pages dashboard
 
-[site]
-bucket = ".next"
+
