@@ -15,8 +15,8 @@ const firebaseConfig = {
 
 // Initialize Firebase only on the client
 let app;
-let auth: any;
-let db: any;
+let auth: any = {};
+let db: any = {};
 
 if (typeof window !== "undefined") {
   app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);

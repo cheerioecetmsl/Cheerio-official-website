@@ -19,7 +19,7 @@ export async function archiveProfilePhoto(photoURL: string): Promise<ArchiveResu
     
     if (!response.ok) {
       console.warn("[archiveProfilePhoto] Proxy fetch failed, falling back to original URL");
-      return photoURL;
+      return { url: photoURL };
     }
 
     const blob = await response.blob();

@@ -385,9 +385,11 @@ export default function DashboardPage() {
                       <div className="flex flex-col md:flex-row gap-6">
                         {item.mediaGallery && item.mediaGallery.length > 0 && (
                           <div className="relative w-full md:w-48 aspect-video md:aspect-square rounded-2xl overflow-hidden flex-shrink-0 border border-gold-soft/20 shadow-lg">
-                            <img 
-                              src={item.mediaGallery[0]} 
+                            <CheerioImage 
+                              baseId={item.mediaBaseIds?.[0]}
+                              fallbackUrl={typeof item.mediaGallery[0] === 'string' ? item.mediaGallery[0] : (item.mediaGallery[0] as any).url}
                               alt={item.title}
+                              variant="preview"
                               className="w-full h-full object-cover"
                             />
                             {item.mediaGallery.length > 1 && (
@@ -467,8 +469,10 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-4 md:gap-8 p-4 md:p-8 bg-gold-soft/20 border-l-4 border-l-gold-primary">
                       <div className="text-2xl md:text-3xl font-bold serif text-brown-primary w-8 md:w-12 text-center">#{userRank}</div>
                       <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-gold-primary shadow-xl flex-shrink-0">
-                        <img 
-                          src={userData.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${auth.currentUser?.uid}`} 
+                        <CheerioImage 
+                          baseId={userData.photoBaseId}
+                          fallbackUrl={userData.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${auth.currentUser?.uid}`} 
+                          variant="avatar"
                           className="w-full h-full object-cover" 
                           alt="You" 
                           onError={(e) => {

@@ -32,6 +32,7 @@ export const CheerioImage: React.FC<CheerioImageProps> = ({
   variant = "gallery", 
   alt = "Memory",
   className = "",
+  priority,
   ...props 
 }) => {
   // Backward compatibility: If no baseId is provided, use the fallbackUrl (old system)

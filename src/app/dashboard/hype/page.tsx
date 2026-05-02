@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { TrendingUp, Megaphone, Calendar, Zap, Image as ImageIcon, Play, Music, Film, Layers } from "lucide-react";
 import { ReturnToDashboard } from "@/components/Sidebar";
+import { CheerioImage } from "@/lib/imageVariants";
 
 interface MediaAsset {
   url: string;
@@ -18,7 +19,9 @@ interface HypeItem {
   date: string;
   tag: string;
   mediaGallery?: MediaAsset[];
+  mediaBaseIds?: string[]; // Added for new system
   mediaURL?: string;
+  mediaBaseId?: string; // Added for single media
   mediaType?: 'image' | 'video' | 'audio';
   createdAt: string | number | Date;
 }
@@ -106,8 +109,9 @@ export default function HypePage() {
                       {item.mediaGallery.map((asset, idx) => (
                         <div key={idx} className={`rounded-3xl overflow-hidden border border-gold/20 shadow-2xl bg-black/5 ${item.mediaGallery!.length > 1 && idx === 0 && item.mediaGallery!.length % 2 !== 0 ? 'col-span-2' : ''}`}>
                           {asset.type === 'image' && (
-                            <img 
-                              src={asset.url} 
+                            <CheerioImage 
+                              baseId={item.mediaBaseIds?.[idx]}
+                              fallbackUrl={asset.url} 
                               alt={item.title} 
                               className="w-full h-auto object-contain hover:scale-105 transition-transform duration-1000" 
                             />
@@ -129,8 +133,9 @@ export default function HypePage() {
                   ) : item.mediaURL ? (
                     <div className="rounded-3xl overflow-hidden border border-gold-soft/30 shadow-2xl max-w-2xl bg-card-tone">
                       {item.mediaType === 'image' && (
-                        <img 
-                          src={item.mediaURL!} 
+                        <CheerioImage 
+                          baseId={item.mediaBaseId}
+                          fallbackUrl={item.mediaURL!} 
                           alt={item.title} 
                           className="w-full h-auto object-contain hover:scale-105 transition-transform duration-1000" 
                         />

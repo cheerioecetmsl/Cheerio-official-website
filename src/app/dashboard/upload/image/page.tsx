@@ -10,7 +10,8 @@ import {
 import Link from "next/link";
 // Removed next/image for static asset delivery
 import { ReturnToDashboard } from "@/components/Sidebar";
-import imageCompression from 'browser-image-compression';
+import { uploadProcessedImage } from "@/lib/uploadHelper";
+import { getDownloadUrl } from "@/lib/imageVariants";
 
 export default function ImageUpload() {
   const [files, setFiles] = useState<File[]>([]);

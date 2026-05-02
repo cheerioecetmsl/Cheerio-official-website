@@ -51,7 +51,7 @@ export const NotificationModal = ({ isOpen, onClose, notification }: Notificatio
                 <div className="relative w-full md:w-5/12 aspect-square md:aspect-auto h-56 md:h-[500px] overflow-hidden bg-parchment-contrast/50">
                   <CheerioImage
                     baseId={notification.mediaBaseIds?.[0]}
-                    fallbackUrl={notification.mediaGallery?.[0]}
+                    fallbackUrl={typeof notification.mediaGallery?.[0] === 'string' ? notification.mediaGallery[0] : (notification.mediaGallery?.[0] as any)?.url}
                     alt={notification.title}
                     variant="preview"
                     className="w-full h-full object-cover"
