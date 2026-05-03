@@ -86,8 +86,8 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile Floating Menu Button (Top Left) */}
-      <div className="fixed top-5 left-6 z-[60] md:hidden">
+      {/* Mobile Floating Menu Button (Top Left - moved to Right on Chat to clear back button) */}
+      <div className={`fixed top-5 z-[60] md:hidden ${pathname === '/dashboard/chat' ? 'right-6' : 'left-6'}`}>
         <button 
           onClick={() => setIsExpanded(true)}
           className={`p-3 text-brown-primary rounded-full shadow-lg transition-all duration-500 hover:scale-110 active:scale-95 ${

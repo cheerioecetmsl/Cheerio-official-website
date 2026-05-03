@@ -39,14 +39,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, user, isMut
     
     if (lastAtSymbol !== -1 && (lastAtSymbol === 0 || textBeforeCursor[lastAtSymbol - 1] === ' ')) {
       const queryStr = textBeforeCursor.substring(lastAtSymbol + 1);
+      mentionIndexRef.current = lastAtSymbol;
+      setMentionSearch(queryStr);
+      const results = await searchUsers(queryStr);
       
-      // If there's a space after the '@', or if the '@' was just deleted, close the results
-      if (queryStr.includes(' ')) {
+      // If no results and there's a space, it's likely a normal message, so close the list
+      if (results.length === 0 && queryStr.includes(' ')) {
         setShowMentionResults(false);
       } else {
-        mentionIndexRef.current = lastAtSymbol;
-        setMentionSearch(queryStr);
-        const results = await searchUsers(queryStr);
         setMentionResults(results);
         setShowMentionResults(true);
       }
@@ -241,7 +241,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, user, isMut
 
             <AnimatePresence>
               {showMentionResults && (
-                <motion.div 
+                <>
+                  {/* Click outside to close mention list */}
+                  <div 
+                    className="fixed inset-0 z-[45]" 
+                    onClick={() => setShowMentionResults(false)}
+                  />
+                  <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
@@ -276,6 +282,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, user, isMut
                     )}
                   </div>
                 </motion.div>
+                </>
               )}
             </AnimatePresence>
 

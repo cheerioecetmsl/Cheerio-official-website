@@ -44,13 +44,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const renderMessageContent = (content: string) => {
     if (!content) return null;
     
-    // Regular expression to find @mentions
-    const parts = content.split(/(@\w+)/g);
+    // Regular expression to find @mentions, supporting names with spaces (capitalized words)
+    // It stops at punctuation or lowercase words
+    const parts = content.split(/(@[^\s,!?.]+(?:\s[A-Z][^\s,!?.]*)*)/g);
     
     return parts.map((part, i) => {
       if (part.startsWith('@')) {
         return (
-          <span key={i} className="font-black text-gold-primary italic underline decoration-gold-soft/30 underline-offset-2">
+          <span 
+            key={i} 
+            className="font-black text-emerald-400 italic"
+            style={{ textShadow: '-0.5px -0.5px 0 #000, 0.5px -0.5px 0 #000, -0.5px 0.5px 0 #000, 0.5px 0.5px 0 #000' }}
+          >
             {part}
           </span>
         );
