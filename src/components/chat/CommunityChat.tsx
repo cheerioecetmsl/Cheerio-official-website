@@ -11,10 +11,11 @@ import {
   startAfter,
   Timestamp,
   doc,
-  getDoc
+  getDoc,
+  where
 } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
-import { ChatMessage, sendMessage, TypingStatus } from '@/lib/chat';
+import { ChatMessage, sendMessage, TypingStatus, updateLastReadChat } from '@/lib/chat';
 import { MessageBubble } from './MessageBubble';
 import { ChatInput } from './ChatInput';
 import { Loader2, Users, Shield, AlertCircle, ChevronDown, MessageSquare } from 'lucide-react';
@@ -33,10 +34,17 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ currentUser }) => 
   const [isMuted, setIsMuted] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [onlineCount, setOnlineCount] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const firstMessageRef = useRef<any>(null);
   const isInitialLoad = useRef(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
+    audioRef.current.volume = 0.5;
+  }, []);
 
   // Check Admin and Muted status
   useEffect(() => {
@@ -51,6 +59,10 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ currentUser }) => 
         const data = userDoc.data();
         setUserData(data);
         setIsMuted(data.isMuted || false);
+
+        // Update last read timestamp
+        await updateLastReadChat(currentUser.uid);
+
         if (data.isBanned) {
           window.location.href = '/banned';
         }
@@ -78,8 +90,34 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ currentUser }) => 
       setLoading(false);
 
       if (isInitialLoad.current) {
-        setTimeout(scrollToBottom, 100);
+        // Only auto-scroll to bottom if there are no unread messages
+        // or if we've already handled the initial load
+        const lastRead = userData?.lastReadChatTimestamp?.toDate ? userData.lastReadChatTimestamp.toDate() : (userData?.lastReadChatTimestamp ? new Date(userData.lastReadChatTimestamp) : null);
+        const hasUnread = lastRead && newMessages.some(m => {
+          if (!m.createdAt) return false;
+          const msgDate = m.createdAt.toDate ? m.createdAt.toDate() : new Date(m.createdAt);
+          return msgDate > lastRead && m.senderId !== currentUser?.uid;
+        });
+
+        if (!hasUnread) {
+          setTimeout(scrollToBottom, 100);
+        }
         isInitialLoad.current = false;
+      } else {
+        // Check if we should play sound and scroll
+        const lastMsg = snapshot.docs[0]?.data() as ChatMessage;
+        if (lastMsg && lastMsg.senderId !== currentUser?.uid && snapshot.docChanges().some(change => change.type === 'added')) {
+          audioRef.current?.play().catch(e => console.log('Audio play failed:', e));
+          
+          // Auto-scroll if near bottom
+          if (scrollRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 300;
+            if (isNearBottom) {
+              setTimeout(scrollToBottom, 100);
+            }
+          }
+        }
       }
 
       if (snapshot.docs.length > 0) {
@@ -102,6 +140,20 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ currentUser }) => 
 
     return () => unsubscribe();
   }, [currentUser]);
+  
+  // Listen to online users
+  useEffect(() => {
+    const q = query(
+      collection(db, "users"),
+      where("presence", "==", "online")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setOnlineCount(snapshot.size);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const scrollToBottom = () => {
     if (scrollRef.current) {
@@ -233,8 +285,8 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ currentUser }) => 
             <h2 className="font-bold text-brown-primary text-base sm:text-lg tracking-tight serif">Global Community</h2>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="text-[9px] sm:text-[10px] font-bold text-gold-primary uppercase tracking-widest">Live Archive</span>
-              <span className="hidden sm:inline text-[10px] text-brown-secondary/30">•</span>
-              <span className="hidden sm:inline text-[10px] text-brown-secondary/60 font-medium">152 online</span>
+              <span className="text-[9px] sm:text-[10px] text-brown-secondary/30">•</span>
+              <span className="text-[9px] sm:text-[10px] text-brown-secondary/60 font-medium">{onlineCount} online</span>
             </div>
           </div>
         </div>

@@ -9,7 +9,6 @@ import { Countdown } from "@/components/Countdown";
 import { HypeBoard, UserStats } from "@/components/DashboardModules";
 import { Trophy, TrendingUp, ChevronDown, ArrowUpRight, Files, MessageSquare } from "lucide-react";
 import Link from "next/link";
-import { collection, query, orderBy, limit, where, getDocs } from "firebase/firestore";
 import { TutorialOverlay } from "@/components/TutorialOverlay";
 import { HypeUpdate } from "@/components/DashboardModules";
 import { SeniorInvitation } from "@/components/SeniorInvitation";
@@ -41,14 +40,15 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showTutorial, setShowTutorial] = useState(false);
   const [showSeniorInvite, setShowSeniorInvite] = useState(false);
-  const [showPulse, setShowPulse] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [latestNotification, setLatestNotification] = useState<HypeUpdate | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [mentionCount, setMentionCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [userRank, setUserRank] = useState<number | null>(null);
   const [activeModule, setActiveModule] = useState<EngagementModule | null>(null);
   const [showEngagement, setShowEngagement] = useState(false);
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [latestNotification, setLatestNotification] = useState<HypeUpdate | null>(null);
-  const [mounted, setMounted] = useState(false);
   const hasTriggeredRef = useRef({ tutorial: false, invite: false });
 
   useEffect(() => {
@@ -141,15 +141,53 @@ export default function DashboardPage() {
         setActiveModule(null);
       }
     };
-
     fetchLeaderboard();
     fetchPulse();
     fetchEngagement();
 
+    // Listen for chat messages to show unread count
+    let unsubscribeChat: () => void = () => {};
+    if (auth.currentUser) {
+      const chatQuery = query(
+        collection(db, "messages"),
+        orderBy("createdAt", "desc"),
+        limit(20)
+      );
+      
+      unsubscribeChat = onSnapshot(chatQuery, (snapshot) => {
+        if (!userData?.lastReadChatTimestamp) {
+          setUnreadCount(0);
+          return;
+        }
+
+        const lastRead = userData.lastReadChatTimestamp.toDate ? userData.lastReadChatTimestamp.toDate() : new Date(userData.lastReadChatTimestamp);
+        
+        const unreadMessages = snapshot.docs.filter(doc => {
+          const msgData = doc.data();
+          if (!msgData.createdAt) return false;
+          const msgDate = msgData.createdAt.toDate ? msgData.createdAt.toDate() : new Date(msgData.createdAt);
+          return msgDate > lastRead && msgData.senderId !== auth.currentUser?.uid && !msgData.deleted;
+        });
+
+        setUnreadCount(unreadMessages.length);
+
+        // Calculate mentions
+        const userName = userData.name || userData.displayName || '';
+        if (userName) {
+          const mentions = unreadMessages.filter(doc => {
+            const text = doc.data().text || '';
+            return text.includes(`@${userName}`);
+          }).length;
+          setMentionCount(mentions);
+        }
+      });
+    }
+
     return () => {
       unsubscribeAuth();
+      unsubscribeChat();
     };
-  }, [router]);
+  }, [router, userData?.lastReadChatTimestamp]);
 
   // Handle Popup Logic once both user data and latest notification are available
   useEffect(() => {
@@ -301,8 +339,31 @@ export default function DashboardPage() {
             <div className="flex flex-col gap-4 md:w-64">
               <button 
                 onClick={() => router.push('/dashboard/chat')}
-                className="w-full h-[180px] bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-3 transition-all group shadow-[0_0_30px_rgba(37,99,235,0.05)]"
+                className="w-full h-[180px] bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-3 transition-all group shadow-[0_0_30px_rgba(37,99,235,0.05)] relative"
               >
+                {unreadCount > 0 && (
+                  <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5 z-10">
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="bg-red-500 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-lg"
+                    >
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </motion.div>
+                    
+                    {mentionCount > 0 && (
+                      <motion.div 
+                        initial={{ scale: 0, x: 20 }}
+                        animate={{ scale: 1, x: 0 }}
+                        className="bg-[#22C55E] text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1 border-2 border-white shadow-xl"
+                      >
+                        <span className="opacity-80">@</span>
+                        <span>{mentionCount}</span>
+                        <span className="ml-1 opacity-60 text-[10px] tracking-tighter">&gt;</span>
+                      </motion.div>
+                    )}
+                  </div>
+                )}
                 <div className="p-3 bg-blue-600/20 rounded-2xl text-blue-400 group-hover:scale-110 transition-transform">
                   <MessageSquare size={24} fill="currentColor" />
                 </div>

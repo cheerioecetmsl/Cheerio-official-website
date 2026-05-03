@@ -5,7 +5,11 @@ import {
   doc, 
   serverTimestamp, 
   setDoc,
-  deleteDoc
+  deleteDoc,
+  getDocs,
+  query,
+  limit,
+  where
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -120,4 +124,40 @@ export async function kickUser(userId: string) {
 export async function toggleMentorAccess(userId: string, canJoinChat: boolean) {
   const userRef = doc(db, USERS_COLLECTION, userId);
   return await updateDoc(userRef, { canJoinChat });
+}
+
+/**
+ * Search users for tagging.
+ */
+export async function searchUsers(queryText: string) {
+  // To handle case-insensitivity and ensure "all" people are searchable,
+  // we fetch a large batch and filter on the client side.
+  const q = query(
+    collection(db, USERS_COLLECTION),
+    limit(1000)
+  );
+  
+  const snapshot = await getDocs(q);
+  const allUsers = snapshot.docs.map(doc => ({
+    id: doc.id,
+    name: doc.data().name || doc.data().displayName || 'Anonymous',
+    photoURL: doc.data().photoURL || ''
+  }));
+
+  if (!queryText) return allUsers;
+
+  const lowerQuery = queryText.toLowerCase();
+  return allUsers.filter(u => 
+    u.name.toLowerCase().includes(lowerQuery)
+  );
+}
+
+/**
+ * Update the user's last read chat timestamp.
+ */
+export async function updateLastReadChat(userId: string) {
+  const userRef = doc(db, USERS_COLLECTION, userId);
+  return await updateDoc(userRef, {
+    lastReadChatTimestamp: serverTimestamp()
+  });
 }

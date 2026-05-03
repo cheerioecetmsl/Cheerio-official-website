@@ -41,6 +41,24 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     await deleteMessage(message.id, isMe ? 'self' : 'admin');
   };
 
+  const renderMessageContent = (content: string) => {
+    if (!content) return null;
+    
+    // Regular expression to find @mentions
+    const parts = content.split(/(@\w+)/g);
+    
+    return parts.map((part, i) => {
+      if (part.startsWith('@')) {
+        return (
+          <span key={i} className="font-black text-gold-primary italic underline decoration-gold-soft/30 underline-offset-2">
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
+
   if (message.deleted) {
     return (
       <div className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'} mb-1`}>
@@ -133,8 +151,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 </div>
               ) : (
                 message.text && (
-                  <p className="text-[13px] sm:text-[14px] leading-relaxed whitespace-pre-wrap break-words serif font-medium">
-                    {message.text}
+                  <p className={`text-[14px] sm:text-[15px] leading-relaxed serif font-medium ${isMe ? 'text-brown-primary' : 'text-brown-primary'}`}>
+                    {renderMessageContent(message.text)}
                     {message.edited && <span className="ml-2 opacity-40 text-[10px] font-bold italic select-none inline-flex items-center gap-1"><span className="w-0.5 h-0.5 rounded-full bg-current" />edited</span>}
                   </p>
                 )

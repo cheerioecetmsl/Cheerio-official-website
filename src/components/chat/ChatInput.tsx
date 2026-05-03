@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Image as ImageIcon, Video, Paperclip, X, Smile, Loader2, Shield } from 'lucide-react';
 import { uploadGenericFile } from '@/lib/uploadHelper';
-import { setTypingStatus } from '@/lib/chat';
+import { setTypingStatus, searchUsers } from '@/lib/chat';
+import { EmojiPicker } from './EmojiPicker';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChatInputProps {
   onSendMessage: (text: string, media?: { url: string; type: 'image' | 'video' | 'file' }) => Promise<void>;
@@ -16,18 +18,83 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, user, isMut
   const [selectedMedia, setSelectedMedia] = useState<{ file: File; type: 'image' | 'video' | 'file' } | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState('');
+  const [mentionResults, setMentionResults] = useState<any[]>([]);
+  const [showMentionResults, setShowMentionResults] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const mentionIndexRef = useRef<number>(-1);
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setText(e.target.value);
+  const handleTextChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setText(value);
     
+    // Mention detection
+    const cursorPosition = e.target.selectionStart;
+    const textBeforeCursor = value.substring(0, cursorPosition);
+    const lastAtSymbol = textBeforeCursor.lastIndexOf('@');
+    
+    if (lastAtSymbol !== -1 && (lastAtSymbol === 0 || textBeforeCursor[lastAtSymbol - 1] === ' ')) {
+      const queryStr = textBeforeCursor.substring(lastAtSymbol + 1);
+      
+      // If there's a space after the '@', or if the '@' was just deleted, close the results
+      if (queryStr.includes(' ')) {
+        setShowMentionResults(false);
+      } else {
+        mentionIndexRef.current = lastAtSymbol;
+        setMentionSearch(queryStr);
+        const results = await searchUsers(queryStr);
+        setMentionResults(results);
+        setShowMentionResults(true);
+      }
+    } else {
+      setShowMentionResults(false);
+    }
+
     // Typing status
     setTypingStatus(user.uid, user.displayName, true);
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
       setTypingStatus(user.uid, user.displayName, false);
     }, 3000);
+  };
+
+  const handleMentionSelect = (userName: string) => {
+    const cursorPosition = textAreaRef.current?.selectionStart || 0;
+    const before = text.substring(0, mentionIndexRef.current);
+    const after = text.substring(cursorPosition);
+    const newText = `${before}@${userName} ${after}`;
+    setText(newText);
+    setShowMentionResults(false);
+    setTimeout(() => {
+      if (textAreaRef.current) {
+        textAreaRef.current.focus();
+        const newPos = before.length + userName.length + 2; // +1 for @, +1 for space
+        textAreaRef.current.setSelectionRange(newPos, newPos);
+      }
+    }, 0);
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    // If it looks like a URL, it's a sticker
+    if (emoji.startsWith('http')) {
+      onSendMessage('', { url: emoji, type: 'image' });
+      setShowEmojiPicker(false);
+      return;
+    }
+
+    const cursorPosition = textAreaRef.current?.selectionStart || 0;
+    const before = text.substring(0, cursorPosition);
+    const after = text.substring(cursorPosition);
+    const newText = before + emoji + after;
+    setText(newText);
+    setShowEmojiPicker(false);
+    
+    // Set focus back to textarea
+    setTimeout(() => textAreaRef.current?.focus(), 0);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video' | 'file') => {
@@ -141,6 +208,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, user, isMut
           <div className="flex items-center gap-1 pl-1 mb-1">
             <button
               type="button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all active:scale-90 ${showEmojiPicker ? 'bg-gold/10 text-gold-primary' : 'text-brown-primary/30 hover:text-gold-primary'}`}
+            >
+              <Smile size={18} className="sm:w-5 sm:h-5" />
+            </button>
+
+            <button
+              type="button"
               onClick={() => {
                 if (fileInputRef.current) {
                   fileInputRef.current.accept = 'image/*,video/*,.pdf,.doc,.docx,.zip';
@@ -154,8 +229,58 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, user, isMut
           </div>
 
           {/* Text Area */}
-          <div className="flex-1 min-w-0 py-1">
+          <div className="flex-1 min-w-0 py-1 relative">
+            <AnimatePresence>
+              {showEmojiPicker && (
+                <EmojiPicker 
+                  onSelect={handleEmojiSelect} 
+                  onClose={() => setShowEmojiPicker(false)} 
+                />
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {showMentionResults && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute bottom-full left-0 mb-4 w-64 bg-parchment-base border border-gold-soft/50 rounded-2xl shadow-2xl overflow-hidden z-50"
+                >
+                  <div className="p-2 border-b border-gold-soft/20 bg-parchment-contrast/50">
+                    <span className="text-[9px] font-black text-gold-primary uppercase tracking-widest">Select Citizen</span>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                    {mentionResults.length === 0 ? (
+                      <div className="px-4 py-3 text-[10px] font-bold text-brown-secondary/40 uppercase tracking-widest text-center">
+                        No citizens found
+                      </div>
+                    ) : (
+                      mentionResults.map((u) => (
+                        <button
+                          key={u.id}
+                          type="button"
+                          onClick={() => handleMentionSelect(u.name)}
+                          className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gold/10 transition-colors border-b border-gold-soft/10 last:border-0"
+                        >
+                          <div className="w-8 h-8 rounded-full overflow-hidden border border-gold-soft/30 bg-gold/5 flex items-center justify-center">
+                            {u.photoURL ? (
+                              <img src={u.photoURL} alt={u.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-[10px] font-bold text-brown-primary/40">{u.name[0]}</span>
+                            )}
+                          </div>
+                          <span className="text-sm font-bold text-brown-primary serif">{u.name}</span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <textarea
+              ref={textAreaRef}
               value={text}
               onChange={handleTextChange}
               placeholder="Transmit..."

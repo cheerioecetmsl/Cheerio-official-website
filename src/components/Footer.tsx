@@ -10,8 +10,11 @@ import { doc, getDoc } from "firebase/firestore";
 
 export function Footer() {
   const pathname = usePathname();
+  const isDashboard = pathname?.startsWith("/dashboard");
   const isHome = pathname === "/";
   const [socialLinks, setSocialLinks] = useState<any[]>([]);
+
+  if (isDashboard) return null;
 
   useEffect(() => {
     const fetchLinks = async () => {
