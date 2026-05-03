@@ -3,6 +3,7 @@ import { Inter, EB_Garamond, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PresenceTracker } from "@/components/PresenceTracker";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -55,6 +56,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${ebGaramond.variable} ${shareTechMono.variable} antialiased film-grain min-h-screen bg-dark-bg text-dark-text`}>
+        <PresenceTracker />
         {/* Service Worker Cleanup: Ensures stale Cloudflare caches are cleared for all users */}
         <script
           dangerouslySetInnerHTML={{

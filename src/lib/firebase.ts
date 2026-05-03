@@ -13,17 +13,13 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Initialize Firebase only on the client
-let app;
-let auth: any = {};
-let db: any = {};
+// Initialize Firebase
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
+// Set persistence explicitly to LOCAL (only on client)
 if (typeof window !== "undefined") {
-  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-
-  // Set persistence explicitly to LOCAL
   setPersistence(auth, browserLocalPersistence).catch((err) => {
     console.error("Auth Persistence Error:", err);
   });
