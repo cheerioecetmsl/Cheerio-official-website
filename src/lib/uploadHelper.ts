@@ -95,6 +95,53 @@ export async function uploadProcessedImage(
 }
 
 /**
+ * Generic file upload to Cloudinary (supports Video and Files).
+ */
+export async function uploadGenericFile(
+  file: File | Blob,
+  subfolder: string = "Archives",
+  onProgress?: (progress: number) => void
+): Promise<{ url: string; publicId: string }> {
+  const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dyvobdjp5";
+  const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-2026";
+  
+  // Determine resource type
+  let resourceType = "raw";
+  if (file.type.startsWith("video/")) resourceType = "video";
+  if (file.type.startsWith("image/")) resourceType = "image";
+
+  const API_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`;
+  const folderPath = subfolder.startsWith("Cheerio/") ? subfolder : `Cheerio/Archives/${subfolder}`;
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", UPLOAD_PRESET);
+  formData.append("folder", folderPath);
+
+  const xhr = new XMLHttpRequest();
+  return new Promise((resolve, reject) => {
+    xhr.upload.addEventListener("progress", (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    });
+
+    xhr.addEventListener("load", () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const response = JSON.parse(xhr.responseText);
+        resolve({ url: response.secure_url, publicId: response.public_id });
+      } else {
+        reject(new Error(`Cloudinary upload failed with status ${xhr.status}`));
+      }
+    });
+
+    xhr.addEventListener("error", () => reject(new Error("Network error during upload")));
+    xhr.open("POST", API_URL);
+    xhr.send(formData);
+  });
+}
+
+/**
  * Convenience function for profile photos (which only need the 'avatar' variant ideally, 
  * but for consistency we'll use the same 8-variant pipeline or a subset).
  * The user wants to eliminate ALL transformations, so having a high-res 'gallery' variant

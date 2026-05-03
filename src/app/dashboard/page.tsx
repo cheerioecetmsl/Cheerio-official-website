@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { Countdown } from "@/components/Countdown";
 import { HypeBoard, UserStats } from "@/components/DashboardModules";
-import { Trophy, TrendingUp, ChevronDown, ArrowUpRight, Files } from "lucide-react";
+import { Trophy, TrendingUp, ChevronDown, ArrowUpRight, Files, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { collection, query, orderBy, limit, where, getDocs } from "firebase/firestore";
 import { TutorialOverlay } from "@/components/TutorialOverlay";
@@ -297,20 +297,38 @@ export default function DashboardPage() {
             <div className="flex-grow">
               <UserStats name={userData?.name} xp={userData?.xp} />
             </div>
-            <button 
-              onClick={() => router.push('/dashboard/my-moments')}
-              className="md:w-64 h-full bg-gold-soft/20 hover:bg-gold-soft/40 border border-gold-soft/40 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-3 transition-all group"
-            >
-              <div className="p-3 bg-gold-soft/20 rounded-2xl text-brown-primary group-hover:scale-110 transition-transform">
-                <Zap size={24} fill="currentColor" />
-              </div>
-              <div className="text-center">
-                <p className="text-brown-primary font-bold uppercase tracking-[0.1em] text-[11px] leading-tight mb-1">Face Discovery</p>
-                <p className="text-brown-secondary/80 text-[9px] font-bold italic leading-relaxed">
-                  Do you want to find your face in the sea of images in cheerio-2026? Click here.
-                </p>
-              </div>
-            </button>
+            
+            <div className="flex flex-col gap-4 md:w-64">
+              <button 
+                onClick={() => router.push('/dashboard/chat')}
+                className="w-full h-[180px] bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-3 transition-all group shadow-[0_0_30px_rgba(37,99,235,0.05)]"
+              >
+                <div className="p-3 bg-blue-600/20 rounded-2xl text-blue-400 group-hover:scale-110 transition-transform">
+                  <MessageSquare size={24} fill="currentColor" />
+                </div>
+                <div className="text-center">
+                  <p className="text-white font-bold uppercase tracking-[0.1em] text-[11px] leading-tight mb-1">Community Chat</p>
+                  <p className="text-white/60 text-[9px] font-bold italic leading-relaxed">
+                    Connect with fellow archivists in real-time. Share moments & vibes.
+                  </p>
+                </div>
+              </button>
+
+              <button 
+                onClick={() => router.push('/dashboard/my-moments')}
+                className="w-full h-[180px] bg-gold-soft/20 hover:bg-gold-soft/40 border border-gold-soft/40 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-3 transition-all group"
+              >
+                <div className="p-3 bg-gold-soft/20 rounded-2xl text-brown-primary group-hover:scale-110 transition-transform">
+                  <Zap size={24} fill="currentColor" />
+                </div>
+                <div className="text-center">
+                  <p className="text-brown-primary font-bold uppercase tracking-[0.1em] text-[11px] leading-tight mb-1">Face Discovery</p>
+                  <p className="text-brown-secondary/80 text-[9px] font-bold italic leading-relaxed">
+                    Do you want to find your face in the sea of images? Click here.
+                  </p>
+                </div>
+              </button>
+            </div>
           </div>
         )}
 

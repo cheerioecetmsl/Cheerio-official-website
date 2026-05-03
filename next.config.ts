@@ -26,9 +26,7 @@ const nextConfig: NextConfig = {
         hostname: 'api.dicebear.com',
       },
     ],
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
+    unoptimized: true,
   },
   typescript: {
     ignoreBuildErrors: true,
