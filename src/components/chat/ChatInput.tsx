@@ -60,12 +60,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, user, isMut
         const folder = selectedMedia.type === 'image' ? 'Images' : 
                       selectedMedia.type === 'video' ? 'Videos' : 'Files';
         
-        const url = await uploadGenericFile(
+        const result = await uploadGenericFile(
           selectedMedia.file,
           folder,
           (progress) => setUploadProgress(progress)
         );
-        mediaData = { url, type: selectedMedia.type };
+        mediaData = { url: result.url, type: selectedMedia.type };
       }
 
       await onSendMessage(text.trim(), mediaData);
