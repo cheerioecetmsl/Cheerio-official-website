@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { Shield, MoreVertical, Trash2, Pencil, X, Check, Eye, Maximize2 } from 'lucide-react';
 import { CheerioImage } from '@/lib/imageVariants';
 import { MediaModal } from './MediaModal';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -21,7 +22,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(message.text);
   const [isMediaOpen, setIsMediaOpen] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const time = message.createdAt?.toDate 
     ? format(message.createdAt.toDate(), 'HH:mm')
@@ -36,11 +37,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     setIsEditing(false);
   };
 
-  const handleDelete = async () => {
-    const confirmDelete = window.confirm("Are you sure you want to remove this message from the archive?");
-    if (confirmDelete) {
-      await deleteMessage(message.id, isMe ? 'self' : 'admin');
-    }
+  const confirmDelete = async () => {
+    await deleteMessage(message.id, isMe ? 'self' : 'admin');
   };
 
   if (message.deleted) {
@@ -57,7 +55,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     <div className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'} group mb-1 sm:mb-1.5 relative`}>
       <div className={`flex items-start gap-2 sm:gap-3 max-w-[90%] sm:max-w-[70%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
         {/* Avatar Area */}
-        <div className="w-7 sm:w-8 flex-shrink-0 flex justify-center pt-1">
+        <div className="w-7 sm:w-8 flex-shrink-0 flex justify-center self-start mt-1">
           {isFirstInGroup && (
             <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border shadow-sm ${isMe ? 'border-gold-primary/30' : 'border-white/10'}`}>
               {(message.senderAvatar || message.senderPhotoBaseId || message.senderPhoto) ? (
@@ -98,7 +96,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                   </button>
                 )}
                 <button 
-                  onClick={handleDelete}
+                  onClick={() => setShowDeleteConfirm(true)}
                   className="p-1.5 rounded-lg bg-parchment-contrast/80 text-brown-primary/40 hover:text-red-500 transition-all border border-gold-soft/20 shadow-sm"
                 >
                   <Trash2 size={12} />
@@ -148,10 +146,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                   {message.mediaType === 'image' && (
                     <div className="relative group/media">
                       <img 
-                        src={message.mediaUrl} 
+                        src={typeof message.mediaUrl === 'string' && !message.mediaUrl.startsWith('[object') ? message.mediaUrl : (message.mediaUrl as any)?.url} 
                         alt="attachment" 
                         className="max-h-[300px] w-full object-cover transition-all duration-500 cursor-pointer"
                         onClick={() => setIsMediaOpen(true)}
+                        onError={(e) => {
+                          // If it's still broken, hide the broken image
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
                       />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                         <Eye className="text-white" size={24} />
@@ -161,7 +163,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                   {message.mediaType === 'video' && (
                     <div className="relative group/media">
                       <video 
-                        src={message.mediaUrl} 
+                        src={typeof message.mediaUrl === 'string' && !message.mediaUrl.startsWith('[object') ? message.mediaUrl : (message.mediaUrl as any)?.url} 
                         className="max-h-[300px] w-full cursor-pointer"
                         onClick={() => setIsMediaOpen(true)}
                       />
@@ -210,6 +212,16 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         onClose={() => setIsMediaOpen(false)} 
         mediaUrl={message.mediaUrl || ''} 
         mediaType={message.mediaType || 'image'} 
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={confirmDelete}
+        title="Remove Entry?"
+        message="Are you sure you want to remove this message from the archive? This action cannot be undone."
+        confirmText="Remove"
+        cancelText="Keep Entry"
       />
     </div>
   );
