@@ -285,8 +285,8 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ currentUser }) => 
             <h2 className="font-bold text-brown-primary text-base sm:text-lg tracking-tight serif">Global Community</h2>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="text-[9px] sm:text-[10px] font-bold text-gold-primary uppercase tracking-widest">Live Archive</span>
-              <span className="text-[9px] sm:text-[10px] text-brown-secondary/30">•</span>
-              <span className="text-[9px] sm:text-[10px] text-brown-secondary/60 font-medium">{onlineCount} online</span>
+              <span className="hidden sm:inline text-[10px] text-brown-secondary/30">•</span>
+              <span className="hidden sm:inline text-[10px] text-brown-secondary/60 font-medium">{onlineCount} online</span>
             </div>
           </div>
         </div>

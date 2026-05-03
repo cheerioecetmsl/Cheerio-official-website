@@ -14,8 +14,6 @@ export function Footer() {
   const isHome = pathname === "/";
   const [socialLinks, setSocialLinks] = useState<any[]>([]);
 
-  if (isDashboard) return null;
-
   useEffect(() => {
     const fetchLinks = async () => {
       try {
@@ -41,6 +39,8 @@ export function Footer() {
     };
     fetchLinks();
   }, []);
+
+  if (isDashboard) return null;
 
   if (isHome) {
     return <LandingFooter socialLinks={socialLinks} />;

@@ -1,10 +1,11 @@
 "use client";
 
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, query, collection, orderBy, limit, getDocs, where, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
 import { Countdown } from "@/components/Countdown";
 import { HypeBoard, UserStats } from "@/components/DashboardModules";
 import { Trophy, TrendingUp, ChevronDown, ArrowUpRight, Files, MessageSquare } from "lucide-react";
@@ -49,6 +50,7 @@ export default function DashboardPage() {
   const [userRank, setUserRank] = useState<number | null>(null);
   const [activeModule, setActiveModule] = useState<EngagementModule | null>(null);
   const [showEngagement, setShowEngagement] = useState(false);
+  const [showPulse, setShowPulse] = useState(false);
   const hasTriggeredRef = useRef({ tutorial: false, invite: false });
 
   useEffect(() => {

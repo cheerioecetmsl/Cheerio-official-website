@@ -20,6 +20,7 @@ export function PresenceTracker() {
         // Initial mark as online
         const setOnline = () => {
           updateDoc(userRef, {
+            isOnline: true,
             presence: 'online',
             onlineSince: serverTimestamp(),
             lastSeen: serverTimestamp()
@@ -30,6 +31,7 @@ export function PresenceTracker() {
 
         const setOffline = () => {
           updateDoc(userRef, {
+            isOnline: false,
             presence: 'offline',
             lastSeen: serverTimestamp()
           })
