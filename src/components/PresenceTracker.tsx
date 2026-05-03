@@ -20,7 +20,7 @@ export function PresenceTracker() {
         // Initial mark as online
         const setOnline = () => {
           updateDoc(userRef, {
-            status: 'online',
+            presence: 'online',
             onlineSince: serverTimestamp(),
             lastSeen: serverTimestamp()
           })
@@ -30,7 +30,7 @@ export function PresenceTracker() {
 
         const setOffline = () => {
           updateDoc(userRef, {
-            status: 'offline',
+            presence: 'offline',
             lastSeen: serverTimestamp()
           })
           .then(() => console.log("PresenceTracker: Successfully marked OFFLINE"))
@@ -51,29 +51,25 @@ export function PresenceTracker() {
 
         const handlePresence = () => {
           if (document.visibilityState === 'hidden') {
+            console.log("PresenceTracker: Tab hidden, marking OFFLINE");
             setOffline();
           } else {
+            console.log("PresenceTracker: Tab visible, marking ONLINE");
             setOnline();
           }
         };
 
         const handleUnload = () => {
-          // Navigator.sendBeacon is better for unload but needs an API endpoint
-          // For now, we rely on the hidden state trigger which fires before unload
           setOffline();
         };
 
         window.addEventListener("beforeunload", handleUnload);
         document.addEventListener("visibilitychange", handlePresence);
-        window.addEventListener("focus", setOnline);
-        window.addEventListener("blur", setOffline);
 
         return () => {
           clearInterval(heartbeat);
           window.removeEventListener("beforeunload", handleUnload);
           document.removeEventListener("visibilitychange", handlePresence);
-          window.removeEventListener("focus", setOnline);
-          window.removeEventListener("blur", setOffline);
           setOffline();
         };
 
