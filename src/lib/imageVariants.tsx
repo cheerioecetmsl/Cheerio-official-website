@@ -72,3 +72,42 @@ export const CheerioImage: React.FC<CheerioImageProps> = ({
     </picture>
   );
 };
+
+/**
+ * Returns a variant URL for internal use (e.g., scanning).
+ */
+export const getVariantUrl = (
+  publicId: string, 
+  variant: ImageVariantName = "gallery",
+  _format?: string, // Kept for compatibility
+  _folder?: string  // Kept for compatibility
+): string => {
+  let urls;
+  switch (variant) {
+    case "avatar": urls = storage.getAvatar(publicId); break;
+    case "faceCard": urls = storage.getFaceCard(publicId); break;
+    case "gallery": urls = storage.getGallery(publicId); break;
+    case "preview": urls = storage.getPreview(publicId); break;
+    default: urls = storage.getPreview(publicId);
+  }
+  return urls.webp || urls.jpg;
+};
+
+/**
+ * Helper to ensure a URL is valid for cross-origin loading.
+ */
+export const getProxiedUrl = (url: string): string => {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  // If it's a public ID, resolve it
+  return getVariantUrl(url, "preview");
+};
+
+/**
+ * Returns the high-quality JPG URL for downloading.
+ */
+export const getDownloadUrl = (publicId: string): string => {
+  if (!publicId) return "";
+  if (publicId.startsWith("http")) return publicId;
+  return storage.getAssetSources(publicId).jpg;
+};
