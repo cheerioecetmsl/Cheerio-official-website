@@ -18,7 +18,7 @@ export default function ChatPage() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-[#050505]">
+    <div className="flex flex-col h-[100dvh] bg-[#050505]">
       {/* Navigation Bar */}
       <div className="flex items-center gap-4 p-4 border-b border-white/5 bg-[#0A0A0A]">
         <Link 

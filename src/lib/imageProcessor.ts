@@ -2,30 +2,20 @@
  * Image Processor Utility
  * Handles client-side resizing and format conversion using the Canvas API.
  * This eliminates the need for runtime transformations on Vercel or Cloudinary.
+ * Simplified to only provide WebP (display) and JPG (download) variants.
  */
 
-export interface ImageVariant {
-  name: string;
-  width: number;
-  height: number;
-  format: "webp" | "jpeg";
+export interface ImageVariantConfig {
   quality: number;
 }
 
-export const IMAGE_VARIANTS: Record<string, { width: number; height: number; quality: number }> = {
-  gallery: { width: 1200, height: 1500, quality: 0.85 },  // 4:5 for high-res viewing
-};
-
 /**
  * Resizes and converts an image file to a specific format and dimension.
- * Implements "object-fit: cover" logic to fill the target dimensions.
  */
 export async function processImage(
   file: File | Blob,
-  targetWidth: number,
-  targetHeight: number,
-  format: "image/webp" | "image/jpeg",
-  quality: number = 0.8
+  quality: number,
+  format: "image/webp" | "image/jpeg"
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -34,6 +24,9 @@ export async function processImage(
     img.onload = () => {
       URL.revokeObjectURL(url);
       
+      const targetWidth = img.width;
+      const targetHeight = img.height;
+
       const canvas = document.createElement("canvas");
       canvas.width = targetWidth;
       canvas.height = targetHeight;
@@ -44,42 +37,18 @@ export async function processImage(
         return;
       }
 
-      // Calculate "object-fit: cover" positioning
-      const imgAspectRatio = img.width / img.height;
-      const targetAspectRatio = targetWidth / targetHeight;
-      
-      let drawWidth, drawHeight, offsetX, offsetY;
-
-      if (imgAspectRatio > targetAspectRatio) {
-        // Image is wider than target - scale by height and crop sides
-        drawHeight = targetHeight;
-        drawWidth = img.width * (targetHeight / img.height);
-        offsetX = (targetWidth - drawWidth) / 2;
-        offsetY = 0;
-      } else {
-        // Image is taller than target - scale by width and crop top/bottom
-        drawWidth = targetWidth;
-        drawHeight = img.height * (targetWidth / img.width);
-        offsetX = 0;
-        offsetY = (targetHeight - drawHeight) / 2;
-      }
-
-      // Fill background (especially for JPG fallback)
+      // Background fill for JPEGs
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, targetWidth, targetHeight);
       
-      // Draw image with calculated offsets
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
       canvas.toBlob(
         (blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error("Canvas toBlob failed"));
-          }
+          if (blob) resolve(blob);
+          else reject(new Error("Canvas toBlob failed"));
         },
         format,
         quality
@@ -96,23 +65,19 @@ export async function processImage(
 }
 
 /**
- * Generates only the required WebP variant for display.
- * Returns a map of variant names to Blobs.
+ * Generates two variants: WebP (display) and JPG (download).
+ * Returns a Map of "format" to Blobs.
  */
 export async function generateAllVariants(file: File | Blob): Promise<Map<string, Blob>> {
   const variants = new Map<string, Blob>();
   
-  const config = IMAGE_VARIANTS.gallery;
-  
-  // Generate WebP for display
-  const webpBlob = await processImage(
-    file, 
-    config.width, 
-    config.height, 
-    "image/webp", 
-    config.quality
-  );
-  variants.set("gallery_webp", webpBlob);
+  // Generate WebP (Display) - using 80% quality for balance
+  const webpBlob = await processImage(file, 0.8, "image/webp");
+  variants.set(`webp`, webpBlob);
+
+  // Generate JPG (Download) - using 90% quality for archival
+  const jpgBlob = await processImage(file, 0.9, "image/jpeg");
+  variants.set(`jpg`, jpgBlob);
 
   return variants;
 }

@@ -135,7 +135,7 @@ export function MemoryMatch({ module, onComplete }: MemoryMatchProps) {
             </div>
             {/* Back */}
             <div className="absolute inset-0 bg-white border-2 border-gold-primary rounded-xl overflow-hidden rotate-y-180 backface-hidden shadow-lg">
-              <CheerioImage baseId={card.baseId} fallbackUrl={card.img} fill className="object-cover" alt="Card" variant="card" />
+              <CheerioImage baseId={card.baseId} fallbackUrl={card.img} fill className="object-cover" alt="Card" variant="faceCard" />
             </div>
           </div>
         ))}

@@ -79,7 +79,7 @@ export function GuessTheSenior({ module, onComplete }: GuessTheSeniorProps) {
         <CheerioImage 
           baseId={currentSenior.photoBaseId}
           fallbackUrl={currentSenior.photoURL}
-          variant="card"
+          variant="faceCard"
           className={`w-full h-full object-cover transition-all duration-1000 ${isCorrect === null ? "blur-xl grayscale" : "blur-0 grayscale-0"}`}
           alt="Mystery Senior"
         />

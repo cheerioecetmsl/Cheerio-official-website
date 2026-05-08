@@ -44,6 +44,13 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ currentUser }) => 
   useEffect(() => {
     audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
     audioRef.current.volume = 0.5;
+
+    // Mobile: Try to hide address bar
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setTimeout(() => {
+        window.scrollTo(0, 1);
+      }, 500);
+    }
   }, []);
 
   // Check Admin and Muted status

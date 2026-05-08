@@ -60,11 +60,12 @@ export async function uploadProcessedImage(
 
   // 2. Upload the Processed WebP Variant(s) (now only one)
   for (const [name, blob] of variants.entries()) {
+    const format = name.split('_')[1]; // 'webp' or 'jpg'
     const formData = new FormData();
-    formData.append("file", blob, `${baseId}_${name}.webp`);
+    formData.append("file", blob, `${baseId}_${name}.${format}`);
     formData.append("upload_preset", UPLOAD_PRESET);
     
-    // public_id convention: {baseId}_{variantName}
+    // public_id convention: {baseId}_{variantName}_{format}
     formData.append("public_id", `${baseId}_${name}`);
     formData.append("folder", folderPath);
 
