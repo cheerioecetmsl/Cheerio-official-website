@@ -21,24 +21,18 @@ export const getAssetSources = (publicId: string): ImageSource => {
   if (!publicId) return { webp: "", jpg: "" };
   
   // 1. If it's already a full URL (our migrated assets), return as is.
-  // This uses 0 credits!
+  // We return it for both webp and jpg to ensure it works everywhere.
   if (publicId.startsWith("http")) {
     return { webp: publicId, jpg: publicId };
   }
 
-  // 2. Build URLs
-  // If the publicId already has an extension, use it directly
-  const hasExtension = /\.(jpg|jpeg|png|webp|gif|mp4|mov)$/i.test(publicId);
-  
-  if (hasExtension) {
-    const url = `${BASE_URL}/image/upload/${publicId}`;
-    return { webp: url, jpg: url };
-  }
+  // 2. Build URLs for local/new IDs
+  // We strip any existing extension first to avoid "image.webp.webp" issues
+  const cleanId = publicId.replace(/\.(jpg|jpeg|png|webp|gif|mp4|mov)$/i, '');
 
-  // 3. Fallback to the suffix pattern (for any assets that were processed with suffixes)
   return {
-    webp: `${BASE_URL}/image/upload/${publicId}_webp.webp`,
-    jpg: `${BASE_URL}/image/upload/${publicId}_jpg.jpg`
+    webp: `${BASE_URL}/image/upload/${cleanId}_webp.webp`,
+    jpg: `${BASE_URL}/image/upload/${cleanId}_jpg.jpg`
   };
 };
 

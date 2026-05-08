@@ -25,10 +25,13 @@ export const CheerioImage: React.FC<CheerioImageProps> = ({
   priority,
   ...props 
 }) => {
-  // Use publicId if provided
-  const id = baseId || src || fallbackUrl || "";
+  // PRIORITY FIX: If src or fallbackUrl is a full URL, use it immediately.
+  // This prevents the component from trying to "rebuild" a URL from baseId
+  // which often causes extension mismatches.
+  const fullUrl = (src?.startsWith('http') ? src : null) || (fallbackUrl?.startsWith('http') ? fallbackUrl : null);
+  const id = fullUrl || baseId || src || fallbackUrl || "";
 
-  // If it's a full URL and not a publicId, just render a standard img
+  // If we have a full URL, render it directly
   if (id.startsWith('http')) {
     return (
       <img 

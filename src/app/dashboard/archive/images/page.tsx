@@ -124,10 +124,9 @@ export default function ImageArchive() {
         const photo = photos.find(p => p.id === selected[i]);
         if (!photo) continue;
         
-        // Use high-res gallery JPG if baseId exists, otherwise fallback to url
-        const downloadUrl = photo.baseId 
-          ? getDownloadUrl(photo.baseId, "gallery")
-          : photo.url;
+        // PRIORITY FIX: Use the full URL if available (migrated), otherwise build from baseId
+        const downloadUrl = (photo.url?.startsWith('http') ? photo.url : null) || 
+                          (photo.baseId ? getDownloadUrl(photo.baseId, "gallery") : photo.url);
           
         const response = await fetch(downloadUrl);
         const blob = await response.blob();
