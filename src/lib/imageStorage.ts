@@ -20,9 +20,8 @@ export interface ImageSource {
 export const getAssetSources = (publicId: string): ImageSource => {
   if (!publicId) return { webp: "", jpg: "" };
   
-  // 1. If it's already a full URL (our migrated assets), return as is.
-  // We return it for both webp and jpg to ensure it works everywhere.
-  if (publicId.startsWith("http")) {
+  // 1. If it's a full URL (migrated) or a local path (public folder), return as is.
+  if (publicId.startsWith("http") || publicId.startsWith("/")) {
     return { webp: publicId, jpg: publicId };
   }
 

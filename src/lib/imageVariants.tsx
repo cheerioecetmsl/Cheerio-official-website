@@ -25,14 +25,13 @@ export const CheerioImage: React.FC<CheerioImageProps> = ({
   priority,
   ...props 
 }) => {
-  // PRIORITY FIX: If src or fallbackUrl is a full URL, use it immediately.
-  // This prevents the component from trying to "rebuild" a URL from baseId
-  // which often causes extension mismatches.
-  const fullUrl = (src?.startsWith('http') ? src : null) || (fallbackUrl?.startsWith('http') ? fallbackUrl : null);
+  // PRIORITY FIX: If src or fallbackUrl is a full URL or a local path (/), use it immediately.
+  const isDirect = (s?: string) => s?.startsWith('http') || s?.startsWith('/');
+  const fullUrl = (isDirect(src) ? src : null) || (isDirect(fallbackUrl) ? fallbackUrl : null);
   const id = fullUrl || baseId || src || fallbackUrl || "";
 
-  // If we have a full URL, render it directly
-  if (id.startsWith('http')) {
+  // If we have a full URL or local path, render it directly
+  if (id.startsWith('http') || id.startsWith('/')) {
     return (
       <img 
         src={id} 
