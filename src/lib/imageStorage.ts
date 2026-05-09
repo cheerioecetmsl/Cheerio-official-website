@@ -17,62 +17,19 @@ export interface ImageSource {
  * We maintain the function names for backward compatibility, but they all return 
  * the same high-quality optimized source now.
  */
-/**
- * Cleans an ID or URL by removing ALL extensions and redundant suffixes.
- * This prevents the "image_webp_webp.webp" bug.
- */
-const getCleanBaseId = (id: string): string => {
-  if (!id) return "";
-  
-  // 1. If it's a full Cloudinary URL, extract the part after /upload/
-  let clean = id;
-  if (id.includes("/upload/")) {
-    clean = id.split("/upload/")[1];
-    // Remove the version number (e.g., v12345678/)
-    clean = clean.replace(/^v\d+\//, "");
-  }
-
-  // 2. Aggressively strip extensions and common redundant suffixes
-  // We do this in a loop to catch "image.jpg.webp" or "image_webp_webp"
-  const patternsToStrip = [
-    /\.(jpg|jpeg|png|webp|gif|mp4|mov)$/i,
-    /_(webp|jpg|png|jpeg|original|gallery|card|preview)$/i,
-    /_(webp|jpg|png|jpeg|original|gallery|card|preview)$/i, // Repeat to catch double suffixes
-  ];
-
-  let previous;
-  do {
-    previous = clean;
-    patternsToStrip.forEach(pattern => {
-      clean = clean.replace(pattern, "");
-    });
-  } while (clean !== previous);
-
-  return clean;
-};
-
 export const getAssetSources = (publicId: string): ImageSource => {
   if (!publicId) return { webp: "", jpg: "" };
   
-  // Local paths (public folder) stay as they are
-  if (publicId.startsWith("/")) {
+  // 1. If it's already a full URL or a local path, use it EXACTLY as it is.
+  // We do not clean, change, or add anything.
+  if (publicId.startsWith("http") || publicId.startsWith("/")) {
     return { webp: publicId, jpg: publicId };
   }
 
-  // For everything else (Cloudinary IDs or Full URLs), we normalize them
-  const cleanId = getCleanBaseId(publicId);
-  const folderPath = publicId.includes("Cheerio/") 
-    ? publicId.split("/upload/")[1]?.replace(/^v\d+\//, "").split("/").slice(0, -1).join("/") || "Cheerio/Archives/Images"
-    : "Cheerio/Archives/Images";
-
-  // Rebuild the URL using the clean ID. 
-  // Cloudinary will serve the image correctly as long as the base ID is right.
-  const finalPath = folderPath ? `${folderPath}/${cleanId}` : cleanId;
-
-  return {
-    webp: `${BASE_URL}/image/upload/${finalPath}.webp`,
-    jpg: `${BASE_URL}/image/upload/${finalPath}.jpg`
-  };
+  // 2. For raw IDs, just build the basic Cloudinary path.
+  // We don't add .webp or _webp anymore.
+  const url = `${BASE_URL}/image/upload/${publicId}`;
+  return { webp: url, jpg: url };
 };
 
 // Aliases for compatibility with existing components
