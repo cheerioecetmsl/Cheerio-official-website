@@ -30,21 +30,9 @@ export const CheerioImage: React.FC<CheerioImageProps> = ({
   const fullUrl = (isDirect(src) ? src : null) || (isDirect(fallbackUrl) ? fallbackUrl : null);
   const id = fullUrl || baseId || src || fallbackUrl || "";
 
-  // If we have a full URL or local path, render it directly
-  if (id.startsWith('http') || id.startsWith('/')) {
-    return (
-      <img 
-        src={id} 
-        alt={alt} 
-        className={className} 
-        loading={priority ? "eager" : "lazy"}
-        crossOrigin="anonymous"
-        {...props} 
-      />
-    );
-  }
-
-  // Get variant URLs from storage layer
+  // Get variant URLs from storage layer. 
+  // Our new storage layer handles everything: full URLs, local paths, and raw IDs.
+  // It also "cleans" them aggressively to fix the extension bugs you saw.
   let urls;
   switch (variant) {
     case "avatar": urls = storage.getAvatar(id); break;
