@@ -140,13 +140,15 @@ export default function ImageUpload() {
   };
 
   // ── Upload ───────────────────────────────────────────────
-  const uploadBatch = async () => {
+  const uploadBatchAction = async () => {
     if (!files.length || !auth.currentUser) return;
     setUploading(true);
     setUploadedCount(0);
     try {
-      for (const file of files) {
-        // Use our new multi-variant processor instead of manual compression/fetch
+      // We process files sequentially to avoid network congestion and browser throttling.
+      // Each call generates 3 variants (Original, WebP, JPG) and uploads them as raw files.
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         const { baseId, url: uploadedUrl } = await uploadProcessedImage(file, "Cheerio/Archives/Images");
         
         await addDoc(collection(db, "archives"), {
@@ -159,8 +161,9 @@ export default function ImageUpload() {
           tag: "General",
         });
         
-        setUploadedCount(p => p + 1);
+        setUploadedCount(i + 1);
       }
+
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
         xp: increment(10 * files.length),
         photoCount: increment(files.length),
@@ -340,7 +343,7 @@ export default function ImageUpload() {
 
               {/* Upload button */}
               <button
-                onClick={uploadBatch}
+                onClick={uploadBatchAction}
                 disabled={!files.length || uploading}
                 className="theme-cinematic-btn-primary w-full py-5 rounded-2xl font-bold uppercase tracking-[0.3em] disabled:opacity-40 flex items-center justify-center gap-3 transition-all"
               >

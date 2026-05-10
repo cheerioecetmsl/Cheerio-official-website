@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useRouter, usePathname } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 /**
  * AuthGuard — mount once inside the dashboard layout.
@@ -16,31 +17,50 @@ import { useRouter, usePathname } from "next/navigation";
 export function AuthGuard() {
   const router = useRouter();
   const pathname = usePathname();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // Token expired, logged out, or account deleted from Auth
-        router.replace("/");
+        // Double check if auth is truly ready before redirecting to avoid reload race conditions
+        await auth.authStateReady();
+        if (!auth.currentUser) {
+          router.replace("/");
+        }
         return;
       }
 
-      // Secondary check: verify the Firestore user document still exists.
-      // Guards against the case where admin deletes the doc but not the auth record.
       try {
-        const snap = await getDoc(doc(db, "users", user.uid));
-        if (!snap.exists()) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        
+        if (!userDoc.exists()) {
           await auth.signOut();
           router.replace("/");
+          return;
         }
-      } catch {
-        // Silently fail — network issue shouldn't log the user out
+
+        setIsInitialized(true);
+      } catch (error) {
+        console.error("Auth verification error:", error);
+        // On error, we still initialize to allow standard recovery
+        setIsInitialized(true);
       }
     });
 
     return () => unsubscribe();
-    // pathname in deps ensures we re-check on every navigation
-  }, [router, pathname]);
+  }, [router]);
 
-  return null; // purely functional — renders nothing
+  if (!isInitialized) {
+    return (
+      <div className="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-10 h-10 text-amber-500 animate-spin" />
+        <p className="text-zinc-500 text-xs font-bold uppercase tracking-[0.3em] animate-pulse">
+          Authenticating Session...
+        </p>
+      </div>
+    );
+  }
+
+  return null; // purely functional once initialized
 }
+

@@ -1,8 +1,7 @@
-import { generateAllVariants } from "./imageProcessor";
+
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-const API_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
 
 export interface UploadResult {
   baseId: string;
@@ -11,91 +10,98 @@ export interface UploadResult {
 }
 
 /**
- * Orchestrates the processing and uploading of all 8 image variants.
- * Returns the baseId used for the variants.
+ * Orchestrates the processing and uploading of Original, WebP, and JPG variants.
+ * Locally processed to ensure NO Cloudinary transformation credits are used.
  */
 export async function uploadProcessedImage(
   file: File | Blob,
   subfolder: string = "Images",
   onProgress?: (progress: number) => void
 ): Promise<UploadResult> {
-  const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-  const API_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
-
-  if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) {
-    console.warn("[UploadHelper] NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME is missing. Using fallback:", CLOUD_NAME);
+  if (!CLOUD_NAME || !UPLOAD_PRESET) {
+    throw new Error("Cloudinary credentials missing in environment");
   }
 
   const baseId = `img_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-  const variants = await generateAllVariants(file);
-  const totalVariants = variants.size;
-  let completed = 0;
-  let lastVersion = 0;
-  let lastUrl = "";
-
-  // Use the folder structure from the user's screenshot: Cheerio/Archives/Images
-  // If subfolder already contains the full path, use it as is; otherwise prepend the archive path.
   const folderPath = subfolder.startsWith("Cheerio/") 
     ? subfolder 
     : `Cheerio/Archives/${subfolder}`;
 
-  console.log(`[UploadHelper] Initializing Upload for ${baseId} to ${folderPath} using preset ${UPLOAD_PRESET}`);
+  console.log(`[UploadHelper] Archiving variants for ${baseId} to ${folderPath}`);
 
-  // 1. Upload the Original File
-  const originalFormData = new FormData();
-  originalFormData.append("file", file);
-  originalFormData.append("upload_preset", UPLOAD_PRESET);
-  originalFormData.append("public_id", `${baseId}_original`);
-  originalFormData.append("folder", folderPath);
+  // Upload the original file directly as a raw image to avoid transformations.
+  // This prevents browser memory issues during bulk uploads and supports all native formats (including HEIC).
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", UPLOAD_PRESET);
+  formData.append("public_id", baseId);
+  formData.append("folder", folderPath);
 
-  console.log(`[UploadHelper] Uploading original file...`);
-  const originalResponse = await fetch(API_URL, {
-    method: "POST",
-    body: originalFormData,
-  });
-
-  if (!originalResponse.ok) {
-    const error = await originalResponse.json().catch(() => ({}));
-    throw new Error(`Failed to upload original file: ${error.error?.message || originalResponse.statusText}`);
-  }
-
-  // 2. Upload the Processed WebP Variant(s) (now only one)
-  for (const [name, blob] of variants.entries()) {
-    const format = name.split('_')[1]; // 'webp' or 'jpg'
-    const formData = new FormData();
-    formData.append("file", blob, `${baseId}_${name}.${format}`);
-    formData.append("upload_preset", UPLOAD_PRESET);
+  const result: any = await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
     
-    // public_id convention: {baseId}_{variantName}_{format}
-    formData.append("public_id", `${baseId}_${name}`);
-    formData.append("folder", folderPath);
-
-    console.log(`[UploadHelper] Uploading display variant ${name}...`);
-
-    const response = await fetch(API_URL, {
-      method: "POST",
-      body: formData,
+    xhr.upload.addEventListener("progress", (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      console.error(`[UploadHelper] Cloudinary Upload Error (${name}):`, error);
-      throw new Error(`Failed to upload variant ${name}: ${error.error?.message || response.statusText}`);
-    }
+    xhr.addEventListener("load", () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(JSON.parse(xhr.responseText));
+      } else {
+        reject(new Error(`Upload failed for ${baseId}`));
+      }
+    });
 
-    const result = await response.json();
-    lastVersion = result.version;
-    lastUrl = result.secure_url;
-    
-    completed++;
-    if (onProgress) {
-      onProgress(Math.round((completed / totalVariants) * 100));
+    xhr.addEventListener("error", () => reject(new Error("Network error during upload")));
+    xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`);
+    xhr.send(formData);
+  });
+
+  const fullBaseId = `${folderPath}/${baseId}`;
+
+  return { 
+    baseId: fullBaseId, 
+    version: result.version, 
+    url: `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${fullBaseId}`
+  };
+}
+
+/**
+ * Sequentially uploads a batch of files to avoid browser throttling and Cloudinary failures.
+ */
+export async function uploadBatch(
+  files: FileList | File[],
+  type: 'image' | 'video' | 'audio',
+  subfolder: string = "Archives",
+  onItemProgress?: (index: number, progress: number) => void
+): Promise<{ url: string; type: string }[]> {
+  const results = [];
+  const filesArray = Array.from(files);
+
+  for (let i = 0; i < filesArray.length; i++) {
+    const file = filesArray[i];
+    try {
+      let result;
+      if (type === 'image') {
+        const uploadRes = await uploadProcessedImage(file, subfolder, (p) => {
+          if (onItemProgress) onItemProgress(i, p);
+        });
+        result = { url: uploadRes.url, type };
+      } else {
+        const uploadRes = await uploadGenericFile(file, subfolder, (p) => {
+          if (onItemProgress) onItemProgress(i, p);
+        });
+        result = { url: uploadRes.url, type };
+      }
+      results.push(result);
+    } catch (err) {
+      console.error(`Failed to upload file ${i}:`, err);
     }
   }
 
-  console.log(`[UploadHelper] Batch Upload Complete for ${baseId}`);
-  return { baseId, version: lastVersion, url: lastUrl || "" };
+  return results;
 }
 
 /**
@@ -106,9 +112,10 @@ export async function uploadGenericFile(
   subfolder: string = "Archives",
   onProgress?: (progress: number) => void
 ): Promise<{ url: string; publicId: string }> {
-  const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-  
+  if (!CLOUD_NAME || !UPLOAD_PRESET) {
+    throw new Error("Cloudinary credentials missing in environment");
+  }
+
   // Determine resource type
   let resourceType = "raw";
   if (file.type.startsWith("video/")) resourceType = "video";
@@ -146,9 +153,6 @@ export async function uploadGenericFile(
 }
 
 /**
- * Convenience function for profile photos (which only need the 'avatar' variant ideally, 
- * but for consistency we'll use the same 8-variant pipeline or a subset).
- * The user wants to eliminate ALL transformations, so having a high-res 'gallery' variant
- * for profile photos is also good if they are ever viewed full-screen.
+ * Profile photo upload (reuses the variant pipeline for consistency).
  */
 export const uploadProfilePhoto = uploadProcessedImage;

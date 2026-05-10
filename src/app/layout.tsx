@@ -57,20 +57,6 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${ebGaramond.variable} ${shareTechMono.variable} antialiased film-grain min-h-screen bg-dark-bg text-dark-text`}>
         <PresenceTracker />
-        {/* Service Worker Cleanup: Ensures stale Cloudflare caches are cleared for all users */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                  for (let registration of registrations) {
-                    registration.unregister();
-                  }
-                });
-              }
-            `,
-          }}
-        />
         <Navbar />
         {children}
         <Footer />

@@ -18,11 +18,9 @@ const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Set persistence explicitly to LOCAL (only on client)
+// Explicitly set persistence to ensure sessions survive page reloads
 if (typeof window !== "undefined") {
-  setPersistence(auth, browserLocalPersistence).catch((err) => {
-    console.error("Auth Persistence Error:", err);
-  });
+  setPersistence(auth, browserLocalPersistence).catch(console.error);
 }
 
 export { auth, db };

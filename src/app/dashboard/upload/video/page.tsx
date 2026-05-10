@@ -257,12 +257,12 @@ export default function VideoUpload() {
       await Promise.all(files.map(async file => {
         const form = new FormData();
         form.append("file", file);
-        form.append("upload_preset", "Cheerio-2026");
+        form.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-26");
         form.append("folder", "Cheerio/Archives/Videos");
         
         console.log(`[VideoUpload] Uploading ${file.name}...`, { 
           cloudName: CLOUD_NAME, 
-          preset: "Cheerio-2026",
+          preset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-26",
           folder: "Cheerio/Archives/Videos"
         });
 

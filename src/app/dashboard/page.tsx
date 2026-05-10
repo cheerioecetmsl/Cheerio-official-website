@@ -295,7 +295,7 @@ export default function DashboardPage() {
 
         <div className="text-center space-y-4">
           <span className="text-brown-secondary uppercase tracking-[0.3em] md:tracking-[0.5em] text-[8px] md:text-[10px] font-bold serif">
-            {isFaculty ? "Faculty of Excellence" : "Cheerio-2026"}
+            {isFaculty ? "Faculty of Excellence" : "Cheerio-26"}
           </span>
           <h1 className="text-4xl md:text-8xl font-bold text-brown-primary serif leading-tight">
             Welcome, <br/> {userData?.name?.split(' ')[0] || "Archivist"} {isFaculty ? userData?.gender : ""}

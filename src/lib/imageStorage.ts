@@ -20,16 +20,27 @@ export interface ImageSource {
 export const getAssetSources = (publicId: string): ImageSource => {
   if (!publicId) return { webp: "", jpg: "" };
   
-  // 1. If it's already a full URL or a local path, use it EXACTLY as it is.
-  // We do not clean, change, or add anything.
-  if (publicId.startsWith("http") || publicId.startsWith("/")) {
+  // 1. If it's already a full URL or a local path, use it.
+  // We check if it's a Cloudinary URL and strip any transformation segments to ensure zero-credit.
+  if (publicId.startsWith("http")) {
+    if (publicId.includes("res.cloudinary.com")) {
+      // Strips the transformation segment (e.g., /upload/v123/... or /upload/f_auto,q_auto/v123/...)
+      // to return the raw high-quality uploaded image.
+      const cleanedUrl = publicId.replace(/\/image\/upload\/(?:[a-z]_[^\/]+\/)+(v\d+\/)?/, "/image/upload/$1");
+      return { webp: cleanedUrl, jpg: cleanedUrl };
+    }
     return { webp: publicId, jpg: publicId };
   }
 
-  // 2. For raw IDs, just build the basic Cloudinary path.
-  // We don't add .webp or _webp anymore.
-  const url = `${BASE_URL}/image/upload/${publicId}`;
-  return { webp: url, jpg: url };
+  if (publicId.startsWith("/")) {
+    return { webp: publicId, jpg: publicId };
+  }
+
+  // 2. For raw IDs, return the raw uploaded image directly.
+  return { 
+    webp: `${BASE_URL}/image/upload/${publicId}`, 
+    jpg: `${BASE_URL}/image/upload/${publicId}` 
+  };
 };
 
 // Aliases for compatibility with existing components

@@ -117,7 +117,7 @@ export default function ImageArchive() {
     if (selected.length === 0) return;
     setDownloadingAll(true);
     const zip = new JSZip();
-    const folder = zip.folder("Cheerio-2026-Memories");
+    const folder = zip.folder("Cheerio-26-Memories");
 
     try {
       for (let i = 0; i < selected.length; i++) {
@@ -135,7 +135,7 @@ export default function ImageArchive() {
       }
 
       const content = await zip.generateAsync({ type: "blob" });
-      saveAs(content, "Cheerio-2026-Memories.zip");
+      saveAs(content, "Cheerio-26-Memories.zip");
     } catch (err) {
       console.error(err);
       alert("Failed to create archive. Some images might be restricted.");
