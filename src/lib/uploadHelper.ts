@@ -7,6 +7,7 @@ const API_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
 export interface UploadResult {
   baseId: string;
   version: number;
+  url: string;
 }
 
 /**
@@ -31,6 +32,7 @@ export async function uploadProcessedImage(
   const totalVariants = variants.size;
   let completed = 0;
   let lastVersion = 0;
+  let lastUrl = "";
 
   // Use the folder structure from the user's screenshot: Cheerio/Archives/Images
   // If subfolder already contains the full path, use it as is; otherwise prepend the archive path.
@@ -84,6 +86,7 @@ export async function uploadProcessedImage(
 
     const result = await response.json();
     lastVersion = result.version;
+    lastUrl = result.secure_url;
     
     completed++;
     if (onProgress) {
@@ -92,7 +95,7 @@ export async function uploadProcessedImage(
   }
 
   console.log(`[UploadHelper] Batch Upload Complete for ${baseId}`);
-  return { baseId, version: lastVersion };
+  return { baseId, version: lastVersion, url: lastUrl || "" };
 }
 
 /**
