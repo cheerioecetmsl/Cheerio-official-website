@@ -41,7 +41,16 @@ service cloud.firestore {
     // Users Collection
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      // Seal 'approved' status: users cannot change their status away from 'approved' once set.
+      // This prevents buggy presence logic from overwriting the approval status.
+      allow write: if isAuthenticated() && (
+        isAdmin() || 
+        (request.auth.uid == userId && (
+          resource == null || 
+          resource.data.get('status', '') != 'approved' || 
+          request.resource.data.get('status', '') == 'approved'
+        ))
+      );
     }
 
     // Admin Emails (Read-only for admins)
@@ -50,9 +59,33 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── Livestream Comments ───────────────────────────────────────────────
+    match /livestream_comments/{commentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 200;
+      allow update, delete: if false; // comments are immutable
+    }
+
+    // ── Livestream Likes (one doc per user UID) ───────────────────────────
+    match /livestream_likes/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update, delete: if false; // likes are permanent
+    }
+
+    // ── Livestream Meta (aggregated like count) ───────────────────────────
+    match /livestream_meta/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
     // Default: Allow all other collections for a limited time (as per existing rules)
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2026, 5, 25);
+      allow read, write: if request.time < timestamp.date(2026, 6, 15);
     }
   }
 }

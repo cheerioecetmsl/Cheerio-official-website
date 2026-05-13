@@ -15,7 +15,8 @@ import {
   ArrowLeft,
   Camera,
   Link2,
-  School
+  School,
+  Radio
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -47,6 +48,7 @@ const navItems = [
     ]
   },
   { name: "Our Legacy", icon: School, path: "/dashboard/legacy" },
+  { name: "Livestream", icon: Radio, path: "/dashboard/livestream" },
 ];
 
 
